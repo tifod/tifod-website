@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Erreur{% endblock %}
+{% block body %}
+    <div>
+        <h1>Erreur!</h1>
+        <p>{{ message }}</p>
+        <div>
+            <div class="action-list"><i class='fa fa-fw fa-arrow-left fa-2x'></i> <a href="/">Revenir à la liste des projets</a></div>
+        </div>
+    </div>
+{% endblock %}

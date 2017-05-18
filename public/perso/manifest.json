@@ -1,0 +1,24 @@
+{
+  "short_name": "tifod",
+  "name": "La BD faite à plusieurs",
+  "icons": [
+    {
+      "src": "/public/img/icon/launcher-icon-1x.png",
+      "type": "image/png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "/public/img/icon/launcher-icon-2x.png",
+      "type": "image/png",
+      "sizes": "96x96"
+    },
+    {
+      "src": "/public/img/icon/launcher-icon-4x.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": "/?utm_source=homescreen",
+  "display": "standalone",
+  "theme_color": "#448AFF"
+}

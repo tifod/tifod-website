@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project[0]['content'] }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/public/treant/Treant.css"/>
+<script src="/public/treant/vendor/raphael.js"></script>
+<script src="/public/treant/Treant.js"></script>
+<script src="/public/smooth-scroll.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script type="text/javascript">$(document).bind("mobileinit", function(){$.extend(  $.mobile , {autoInitializePage: false})});</script>
+<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+<link rel="stylesheet" href="/public/drawingboard/drawingboard.min.css">
+<script src="/public/drawingboard/drawingboard.min.js"></script>
+{{ parent() }}
+{% endblock %}
+
+{% block body %}
+{% if project[0]['children'] %}
+    <div class="container">
+        <div class="project-header">
+            <h2>{{ project[0]['content'] }}</h2>
+            <p>Un projet de <a href="/u/{{ project[0]['author_name']|lower }}">{{ project[0]['author_name'] }}</a></p>
+            <hr>
+            <p class="action-list">
+                <span>
+                    <i class='fa fa-fw fa-arrow-left'></i> <a href="/">Revenir à la liste des projets</a>
+                </span>
+                <span>
+                    <i class='fa fa-fw fa-code-fork fa-flip-vertical'></i> <a href="#project-tree-section" data-scroll>Voir l'arborescence du projet</a>
+                </span>
+                <span>
+                    <i class='fa fa-fw fa-trash'></i> <a href="/delete-post/{{ project[0]['id'] }}">Supprimer ce projet</a>
+                </span>
+            </p>
+        </div>
+    </div>
+    <div id="project-player">
+        <div>
+            {% include "post/branch.html" with {'post':project[0]} %}
+        </div>
+    </div>
+    <div class="container">
+        <div id="project-tree-section">
+            <h2><i class='fa fa-fw fa-code-fork fa-flip-vertical'></i> Arborescence du projet</h2>
+            <p>
+                <a href="#top" data-scroll>Revenir en haut de la page</a>
+            </p>
+            <div id="project-tree"></div>
+        </div>            
+    </div>
+    
+    <script>
+        var simple_chart_config = {
+        chart: { container: "#project-tree" },
+        nodeStructure: {{ project_json[0]['children'][0]|json_encode|raw }}
+        };
+        new Treant(simple_chart_config);
+        var windowWidth = $(window).width();
+        $(window).on('resize',function(){
+            if (windowWidth != $(window).width()){
+                new Treant(simple_chart_config);
+                resizePlayer();
+                windowWidth = $(window).width();
+            }
+        });
+    </script>
+    <script src="/public/perso/project.js"></script>
+{% else %}
+    <div class="container">
+        <div>
+            <h1>{{ project[0]['content'] }}</h1>
+            <div>Un projet de <a href="#">Jean</a></div>
+        </div>
+        <div class="action-list">
+            <div><a href="/">Revenir à la liste des projets</a></div>
+            <div><a href="/delete-post/{{ project[0]['id'] }}">Supprimer ce projet</a></div>
+        </div>
+        {% set child = project[0] %}
+        {% include "post/add-content.html" %}
+    </div>
+    <script src="/public/perso/project.js"></script>
+    <script>var boards = document.getElementsByClassName('drawing-board'); for (var z = 0; z < boards.length; z++){ resetBoard(boards[z].getAttribute('id')); }</script>
+{% endif %}
+{% endblock %}

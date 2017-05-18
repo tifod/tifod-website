@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <div class="container">
+        <h1>Liste des projets existants</h1>
+        {% for project in projects %}
+        <h3><a href="/p/{{ project['project_id'] }}">{{ project['content'] }}</a></h3>
+        {% endfor %}
+        <p>
+            <h3>Créer un nouveau projet</h3>
+            {% include "post/add-text.html" %}
+        </p>
+    </div>
+{% endblock %}
