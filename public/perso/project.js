@@ -13,7 +13,7 @@ function handleImage(e){
     reader.onload = function(event){
         var img = new Image();
         img.onload = function(){
-            document.getElementById(postId).getElementsByClassName('file-dimensions')[0].innerHTML = img.width + ' × ' + img.height;
+            document.getElementById(postId).parentNode.getElementsByClassName('file-dimensions')[0].innerHTML = img.width + ' × ' + img.height;
             document.getElementById(postId + '-drawing-board').style.height = img.height + 'px';
             document.getElementById(postId + '-drawing-board').style.width = img.width + 'px';
             resetBoard(postId + '-drawing-board');
@@ -32,6 +32,8 @@ function handleImage(e){
 }
 
 // drawing board
+$('.drawingboard-width-input').on('change',function(){ resizeDrawingBoardSize('width',this.getAttribute('data-postid')); });
+$('.drawingboard-height-input').on('change',function(){ resizeDrawingBoardSize('height',this.getAttribute('data-postid')); });
 function resizeDrawingBoardSize (dimension, postId){
     if (dimension == 'height'){
         document.getElementById(postId + '-drawing-board').style.height = event.target.value < 310 ? (event.target.value*1 + 89) +'px' : (event.target.value*1 + 33) +'px';
@@ -44,9 +46,10 @@ function resizeDrawingBoardSize (dimension, postId){
     resetBoard(postId + '-drawing-board');
     resizePlayer();
 }
+var mainBoard;
 function resetBoard (elId){
     document.getElementById(elId).innerHTML = '';
-    var mainBoard = new DrawingBoard.Board(elId, {
+    mainBoard = new DrawingBoard.Board(elId, {
         controls: [
             'Color',
             { Size: { type: 'dropdown' } },

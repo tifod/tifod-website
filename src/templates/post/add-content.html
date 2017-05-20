@@ -1,18 +1,13 @@
 {# template utilisé quand un projet est vide et pour ajouter du contenu à chaque post #}
 <div>
-    <h3>Ajouter du texte</h3>
-    {% include "post/add-text.html" %}
-</div>
-<div>
-    <h3>Ou du dessin</h3>
     <form action="javascript:void(0);">
-        <p>
-            <button onclick="this.getElementsByTagName('input')[0].value = '';"><label>Changer l'image de background du dessin<input style="display: none;" type="file" onchange="handleImage()" data-postid="{{ child['id'] }}"></label></button>
-        </p>
-        <p class="file-dimensions"></p>
         <p class="action-list">
-            <label>Largeur <input placeholder="largeur" value ="600" type="number" onchange="resizeDrawingBoardSize('width',{{ child['id'] }});"></label>
-            <label>Hauteur <input value="400" placeholder="hauteur" type="number" onchange="resizeDrawingBoardSize('height',{{ child['id'] }});"></label>
+            <input onclick="this.value='';" class="" type="file" onchange="handleImage()" data-postid="{{ child['id'] }}">
+            <span class="file-dimensions"></span>
+        </p>
+        <p class="action-list">
+            <label>Largeur <input placeholder="largeur" class="drawingboard-width-input" type="text" data-postid="{{ child['id'] }}"></label>
+            <label>Hauteur <input placeholder="hauteur" class="drawingboard-height-input" type="text" data-postid="{{ child['id'] }}"></label>
         </p>
     </form>
     <form class="drawing-form" action="/add-post" method="post">
