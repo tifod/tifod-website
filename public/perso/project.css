@@ -123,9 +123,10 @@ img { width: 100%; height: auto; }
 #project-tree-section { position: relative; z-index: 1; }
 .tree-post {
     cursor: pointer;
-    max-width: 20vw;
-    overflow: auto;
+    width: 200px;
+    display: inline-block;
     padding: 0.5em;
+    overflow: auto;
     word-wrap: break-word;
     background-color: white;
     border-radius: 3px;
