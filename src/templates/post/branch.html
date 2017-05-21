@@ -27,13 +27,7 @@
         
                 {# content #}
                 <label for="{{ child['id'] }}-post-checkbox" class="post-more-label">
-                    {% if child['content_type'] == 'text' %}
-                        <h3>{{ child['content'] }}</h3>
-                    {% elseif child['content_type'] == 'file' %}
-                        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ child['content'] }}">
-                    {% else %}
-                        <h3><i>Contenu inconnu</i></h3>
-                    {% endif %}
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ child['content'] }}">
                 </label>
             </div>
             <div class="post-more">
@@ -42,13 +36,7 @@
                     <label for="{{ child['id'] }}-post-checkbox" class="exit-btn"><i class="fa fa-times fa-2x"></i></label>
                     
                     <div class="post-preview">
-                        {% if child['content_type'] == 'text' %}
-                            <h3>{{ child['content'] }}</h3>
-                        {% elseif child['content_type'] == 'file' %}
-                            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ child['content'] }}">
-                        {% else %}
-                            <h3><i>Contenu inconnu</i></h3>
-                        {% endif %}
+                        <img src="/public/img/post/{{ child['content'] }}">
                     </div>
                     
                     {# author and time ago #}

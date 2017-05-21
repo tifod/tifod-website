@@ -19,7 +19,7 @@ $container['dbinfos'] = [
 $container['view'] = function ($container) {
     $loader = new Twig_Loader_Filesystem(__DIR__ . '/src/templates');
     $twig = new Twig_Environment($loader, [
-        // 'cache' => __DIR__ . '/templates/cache'
+        // 'cache' => __DIR__ . '/templates/twig_cache'
         'cache' => false
     ]);
     
@@ -120,7 +120,6 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             $posts [] = [
                 'id' => $post['id'],
                 'content' => $post['content'],
-                'content_type' => $post['content_type'],
                 'parent_id' => $post['parent_id'],
                 'path' => $post['path'],
                 'score_result' => $post['score_result'],
@@ -162,43 +161,56 @@ $app->get('/', function ($request, $response) {
     $reponse = $db->query ('select id, project_id, content from post where parent_id = 0');
     while ($donnees[] = $reponse->fetch());
     array_pop($donnees);
+    $lastProjectId = count($donnees) > 0 ? $donnees[count($donnees) - 1]['project_id'] + 1 : 1;
     $reponse->closeCursor();
-    return $this->view->render('homepage.html', ['projects' => $donnees, 'child' => ['id' => 0], 'projectId' => ($donnees[count($donnees) - 1]['project_id'] + 1)]);
+    return $this->view->render('homepage.html', ['projects' => $donnees, 'child' => ['id' => 0], 'projectId' => $lastProjectId]);
 })->setName('homepage');
 
-$app->post('/add-post', function ($request, $response) {
-    if ((!empty($_POST['content']) or isset($_POST['image'])) and isset($_POST['parent_id']) and isset($_POST['project_id']) and isset($_POST['content_type'])){
+$app->post('/create-project', function ($request, $response) {
+    if (!(empty($_POST['content']) or empty($_POST['project_id']))){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
         
-        $content = ($_POST['content_type'] == 'file') ? 'file' : $_POST['content'] ;
-        $reponse = $db->prepare ("INSERT INTO post(content, content_type, parent_id, project_id, path) VALUES (:content, :content_type, :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id)))); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
+        $reponse = $db->prepare ("INSERT INTO post(content, parent_id, project_id, path) VALUES (:content, 0, :project_id, '/'); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
         $reponse->execute([
-            'content' => $content,
-            'content_type' => $_POST['content_type'],
+            'content' => $_POST['content'],
+            'project_id' => $_POST['project_id']
+        ]);
+        $reponse->closeCursor();
+    }
+    header('Location: /'); exit();
+});
+
+$app->post('/add-post', function ($request, $response) {
+    if ((!empty($_POST['content']) or isset($_POST['image'])) and isset($_POST['parent_id']) and isset($_POST['project_id'])){
+        try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+        } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+        
+        $isremake = empty($_POST['isremake']) ? 0 : 1;
+        $reponse = $db->prepare ("INSERT INTO post(content, is_remake, parent_id, project_id, path) VALUES ('file', :is_remake, :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id)))); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
+        $reponse->execute([
+            'is_remake' => $isremake,
             'parent_id' => $_POST['parent_id'],
             'project_id' => $_POST['project_id']
         ]);
         $reponse->closeCursor();
-        if ($_POST['content_type'] == 'file'){
-            $reponse = $db->query('SELECT LAST_INSERT_ID()');
-            $postId = $reponse->fetch()[0];
-            $fileName = MyApp\Utility\Math::getARandomString(6) . '-' . $postId . '.png';
-            $reponse->closeCursor();
-            $reponse = $db->prepare("UPDATE post SET content = :fileName WHERE id = :postId");
-            $reponse->execute(['fileName' => $fileName, 'postId' => $postId]);
-            $reponse->closeCursor();
-            
-            $img = filter_input(INPUT_POST, 'image', FILTER_SANITIZE_URL);
-            $img = str_replace(' ', '+', str_replace('data:image/png;base64,', '', $img));
-            $data = base64_decode($img);
-            file_put_contents(__DIR__ . '/public/img/post/' . $fileName, $data);
-        }
+        $reponse = $db->query('SELECT LAST_INSERT_ID()');
+        $postId = $reponse->fetch()[0];
+        // need to get infos about the post
+        $fileName = MyApp\Utility\Math::getARandomString(6) . '-' . $postId . '.png';
+        $reponse->closeCursor();
+        $reponse = $db->prepare("UPDATE post SET content = :fileName WHERE id = :postId");
+        $reponse->execute(['fileName' => $fileName, 'postId' => $postId]);
+        $reponse->closeCursor();
+        
+        $img = filter_input(INPUT_POST, 'image', FILTER_SANITIZE_URL);
+        $img = str_replace(' ', '+', str_replace('data:image/png;base64,', '', $img));
+        $data = base64_decode($img);
+        file_put_contents(__DIR__ . '/public/img/post/' . $fileName, $data);
+        
         header('Location: /p/'.$_POST['project_id']); exit();
     } else {
-        $msg = 'Erreur : Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "projectId", "content_type")';
-        error_log($msg);
-        throw new Exception ($msg);
+        throw new Exception ('Erreur : Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "projectId")');
     }
 });
 

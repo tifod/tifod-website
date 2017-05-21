@@ -8,7 +8,11 @@
         {% endfor %}
         <p>
             <h3>Créer un nouveau projet</h3>
-            {% include "post/add-text.html" %}
+            <form action="/create-project" method="post">
+                <input name="content" type="text">
+                <input name="project_id" type="hidden" value="{{ projectId }}">
+                <button type="submit">Envoyer</button>
+            </form>
         </p>
     </div>
 {% endblock %}

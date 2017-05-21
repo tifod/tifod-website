@@ -14,12 +14,16 @@
         <!-- this is the drawingboard container -->
         <div class="drawing-board" id="{{ child['id'] }}-drawing-board"></div>
         <p>
+            <label>
+                <input type="checkbox" name="isremake"> Envoyer comme un remake
+            </label>
+        </p>
+        <p>
             <button>Envoyer</button>
         </p>
         
         <!-- this will be the input used to pass the drawingboard content to the server -->
         <input type="hidden" name="image" value="">
-        <input type="hidden" name="content_type" value="file">
         <input type="hidden" name="parent_id" value="{{ child['id'] }}">
         <input type="hidden" name="project_id" value="{{ projectId }}">
     </form>
