@@ -48,7 +48,13 @@
                         </p>
                         
                         <p class="list-inline">
-                            <button onclick="ajaxPingUrl('/togglePin/{{ child['id'] }}',this,updatePin)" data-unpin="<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post" data-repin="<i class='fa fa-thumb-tack'></i> Reépingler ce post" >{% if child['has_pin'] %}<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post{% else %}<i class='fa fa-thumb-tack'></i> Epingler ce post{% endif %}</button>
+                            <a href="/togglePin/{{ child['id'] }}?redirect=/p/{{ projectId }}" >
+                                {% if child['has_pin'] %}
+                                    <i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post
+                                {% else %}
+                                    <i class='fa fa-thumb-tack'></i> Epingler ce post
+                                {% endif %}
+                            </a>
                             
                             <button onclick="ajaxPingUrl('/vote/minus/{{ child['id'] }}',this,updateScore)">-</button>
                             <span class="post-score">{{ child['score_result'] }} pts</span>
@@ -71,7 +77,13 @@
                                 </div>
                                 <div>
                                     <p class="list-inline">
-                                        <button onclick="ajaxPingUrl('/togglePin/{{ remake['id'] }}',this,updatePin)" data-unpin="<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post" data-repin="<i class='fa fa-thumb-tack'></i> Reépingler ce post" >{% if remake['has_pin'] %}<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post{% else %}<i class='fa fa-thumb-tack'></i> Epingler ce post{% endif %}</button>
+                                        <a href="/togglePin/{{ remake['id'] }}?redirect=/p/{{ projectId }}" >
+                                            {% if remake['has_pin'] %}
+                                                <i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post
+                                            {% else %}
+                                                <i class='fa fa-thumb-tack'></i> Epingler ce post
+                                            {% endif %}
+                                        </a>
                                         
                                         <button onclick="ajaxPingUrl('/vote/minus/{{ remake['id'] }}',this,updateScore)">-</button>
                                         <span class="post-score">{{ remake['score_result'] }} pts</span>

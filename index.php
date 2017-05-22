@@ -267,7 +267,11 @@ $app->get('/togglePin/{post-id}', function ($request, $response, $args) {
     $reponse->execute(['postId' => $args['post-id']]);
     while ($donnees[] = $reponse->fetch());
     $reponse->closeCursor();
-    die(json_encode($donnees));
+    if (!empty($_GET['redirect'])){
+        header ('Location: ' . $_GET['redirect']); exit();
+    } else {
+        die(json_encode($donnees));
+    }
 });
 
 $app->get('/resetPostScore/{post-id}', function ($request, $response, $args) {
