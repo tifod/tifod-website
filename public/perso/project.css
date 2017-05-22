@@ -80,7 +80,7 @@ img { width: 100%; height: auto; }
 .many-posts .post-more-label>h3 { margin: 12px 1em 36px 1em; }
 .post-checkbox, .post-more { display: none; }
 .post-checkbox:checked ~ .post-more { display: initial; }
-.action-list>* { display: inline-block; margin-right: 5px; }
+.list-inline>* { display: inline-block; margin-right: 5px; }
 
 .post-more {
     position: fixed;
@@ -93,15 +93,28 @@ img { width: 100%; height: auto; }
     text-align: center;
     background-color: rgba(0,0,0,0.5);
 }
+.post-more>label {
+    position: fixed;
+    z-index: 4;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
 .post-more-content {
     text-align: initial;
     display: inline-block;
-    width: 80vw;
-    background-color: white;
     z-index: 5;
-    margin: 1em;
+    margin: 0 1em;
+    padding: 0 1em;
 }
-.post-more-content>* { margin: 1em; }
+.post-more-content>* {
+    position: relative;
+    z-index: 4;
+    margin: 1em;
+    padding: 1em;
+    background-color: white;
+}
 .exit-btn { cursor: pointer; float: right; }
 .post-preview>* { display: inline-block; border: solid 1px #ddd; }
 .post-preview>img { max-height: 20vh; width: auto; }
@@ -113,9 +126,6 @@ img { width: 100%; height: auto; }
     z-index: 6;
 }
 .add-content-btn+* {
-    margin: 0;
-    padding: 1em;
-    background-color: white;
     position: relative;
     z-index: 7;
 }
@@ -138,17 +148,18 @@ img { width: 100%; height: auto; }
 .tree-post:hover, .tree-post-active { background-color: rgba(0,0,0,0.2); }
 
 .drawing-board {
+    position: relative;
+    z-index: 10;
     margin-bottom: 33px;
     width: 600px;
     height: 400px;
 }
-.drawing-form { overflow: auto; }
+.drawing-board-wrapper { overflow: auto; }
 
 /* tablet (768px) and smaller */
 @media screen and (max-width: 768px){
     body::-webkit-scrollbar, .post-more::-webkit-scrollbar { display: none; }
     :root { --width: 100vw; }
-    .post-more-content { margin: 0; }
     .prev, .next { display: initial; }
     .prev { left: 0; }
     .next { right: 0; }
@@ -167,5 +178,6 @@ img { width: 100%; height: auto; }
     .prev { left: -50px; }
     .next { right: -50px; }
 }
-#project-player, .posts, .post-more-content { width: var(--width); }
+#project-player, .posts { width: var(--width); }
 .post { width: calc(var(--width) - 2px); }
+.post-more-content { width: calc(var(--width) - 4em); }

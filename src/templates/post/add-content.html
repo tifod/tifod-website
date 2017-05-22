@@ -1,18 +1,19 @@
 {# template utilisé quand un projet est vide et pour ajouter du contenu à chaque post #}
 <div>
     <form action="javascript:void(0);">
-        <p class="action-list">
+        <p class="list-inline">
             <input onclick="this.value='';" class="" type="file" onchange="handleImage()" data-postid="{{ child['id'] }}">
             <span class="file-dimensions"></span>
         </p>
-        <p class="action-list">
+        <p class="list-inline">
             <label>Largeur <input placeholder="largeur" class="drawingboard-width-input" type="text" data-postid="{{ child['id'] }}"></label>
             <label>Hauteur <input placeholder="hauteur" class="drawingboard-height-input" type="text" data-postid="{{ child['id'] }}"></label>
         </p>
     </form>
     <form class="drawing-form" action="/add-post" method="post">
-        <!-- this is the drawingboard container -->
-        <div class="drawing-board" id="{{ child['id'] }}-drawing-board"></div>
+        <div class="drawing-board-wrapper">
+            <div class="drawing-board" id="{{ child['id'] }}-drawing-board"></div>
+        </div>
         <p>
             <label>
                 <input type="checkbox" name="isremake"> Envoyer comme un remake
@@ -22,7 +23,6 @@
             <button>Envoyer</button>
         </p>
         
-        <!-- this will be the input used to pass the drawingboard content to the server -->
         <input type="hidden" name="image" value="">
         <input type="hidden" name="parent_id" value="{{ child['id'] }}">
         <input type="hidden" name="project_id" value="{{ projectId }}">

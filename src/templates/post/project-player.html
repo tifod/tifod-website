@@ -22,7 +22,7 @@
             <h2>{{ project[0]['content'] }}</h2>
             <p>Un projet de <a href="/u/{{ project[0]['author_name']|lower }}">{{ project[0]['author_name'] }}</a></p>
             <hr>
-            <p class="action-list">
+            <p class="list-inline">
                 <span>
                     <i class='fa fa-fw fa-arrow-left'></i> <a href="/">Revenir à la liste des projets</a>
                 </span>
@@ -72,7 +72,7 @@
             <h1>{{ project[0]['content'] }}</h1>
             <div>Un projet de <a href="#">Jean</a></div>
         </div>
-        <div class="action-list">
+        <div class="list-inline">
             <div><a href="/">Revenir à la liste des projets</a></div>
             <div><a href="/delete-post/{{ project[0]['id'] }}">Supprimer ce projet</a></div>
         </div>

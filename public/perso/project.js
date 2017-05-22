@@ -6,6 +6,27 @@ $("img").unveil(500, function(){
     });
 });
 
+function doubleScroll(element) {
+    if (element.parentNode.firstChild.className != 'dblscrollbar'){
+        var scrollbar= document.createElement('div');
+        scrollbar.appendChild(document.createElement('div'));
+        scrollbar.className = 'dblscrollbar';
+        scrollbar.style.overflow= 'auto';
+        scrollbar.style.overflowY= 'hidden';
+        scrollbar.style.marginBottom= '1em';
+        scrollbar.firstChild.style.width= element.scrollWidth+'px';
+        scrollbar.firstChild.style.paddingTop= '1px';
+        scrollbar.firstChild.appendChild(document.createTextNode('\xA0'));
+        scrollbar.onscroll= function() {
+            element.scrollLeft= scrollbar.scrollLeft;
+        };
+        element.onscroll= function() {
+            scrollbar.scrollLeft= element.scrollLeft;
+        };
+        element.parentNode.insertBefore(scrollbar, element);
+    }
+}
+
 function handleImage(e){
     var postId = event.target.getAttribute('data-postid');
     
@@ -62,6 +83,8 @@ function resetBoard (elId){
         enlargeYourContainer: true,
         droppable: true
     });
+    
+    doubleScroll(document.getElementById(elId).parentNode);
     
     $('#' + elId).parent().on('submit', drawingSubmit);
     

@@ -31,41 +31,42 @@
                 </label>
             </div>
             <div class="post-more">
+                <label for="{{ child['id'] }}-post-checkbox"></label>
                 <div class="post-more-content">
-                    {# exit button #}
-                    <label for="{{ child['id'] }}-post-checkbox" class="exit-btn"><i class="fa fa-times fa-2x"></i></label>
-                    
-                    <div class="post-preview">
-                        <img src="/public/img/post/{{ child['content'] }}">
+                    <div>
+                        {# exit button #}
+                        <label for="{{ child['id'] }}-post-checkbox" class="exit-btn"><i class="fa fa-times fa-2x"></i></label>
+                        
+                        <div class="post-preview">
+                            <img src="/public/img/post/{{ child['content'] }}">
+                        </div>
+                        
+                        {# author and time ago #}
+                        <p>
+                            <a href="/u/{{ child['author_name']|lower }}">{{ child['author_name'] }}</a>
+                            <span>, {{ child['posted_on']|timeago }}</span>
+                        </p>
+                        
+                        {# go to tree #}
+                        <p class="list-inline">
+                            <i class='fa fa-code-fork fa-flip-vertical'></i> <a href="#{{ child['id'] }}-post-tree" class="tree-link" data-postid="{{ child['id'] }}" data-scroll>Voir dans l'arborescence du projet</a>
+                        </p>
+                        
+                        <p class="list-inline">
+                            <i class='fa fa-trash'></i> <a href="/delete-post/{{ child['id'] }}?redirect=/p/{{ projectId }}">Supprimer ce post</a>
+                        </p>
+                        <p class="list-inline">
+                            <button onclick="ajaxPingUrl('/vote/minus/{{ child['id'] }}',this,updateScore)">-</button>
+                            <span class="post-score">{{ child['score_result'] }} pts</span>
+                            <button onclick="ajaxPingUrl('/vote/plus/{{ child['id'] }}',this,updateScore)">+</button>
+                            <span class="post-percent">({{ child['score_percent'] }}%)</span>
+                            <i class='fa fa-undo fa-fw'></i> <a href="/resetPostScore/{{ child['id'] }}?redirect=/p/{{ projectId }}">Reset</a>
+                        </p>
+                        <p class="list-inline">
+                            <button onclick="ajaxPingUrl('/togglePin/{{ child['id'] }}',this,updatePin)" data-unpin="<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post" data-repin="<i class='fa fa-thumb-tack'></i> Reépingler ce post" >{% if child['has_pin'] %}<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post{% else %}<i class='fa fa-thumb-tack'></i> Epingler ce post{% endif %}</button>
+                        </p>
                     </div>
-                    
-                    {# author and time ago #}
-                    <p>
-                        <a href="/u/{{ child['author_name']|lower }}">{{ child['author_name'] }}</a>
-                        <span>, {{ child['posted_on']|timeago }}</span>
-                    </p>
-                    
-                    {# go to tree #}
-                    <p class="action-list">
-                        <i class='fa fa-code-fork fa-flip-vertical'></i> <a href="#{{ child['id'] }}-post-tree" class="tree-link" data-postid="{{ child['id'] }}" data-scroll>Voir dans l'arborescence du projet</a>
-                    </p>
-                    
-                    <p class="action-list">
-                        <i class='fa fa-trash'></i> <a href="/delete-post/{{ child['id'] }}?redirect=/p/{{ projectId }}">Supprimer ce post</a>
-                    </p>
-                    <p class="action-list">
-                        <button onclick="ajaxPingUrl('/vote/minus/{{ child['id'] }}',this,updateScore)">-</button>
-                        <span class="post-score">{{ child['score_result'] }} pts</span>
-                        <button onclick="ajaxPingUrl('/vote/plus/{{ child['id'] }}',this,updateScore)">+</button>
-                        <span class="post-percent">({{ child['score_percent'] }}%)</span>
-                        <i class='fa fa-undo fa-fw'></i> <a href="/resetPostScore/{{ child['id'] }}?redirect=/p/{{ projectId }}">Reset</a>
-                    </p>
-                    <p class="action-list">
-                        <button onclick="ajaxPingUrl('/togglePin/{{ child['id'] }}',this,updatePin)" data-unpin="<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post" data-repin="<i class='fa fa-thumb-tack'></i> Reépingler ce post" >{% if child['has_pin'] %}<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post{% else %}<i class='fa fa-thumb-tack'></i> Epingler ce post{% endif %}</button>
-                    </p>
-                    
                     {# add content #}
-                    <hr>
                     <div class="add-content-btn">
                         <a href="#{{ child['id'] }}-add-content" class="mdl-button mdl-js-button mdl-button--fab mdl-button--accent">
                             <i class="material-icons">add</i>
