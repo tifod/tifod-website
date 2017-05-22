@@ -27,7 +27,7 @@
         
                 {# content #}
                 <label for="{{ child['id'] }}-post-checkbox" class="post-more-label">
-                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ child['content'] }}">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{% if child['remakes'][0]['has_pin'] == 1 %}{{ child['remakes'][0]['content'] }}{% else %}{{ child['content'] }}{% endif %}">
                 </label>
             </div>
             <div class="post-more">
@@ -47,24 +47,46 @@
                             <span>, {{ child['posted_on']|timeago }}</span>
                         </p>
                         
-                        {# go to tree #}
                         <p class="list-inline">
-                            <i class='fa fa-code-fork fa-flip-vertical'></i> <a href="#{{ child['id'] }}-post-tree" class="tree-link" data-postid="{{ child['id'] }}" data-scroll>Voir dans l'arborescence du projet</a>
-                        </p>
-                        
-                        <p class="list-inline">
-                            <i class='fa fa-trash'></i> <a href="/delete-post/{{ child['id'] }}?redirect=/p/{{ projectId }}">Supprimer ce post</a>
-                        </p>
-                        <p class="list-inline">
+                            <button onclick="ajaxPingUrl('/togglePin/{{ child['id'] }}',this,updatePin)" data-unpin="<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post" data-repin="<i class='fa fa-thumb-tack'></i> Reépingler ce post" >{% if child['has_pin'] %}<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post{% else %}<i class='fa fa-thumb-tack'></i> Epingler ce post{% endif %}</button>
+                            
                             <button onclick="ajaxPingUrl('/vote/minus/{{ child['id'] }}',this,updateScore)">-</button>
                             <span class="post-score">{{ child['score_result'] }} pts</span>
                             <button onclick="ajaxPingUrl('/vote/plus/{{ child['id'] }}',this,updateScore)">+</button>
                             <span class="post-percent">({{ child['score_percent'] }}%)</span>
-                            <i class='fa fa-undo fa-fw'></i> <a href="/resetPostScore/{{ child['id'] }}?redirect=/p/{{ projectId }}">Reset</a>
                         </p>
                         <p class="list-inline">
-                            <button onclick="ajaxPingUrl('/togglePin/{{ child['id'] }}',this,updatePin)" data-unpin="<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post" data-repin="<i class='fa fa-thumb-tack'></i> Reépingler ce post" >{% if child['has_pin'] %}<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post{% else %}<i class='fa fa-thumb-tack'></i> Epingler ce post{% endif %}</button>
+                            <i class='fa fa-undo fa-fw'></i> <a href="/resetPostScore/{{ child['id'] }}?redirect=/p/{{ projectId }}">Remettre le score à zéro</a>
+                            <i class='fa fa-trash'></i> <a href="/delete-post/{{ child['id'] }}?redirect=/p/{{ projectId }}">Supprimer ce post</a>
+                            <i class='fa fa-code-fork fa-flip-vertical'></i> <a href="#{{ child['id'] }}-post-tree" class="tree-link" data-postid="{{ child['id'] }}" data-scroll>Voir dans l'arborescence du projet</a>
                         </p>
+                    </div>
+                    {# remakes #}
+                    <div>
+                        {% set remakes = child['remakes'] %}
+                        {% if remakes %}
+                            {% for remake in remakes %}
+                                <div class="post-preview">
+                                    <img src="/public/img/post/{{ remake['content'] }}">
+                                </div>
+                                <div>
+                                    <p class="list-inline">
+                                        <button onclick="ajaxPingUrl('/togglePin/{{ remake['id'] }}',this,updatePin)" data-unpin="<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post" data-repin="<i class='fa fa-thumb-tack'></i> Reépingler ce post" >{% if remake['has_pin'] %}<i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post{% else %}<i class='fa fa-thumb-tack'></i> Epingler ce post{% endif %}</button>
+                                        
+                                        <button onclick="ajaxPingUrl('/vote/minus/{{ remake['id'] }}',this,updateScore)">-</button>
+                                        <span class="post-score">{{ remake['score_result'] }} pts</span>
+                                        <button onclick="ajaxPingUrl('/vote/plus/{{ remake['id'] }}',this,updateScore)">+</button>
+                                        <span class="post-percent">({{ remake['score_percent'] }}%)</span>
+                                    </p>
+                                    <p class="list-inline">
+                                        <i class='fa fa-undo fa-fw'></i> <a href="/resetPostScore/{{ remake['id'] }}?redirect=/p/{{ projectId }}">Remettre le score à zéro</a>
+                                        <i class='fa fa-trash'></i> <a href="/delete-post/{{ remake['id'] }}?redirect=/p/{{ projectId }}">Supprimer ce post</a>
+                                    </p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <i>Il n'y a pas de remakes</i>
+                        {% endif %}
                     </div>
                     {# add content #}
                     <div class="add-content-btn">

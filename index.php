@@ -120,6 +120,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             $posts [] = [
                 'id' => $post['id'],
                 'content' => $post['content'],
+                'is_remake' => $post['is_remake'],
                 'parent_id' => $post['parent_id'],
                 'path' => $post['path'],
                 'score_result' => $post['score_result'],
@@ -131,21 +132,33 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             ];
             if ($post['parent_id'] == 0) $topPostId = $k;
         }
-
-        $new = [];
+        
+        $new_posts = [];
+        $all_remakes = [];
         foreach ($posts as $a){
+            if($a['is_remake'] == '0'){
+                $new_posts[$a['id']] = $a;
+            } else {
+                $all_remakes[] = $a;
+            }
+        }
+        foreach ($all_remakes as $a){
+            $new_posts[$a['parent_id']]['remakes'][] = $a;
+        }
+        $new = [];
+        foreach ($new_posts as $a){
             $new[$a['parent_id']][] = $a;
         }
         $project = createTree($new, array($posts[$topPostId]));
 
         $new = [];
-        foreach ($posts as $a){
-            $has_pin = $a['has_pin'] ? ' | <i class="fa fa-thumb-tack" aria-hidden="true"></i>' : '';
-            // $new[$a['parent_id']][] = ['innerHTML' => '<p class="tree-post" data-path="' . $a['path'] . '" data-id="' . $a['id'] . '">' . htmlspecialchars($a['content']) . '</p><hr><p>' . $a['score_result'] . ' points | ' . $a['score_percent'] . '%' . $has_pin . '</p>', 'id' => $a['id']];
-            $new[$a['parent_id']][] = [
-                'innerHTML' => $this->view->render('post/tree-post.html', ['post' => $a]),
-                'id' => $a['id']
-            ];
+        foreach ($new_posts as $a){
+            if($a['is_remake'] == '0'){
+                $new[$a['parent_id']][] = [
+                    'innerHTML' => $this->view->render('post/tree-post.html', ['post' => $a]),
+                    'id' => $a['id']
+                ];
+            }
         }
         $project_json = createTree($new, array($posts[$topPostId]));
         

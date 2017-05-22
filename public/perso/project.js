@@ -86,7 +86,7 @@ function resetBoard (elId){
     
     doubleScroll(document.getElementById(elId).parentNode);
     
-    $('#' + elId).parent().on('submit', drawingSubmit);
+    $('#' + elId).parent().parent().on('submit', drawingSubmit);
     
     function drawingSubmit(){
        //get drawingboard content
