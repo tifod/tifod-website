@@ -48,11 +48,12 @@
                         </p>
                         
                         <p class="list-inline">
+                            <i class='fa fa-thumb-tack'></i>
                             <a href="/togglePin/{{ child['id'] }}?redirect=/p/{{ projectId }}" >
                                 {% if child['has_pin'] %}
-                                    <i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post
+                                    Enlever l'épingle de ce post
                                 {% else %}
-                                    <i class='fa fa-thumb-tack'></i> Epingler ce post
+                                    Epingler ce post
                                 {% endif %}
                             </a>
                             
@@ -77,11 +78,12 @@
                                 </div>
                                 <div>
                                     <p class="list-inline">
+                                        <i class='fa fa-thumb-tack'></i>
                                         <a href="/togglePin/{{ remake['id'] }}?redirect=/p/{{ projectId }}" >
                                             {% if remake['has_pin'] %}
-                                                <i class='fa fa-thumb-tack'></i> Enlever l'épingle de ce post
+                                                Enlever l'épingle de ce post
                                             {% else %}
-                                                <i class='fa fa-thumb-tack'></i> Epingler ce post
+                                                Epingler ce post
                                             {% endif %}
                                         </a>
                                         
