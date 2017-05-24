@@ -1,0 +1,57 @@
+<div class="post-infos">
+    <p class="list-inline">
+        <span class="list-inline">
+            <a href="/u/{{ post['author_name']|lower }}">{{ post['author_name'] }}</a>
+            <span>{{ post['posted_on']|timeago }}</span>
+        </span>
+        <span class="list-inline">
+            <button class="mdl-button mdl-js-button mdl-button--icon" onclick="ajaxPingUrl('/vote/minus/{{ post['id'] }}',this,updateScore)"><span class="fa fa-minus-circle"></span></button>
+            <span class="post-score">{{ post['score_result'] }}</span>
+            <button class="mdl-button mdl-js-button mdl-button--icon" onclick="ajaxPingUrl('/vote/plus/{{ post['id'] }}',this,updateScore)"><span class="fa fa-plus-circle"></span></button>
+            <span class="post-percent">({{ post['score_percent'] }}%)</span>
+            <a href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >
+                {% if post['has_pin'] %}
+                    <span class="fa-stack fa-fw">
+                        <i class="fa fa-circle-o fa-stack-2x"></i>
+                        <i class="fa fa-thumb-tack fa-stack-1x"></i>
+                    </span>
+                    <i class="fa fa-check"></i>
+                {% else %}
+                    <i class="fa fa-thumb-tack fa-lg fa-fw text-initial"></i>
+                {% endif %}
+            </a>
+            {% if not post['is_remake'] %}
+                <a href="#{{ post['id'] }}-post-tree" class="tree-link text-initial" data-scroll>
+                    <span class="fa-stack fa-fw">
+                        <i class="fa fa-circle fa-stack-2x"></i>
+                        <i class="fa fa-code-fork fa-inverse fa-flip-vertical fa-stack-1x"></i>
+                    </span>
+                </a>
+            {% endif %}
+        </span>
+        
+        <label class="list-inline btn-more" for="{{ post['id'] }}-checkbox-more">
+            <span class="mdl-button mdl-js-button mdl-button--icon">
+                <i class="material-icons">more_vert</i>
+            </span>
+        </label>
+    </p>
+    <input type="checkbox" id="{{ post['id'] }}-checkbox-more" class="checkbox-more" data-postid="{{ post['id'] }}">
+    <div class="post-more">
+        <hr>
+        <p class="list-inline">
+            <span class="list-inline">
+                <i class='fa fa-undo fa-fw'></i>
+                <a href="/resetPostScore/{{ post['id'] }}?redirect=/p/{{ projectId }}">Remettre le score à zéro</a>
+            </span>
+            
+            <span class="list-inline">
+                <i class='fa fa-trash text-danger fa-fw'></i>
+                <a class="text-danger" href="/delete-post/{{    post['id'] }}?redirect=/p/{{ projectId }}">Supprimer ce post</a>
+            </span>
+        </p>
+        {% if not post['is_remake'] %}
+            {% include "post/add-content.html" %}
+        {% endif %}
+    </div>
+</div>

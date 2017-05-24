@@ -142,11 +142,13 @@ for (var z = 0; z < checkboxMore.length; z++){
 var treeLinks = document.getElementsByClassName('tree-link');
 for(var z = 0; z < treeLinks.length; z++) {
     treeLinks[z].onclick = function (){
-        var postId = event.target.getAttribute('data-postid');
-        document.getElementById(postId + '-post-tree').className = 'tree-post tree-post-active';
+        var postTreeId = this.getAttribute('href');
+        $(postTreeId).addClass('tree-post-active');
+        var scrollQuantity = $(postTreeId).offset().left - $(postTreeId).parent().offset().left + $(postTreeId).parent().scrollLeft();
+        $(postTreeId).parent().stop().animate({ scrollLeft: scrollQuantity }, 500);
         animationsTest(function(){
             setTimeout(function(){
-                document.getElementById(postId + '-post-tree').className = 'tree-post';
+                $(postTreeId).removeClass('tree-post-active');
             },1000);
         });
     };

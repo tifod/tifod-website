@@ -9,6 +9,9 @@ img { width: 100%; height: auto; }
     cursor: pointer;
 }
 .btn-more { position: absolute; right: 0; }
+.text-danger { color: red; }
+.text-primary { color: #448AFF; }
+.text-initial { color: initial; }
 
 .post-siblings-nav {
     display: inline-block;
@@ -21,7 +24,8 @@ img { width: 100%; height: auto; }
 .group-post-link {
     display: inline-block;
     margin: 0 3px;
-    border-radius: 5px;
+    padding-bottom: 1px;
+    border-radius: 20px;
     background-color: rgba(0,0,0,0.1);
 }
 .post-siblings-nav, .prev, .next { cursor: pointer; }
@@ -83,16 +87,18 @@ img { width: 100%; height: auto; }
     border-top-width: 0;
     background-color: white;
 }
-.post-remake {
+.post img {
+    margin-left: 1px;
+    width: calc(100% - 1px);
+    border-radius: 3px 3px 0 0;
+    border-bottom: solid 1px #ddd;
+}
+.post-remake, .post-remake img {
     border-color: #448AFF;
 }
 .post-infos {
     margin: 1em;
     margin-bottom: 48px;
-}
-.post img {
-    border-radius: 3px 3px 0 0;
-    border-bottom: solid 1px #ddd;
 }
 .list-inline>* { display: inline-block; margin-right: 5px; }
 

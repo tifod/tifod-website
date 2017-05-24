@@ -2,29 +2,34 @@
 <div>
     <form action="javascript:void(0);">
         <p class="list-inline">
-            <input onclick="this.value='';" class="" type="file" onchange="handleImage()" data-postid="{{ child['id'] }}">
-            <span class="file-dimensions"></span>
+            <label class="list-inline">
+                <strong>Travailler sur un dessin</strong>
+                <input onclick="this.value='';" class="" type="file" onchange="handleImage()" data-postid="{{ post['id'] }}">
+                <span class="file-dimensions"></span>
+            </label>
         </p>
         <p class="list-inline">
-            <label>Largeur <input placeholder="largeur" class="drawingboard-width-input" type="text" data-postid="{{ child['id'] }}"></label>
-            <label>Hauteur <input placeholder="hauteur" class="drawingboard-height-input" type="text" data-postid="{{ child['id'] }}"></label>
+            <label class="list-inline"><strong>Largeur</strong><input placeholder="largeur" class="drawingboard-width-input" type="text" data-postid="{{ post['id'] }}"></label>
+            <label class="list-inline"><strong>Hauteur</strong><input placeholder="hauteur" class="drawingboard-height-input" type="text" data-postid="{{ post['id'] }}"></label>
         </p>
     </form>
     <form class="drawing-form" action="/add-post" method="post">
         <div class="drawing-board-wrapper">
-            <div class="drawing-board" id="{{ child['id'] }}-drawing-board"></div>
+            <div class="drawing-board" id="{{ post['id'] }}-drawing-board"></div>
         </div>
-        <p>
-            <label>
-                <input type="checkbox" name="isremake"> Envoyer comme un remake
-            </label>
-        </p>
+        {% if not cant_be_remake %}
+            <p>
+                <label>
+                    <input type="checkbox" name="isremake"> Envoyer comme <span class="text-primary">un remake</span>
+                </label>
+            </p>
+        {% endif %}
         <p>
             <button>Envoyer</button>
         </p>
         
         <input type="hidden" name="image" value="">
-        <input type="hidden" name="parent_id" value="{{ child['id'] }}">
+        <input type="hidden" name="parent_id" value="{{ post['id'] }}">
         <input type="hidden" name="project_id" value="{{ projectId }}">
     </form>
 </div>
