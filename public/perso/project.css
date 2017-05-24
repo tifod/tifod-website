@@ -43,15 +43,11 @@ img { width: 100%; height: auto; }
     cursor: pointer;
 }
 .link-btn-remake {
-    background-color: cyan;
+    background-color: #448AFF;
 }
 .link input[type=radio] { display: none; }
 .link input[type=radio]:checked + .link-btn {
-    padding: 2px;
-    background-color: gray;
-}
-.link input[type=radio]:checked + .link-btn-remake {
-    background-color: #448AFF;
+    padding: 4px;
 }
 
 #project-player { transition: height .5s; }
@@ -89,8 +85,6 @@ img { width: 100%; height: auto; }
     margin-bottom: 48px;
 }
 .post img {
-    width: calc(100% - 1px);
-    padding-left: 1px;
     border-radius: 3px 3px 0 0;
     border-bottom: solid 1px #ddd;
 }
