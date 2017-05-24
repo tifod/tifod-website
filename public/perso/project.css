@@ -18,6 +18,12 @@ img { width: 100%; height: auto; }
     left: 50%;
     transform: translate(-50%, 0);
 }
+.group-post-link {
+    display: inline-block;
+    margin: 0 3px;
+    border-radius: 5px;
+    background-color: rgba(0,0,0,0.1);
+}
 .post-siblings-nav, .prev, .next { cursor: pointer; }
 .prev, .next {
     top: 50%;
@@ -34,7 +40,7 @@ img { width: 100%; height: auto; }
 
 .link-btn {
     vertical-align: middle;
-    background-color: #ddd;
+    background-color: #bbb;
     border-radius: 50%;
     height: 10px;
     width: 10px;

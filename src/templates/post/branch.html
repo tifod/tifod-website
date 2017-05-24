@@ -8,18 +8,21 @@
         <div class="post-siblings-nav">
             <form>
                 {% for t_child in children %}
-                    <label class="link" data-target="{{ t_child['id'] }}">
-                        <input type="radio" id="{{ t_child['id'] }}-radio-button" name="radio-{{ post['id'] }}" {% if loop.first %}checked{% endif %} />
-                        <div class="link-btn"></div>
-                    </label>
-                    {% if t_child['remakes'] %}
-                        {% for t_remake in t_child['remakes'] %}
-                            <label class="link" data-target="{{ t_remake['id'] }}">
-                                <input type="radio" id="{{ t_remake['id'] }}-radio-button" name="radio-{{ post['id'] }}" />
-                                <div class="link-btn link-btn-remake"></div>
-                            </label>
-                        {% endfor %}
-                    {% endif %}
+                    <div class="group-post-link">
+                        <label class="link" data-target="{{ t_child['id'] }}">
+                            <input type="radio" class="link-radio-button" id="{{ t_child['id'] }}-radio-button" name="radio-{{ post['id'] }}" {% if loop.first and (not t_child['remakes'] or t_child['remakes'][0]['has_pin'] == '0') %}checked{% endif %} />
+                            <div class="link-btn"></div>
+                            {% set loopfirstparent = loop.first %}
+                        </label>
+                        {% if t_child['remakes'] %}
+                            {% for t_remake in t_child['remakes'] %}
+                                <label class="link" data-target="{{ t_remake['id'] }}">
+                                    <input type="radio" class="link-radio-button" id="{{ t_remake['id'] }}-radio-button" name="radio-{{ post['id'] }}" {% if loopfirstparent and t_remake['has_pin'] == '1' %}checked{% endif %}/>
+                                    <div class="link-btn link-btn-remake"></div>
+                                </label>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
                 {% endfor %}
             </form>
         </div>

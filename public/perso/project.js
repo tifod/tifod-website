@@ -6,6 +6,11 @@ $("img").unveil(500, function(){
     });
 });
 
+var radioBtns = document.getElementsByClassName('link-radio-button');
+for (var z = 0; z < radioBtns.length; z++){
+    if (radioBtns[z].checked == true) showPost(radioBtns[z].parentNode.getAttribute('data-target'));
+}
+
 function doubleScroll(element) {
     if (element.parentNode.firstChild.className != 'dblscrollbar'){
         var scrollbar= document.createElement('div');
