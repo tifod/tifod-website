@@ -2,6 +2,12 @@
 .container { max-width: 80vw; margin: auto; }
 body { background-color: #eee; }
 img { width: 100%; height: auto; }
+.url-like {
+    color: rgb(68,138,255);
+    font-weight: 500;
+    text-decoration: underline;
+    cursor: pointer;
+}
 
 .post-siblings-nav {
     display: inline-block;
@@ -11,14 +17,9 @@ img { width: 100%; height: auto; }
     left: 50%;
     transform: translate(-50%, 0);
 }
-.post-siblings-nav, .prev, .next {
-    opacity: 0.2;
-    transition: opacity .5s;
-    cursor: pointer;
-}
-.post-siblings-nav:hover, .prev:hover, .next:hover { opacity: 1; }
+.post-siblings-nav, .prev, .next { cursor: pointer; }
 .prev, .next {
-    height: 100%;
+    top: 50%;
     width: 4em;
     z-index: 3;
     position: absolute;
@@ -32,7 +33,7 @@ img { width: 100%; height: auto; }
 
 .link-btn {
     vertical-align: middle;
-    background-color: gray;
+    background-color: #ddd;
     border-radius: 50%;
     height: 10px;
     width: 10px;
@@ -40,10 +41,16 @@ img { width: 100%; height: auto; }
     display: inline-block;
     cursor: pointer;
 }
+.link-btn-remake {
+    background-color: cyan;
+}
 .link input[type=radio] { display: none; }
 .link input[type=radio]:checked + .link-btn {
     padding: 2px;
-    background-color: black;
+    background-color: gray;
+}
+.link input[type=radio]:checked + .link-btn-remake {
+    background-color: #448AFF;
 }
 
 #project-player { transition: height .5s; }
@@ -62,73 +69,31 @@ img { width: 100%; height: auto; }
     position: relative;
 }
 .post {
-    margin: 0.5em 2px 0.5em 0;
+    margin: 0.5em 1em 0.5em 0;
     vertical-align: top;
     display: inline-block;
     position: relative;
     z-index: 2;
     border-radius: 3px;
-    border-style: solid;
-    border-color: #ddd;
-    border-width: 0 1px 2px 1px;
+    border: solid #ddd 1px;
+    border-bottom-width: 3px;
+    border-top-width: 0;
     background-color: white;
 }
-.post img { border-radius: 3px; }
-.post-more-label { text-align: center; display: inline-block; width: 100%; cursor: pointer; }
-
-.post-more-label>h3 { margin: 12px 1em; }
-.many-posts .post-more-label>h3 { margin: 12px 1em 36px 1em; }
-.post-checkbox, .post-more { display: none; }
-.post-checkbox:checked ~ .post-more { display: initial; }
-.list-inline>* { display: inline-block; margin-right: 5px; }
-
-.post-more {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 100vw;
-    z-index: 4;
-    overflow: auto;
-    text-align: center;
-    background-color: rgba(0,0,0,0.5);
+.post-remake {
+    border-color: #448AFF;
 }
-.post-more>label:first-child {
-    cursor: pointer;
-    position: fixed;
-    z-index: 4;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 100vw;
-}
-.post-more-content {
-    text-align: initial;
-    display: inline-block;
-    z-index: 5;
-}
-.post-more-content>* {
-    position: relative;
-    z-index: 4;
+.post-infos {
     margin: 1em;
-    padding: 1em;
-    border-radius: 3px;
-    background-color: white;
+    margin-bottom: 48px;
 }
-.exit-btn { cursor: pointer; float: right; }
-.post-preview { text-align: center; }
-.post-preview>img { width: 50%; border: solid 1px #ddd; }
-.add-content-btn { float: right; }
-.add-content-btn>* {
-    position: fixed;
-    transform: translate(-100%,0);
-    bottom: 1em;
-    z-index: 6;
+.post img {
+    width: calc(100% - 1px);
+    padding-left: 1px;
+    border-radius: 3px 3px 0 0;
+    border-bottom: solid 1px #ddd;
 }
-.add-content-btn+* {
-    position: relative;
-    z-index: 7;
-}
+.list-inline>* { display: inline-block; margin-right: 5px; }
 
 #project-tree-section { position: relative; z-index: 1; }
 .tree-post {
@@ -147,6 +112,8 @@ img { width: 100%; height: auto; }
 .tree-post img { width: 100%; height: auto; }
 .tree-post:hover, .tree-post-active { background-color: rgba(0,0,0,0.2); }
 
+.checkbox-more, .post-more { display: none; }
+.checkbox-more:checked ~ .post-more { display: initial; }
 .drawing-board {
     position: relative;
     z-index: 10;
@@ -158,7 +125,7 @@ img { width: 100%; height: auto; }
 
 /* tablet (768px) and smaller */
 @media screen and (max-width: 768px){
-    body::-webkit-scrollbar, .post-more::-webkit-scrollbar { display: none; }
+    body::-webkit-scrollbar { display: none; }
     :root { --width: 100vw; }
     .prev, .next { display: initial; }
     .prev { left: 0; }
@@ -180,4 +147,3 @@ img { width: 100%; height: auto; }
 }
 #project-player, .posts { width: var(--width); }
 .post { width: calc(var(--width) - 2px); }
-.post-more-content { width: calc(var(--width) - 2em); }

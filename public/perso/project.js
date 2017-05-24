@@ -69,40 +69,68 @@ function resizeDrawingBoardSize (dimension, postId){
 }
 var mainBoard;
 function resetBoard (elId){
-    document.getElementById(elId).innerHTML = '';
-    mainBoard = new DrawingBoard.Board(elId, {
-        controls: [
-            'Color',
-            { Size: { type: 'dropdown' } },
-            { DrawingMode: { filler: false } },
-            'Navigation',
-            'Download'
-        ],
-        size: 1,
-        webStorage: 'session',
-        enlargeYourContainer: true,
-        droppable: true
-    });
-    
-    doubleScroll(document.getElementById(elId).parentNode);
-    
-    $('#' + elId).parent().parent().on('submit', drawingSubmit);
-    
-    function drawingSubmit(){
-       //get drawingboard content
-      var img = mainBoard.getImg();
-      
-      //we keep drawingboard content only if it's not the 'blank canvas'
-      var imgInput = (mainBoard.blankCanvas == img) ? '' : img;
-      
-      //put the drawingboard content in the form field to send it to the server
-      $(this).find('input[name=image]').val( imgInput );
+    if (document.getElementById(elId) != null){
+        document.getElementById(elId).innerHTML = '';
+        mainBoard = new DrawingBoard.Board(elId, {
+            controls: [
+                'Color',
+                { Size: { type: 'dropdown' } },
+                { DrawingMode: { filler: false } },
+                'Navigation',
+                'Download'
+            ],
+            size: 1,
+            webStorage: 'session',
+            enlargeYourContainer: true,
+            droppable: true
+        });
+        
+        doubleScroll(document.getElementById(elId).parentNode);
+        
+        $('#' + elId).parent().parent().on('submit', drawingSubmit);
+        
+        function drawingSubmit(){
+           //get drawingboard content
+          var img = mainBoard.getImg();
+          
+          //we keep drawingboard content only if it's not the 'blank canvas'
+          var imgInput = (mainBoard.blankCanvas == img) ? '' : img;
+          
+          //put the drawingboard content in the form field to send it to the server
+          $(this).find('input[name=image]').val( imgInput );
 
-      //we can also assume that everything goes well server-side
-      //and directly clear webstorage here so that the drawing isn't shown again after form submission
-      //but the best would be to do when the server answers that everything went well
-      mainBoard.clearWebStorage();
+          //we can also assume that everything goes well server-side
+          //and directly clear webstorage here so that the drawing isn't shown again after form submission
+          //but the best would be to do when the server answers that everything went well
+          mainBoard.clearWebStorage();
+        }
     }
+}
+// checkbox-more init
+var checkboxMore = document.getElementsByClassName('checkbox-more');
+for (var z = 0; z < checkboxMore.length; z++){
+    (checkboxMore[z]).onchange = function(){
+        var cssRule = '.prev, .next { display: none; }';
+        var cssId = 'style-for-prev-next';
+        var css = document.getElementById(cssId);
+        if (css == null){
+            css = document.createElement("style");
+            css.type = "text/css";
+            css.id = cssId;
+            css.innerHTML = cssRule;
+            document.body.appendChild(css);
+        } else {
+            var oneChecked = false;
+            var allCheckboxMore = document.getElementsByClassName('checkbox-more');
+            for (var y = 0; y < allCheckboxMore.length; y++){
+                if (allCheckboxMore[y].checked) oneChecked = true;
+            }
+            css.innerHTML = oneChecked ? cssRule : '';
+        }
+        
+        resetBoard(this.getAttribute('data-postid') + '-drawing-board');
+        resizePlayer();
+    };
 }
 
 // tree-link init
@@ -110,7 +138,6 @@ var treeLinks = document.getElementsByClassName('tree-link');
 for(var z = 0; z < treeLinks.length; z++) {
     treeLinks[z].onclick = function (){
         var postId = event.target.getAttribute('data-postid');
-        document.getElementById(postId + '-post-checkbox').checked = false;
         document.getElementById(postId + '-post-tree').className = 'tree-post tree-post-active';
         animationsTest(function(){
             setTimeout(function(){
@@ -119,15 +146,6 @@ for(var z = 0; z < treeLinks.length; z++) {
         });
     };
 }
-
-$(document).keyup(function(e) {
-    // escape key maps to keycode `27`
-    if (e.keyCode == 27) {
-        // collapse the 'more infos' pannel
-        var checks = document.getElementsByClassName('post-checkbox');
-        for (var i = 0; i < checks.length; i++) checks[i].checked = false;
-    }
-});
 
 // project player height init
 resizePlayer();
@@ -178,16 +196,6 @@ for(var z = 0; z < next.length; z++) { $(next[z]).on("click",function(){ nextSli
 var prev = document.getElementsByClassName('prev');
 for(var z = 0; z < prev.length; z++) { $(prev[z]).on("click",function(){ prevSlide(this); }); }
 
-// post-more-label init
-var postCheckbox = document.getElementsByClassName('post-checkbox');
-for(var z = 0; z < postCheckbox.length; z++) {
-    $(postCheckbox[z]).change(function(e){
-        toggleCssRule('.prev, .next { display: none; }');
-        resetBoard(e.target.nextElementSibling.id + '-drawing-board');
-        resizePlayer();
-    });
-}
-
 function hasClass(element, cls) { return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1; }
 
 function goToPost (postId){
@@ -201,8 +209,9 @@ function goToPost (postId){
 }
 
 function showPost (postId) {
+    var t_postId = hasClass(document.getElementById(postId),'post-remake') ? document.getElementById(postId).getAttribute('data-parentid') : postId ;
     // Select '.post-level' among direct children
-    var allSiblingsLvl = document.getElementById(postId).parentNode.parentNode.parentNode.parentNode.childNodes;
+    var allSiblingsLvl = document.getElementById(t_postId).parentNode.parentNode.parentNode.parentNode.childNodes;
     var levels = [];
     for (var i = 0; i < allSiblingsLvl.length; i++) {
         if (hasClass(allSiblingsLvl[i], 'post-level')) {
@@ -215,22 +224,18 @@ function showPost (postId) {
     }
     // for finally activating only the targeted post '.post-level'
     // only if there is a '.post-level' (all post don't necessarily have children)
-    if (document.getElementById(postId + '-children') != null) {
-        document.getElementById(postId + '-children').className = 'post-level active-level';
+    if (document.getElementById(t_postId + '-children') != null) {
+        document.getElementById(t_postId + '-children').className = 'post-level active-level';
     }
     
     // same process but for .post
     var posts = document.getElementById(postId).parentNode.parentNode.childNodes;
     for(var y = 0; y < posts.length; y++) {
-        posts[y].getElementsByClassName('post')[0].className = 'post';
+        $(posts[y].getElementsByClassName('post')[0]).removeClass('active-post');
     }
-    document.getElementById(postId).className = 'post active-post';
+    $(document.getElementById(postId)).addClass('active-post');
     
     resizePlayer();
-    
-    // collapse the 'more infos' pannel
-    var checks = document.getElementsByClassName('post-checkbox');
-    for (var i = 0; i < checks.length; i++) checks[i].checked = false;
     
     // check the radio button matching with the post
     // if it exists

@@ -2,7 +2,7 @@
 
 <div class="post-siblings">
     {# nav bar #}
-    {% if children|length > 1 %}
+    {% if children|length > 1 or children[0]['remakes'] %}
         <div class="prev"><i class="fa fa-chevron-left fa-2x"></i></div>
         <div class="next"><i class="fa fa-chevron-right fa-2x"></i></div>
         <div class="post-siblings-nav">
@@ -12,41 +12,48 @@
                         <input type="radio" id="{{ t_child['id'] }}-radio-button" name="radio-{{ post['id'] }}" {% if loop.first %}checked{% endif %} />
                         <div class="link-btn"></div>
                     </label>
+                    {% if t_child['remakes'] %}
+                        {% for t_remake in t_child['remakes'] %}
+                            <label class="link" data-target="{{ t_remake['id'] }}">
+                                <input type="radio" id="{{ t_remake['id'] }}-radio-button" name="radio-{{ post['id'] }}" />
+                                <div class="link-btn link-btn-remake"></div>
+                            </label>
+                        {% endfor %}
+                    {% endif %}
                 {% endfor %}
             </form>
         </div>
     {% endif %}
     
     {# posts #}
-    <div class="posts{% if children|length > 1 %} many-posts{% endif %}">
-    {% for child in children%}
+    <div class="posts{% if children|length > 1 or children[0]['remakes'] %} many-posts{% endif %}">
+    {% for child in children %}
         {% set lastChild = children[children|length - 1] %}        
         <div>
-            <input class="post-checkbox" id="{{ child['id'] }}-post-checkbox" type="checkbox">
             <div class="post{% if loop.first %} active-post{% endif %}" id="{{ child['id'] }}" data-path="{{ child['path'] }}">
         
                 {# content #}
-                <label for="{{ child['id'] }}-post-checkbox" class="post-more-label">
-                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{% if child['remakes'][0]['has_pin'] == 1 %}{{ child['remakes'][0]['content'] }}{% else %}{{ child['content'] }}{% endif %}">
-                </label>
-            </div>
-            <div class="post-more">
-                <label for="{{ child['id'] }}-post-checkbox"></label>
-                <div class="post-more-content">
-                    <div>
-                        {# exit button #}
-                        <label for="{{ child['id'] }}-post-checkbox" class="exit-btn"><i class="fa fa-times fa-2x"></i></label>
+                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ child['content'] }}">
+                
+                {# post infos #}
+                <div class="post-infos">
+                    <p class="list-inline">
+                        <a href="/u/{{ child['author_name']|lower }}">{{ child['author_name'] }}</a>
+                        <span>{{ child['posted_on']|timeago }}</span>
                         
-                        <div class="post-preview">
-                            <img src="/public/img/post/{{ child['content'] }}">
-                        </div>
-                        
-                        {# author and time ago #}
-                        <p>
-                            <a href="/u/{{ child['author_name']|lower }}">{{ child['author_name'] }}</a>
-                            <span>, {{ child['posted_on']|timeago }}</span>
+                        <button onclick="ajaxPingUrl('/vote/minus/{{ child['id'] }}',this,updateScore)">-</button>
+                        <span class="post-score">{{ child['score_result'] }} pts</span>
+                        <button onclick="ajaxPingUrl('/vote/plus/{{ child['id'] }}',this,updateScore)">+</button>
+                        <span class="post-percent">({{ child['score_percent'] }}%)</span>
+                    </p>
+                    <label for="{{ child['id'] }}-checkbox-more">
+                        <p class="list-inline">
+                            <i class='fa fa-ellipsis-v'></i><span class="url-like">Actions supplémentaires</span>
                         </p>
-                        
+                    </label>
+                    <input type="checkbox" id="{{ child['id'] }}-checkbox-more" class="checkbox-more" data-postid="{{ child['id'] }}">
+                    <div class="post-more">
+                        <hr>
                         <p class="list-inline">
                             <i class='fa fa-thumb-tack'></i>
                             <a href="/togglePin/{{ child['id'] }}?redirect=/p/{{ projectId }}" >
@@ -57,63 +64,66 @@
                                 {% endif %}
                             </a>
                             
-                            <button onclick="ajaxPingUrl('/vote/minus/{{ child['id'] }}',this,updateScore)">-</button>
-                            <span class="post-score">{{ child['score_result'] }} pts</span>
-                            <button onclick="ajaxPingUrl('/vote/plus/{{ child['id'] }}',this,updateScore)">+</button>
-                            <span class="post-percent">({{ child['score_percent'] }}%)</span>
-                        </p>
-                        <p class="list-inline">
                             <i class='fa fa-undo fa-fw'></i> <a href="/resetPostScore/{{ child['id'] }}?redirect=/p/{{ projectId }}">Remettre le score à zéro</a>
+                            
                             <i class='fa fa-trash'></i> <a href="/delete-post/{{ child['id'] }}?redirect=/p/{{ projectId }}">Supprimer ce post</a>
+                            
                             <i class='fa fa-code-fork fa-flip-vertical'></i> <a href="#{{ child['id'] }}-post-tree" class="tree-link" data-postid="{{ child['id'] }}" data-scroll>Voir dans l'arborescence du projet</a>
                         </p>
-                    </div>
-                    {# remakes #}
-                    <div>
-                        {% set remakes = child['remakes'] %}
-                        {% if remakes %}
-                            {% for remake in remakes %}
-                                <div class="post-preview">
-                                    <img src="/public/img/post/{{ remake['content'] }}">
-                                </div>
-                                <div>
-                                    <p class="list-inline">
-                                        <i class='fa fa-thumb-tack'></i>
-                                        <a href="/togglePin/{{ remake['id'] }}?redirect=/p/{{ projectId }}" >
-                                            {% if remake['has_pin'] %}
-                                                Enlever l'épingle de ce post
-                                            {% else %}
-                                                Epingler ce post
-                                            {% endif %}
-                                        </a>
-                                        
-                                        <button onclick="ajaxPingUrl('/vote/minus/{{ remake['id'] }}',this,updateScore)">-</button>
-                                        <span class="post-score">{{ remake['score_result'] }} pts</span>
-                                        <button onclick="ajaxPingUrl('/vote/plus/{{ remake['id'] }}',this,updateScore)">+</button>
-                                        <span class="post-percent">({{ remake['score_percent'] }}%)</span>
-                                    </p>
-                                    <p class="list-inline">
-                                        <i class='fa fa-undo fa-fw'></i> <a href="/resetPostScore/{{ remake['id'] }}?redirect=/p/{{ projectId }}">Remettre le score à zéro</a>
-                                        <i class='fa fa-trash'></i> <a href="/delete-post/{{ remake['id'] }}?redirect=/p/{{ projectId }}">Supprimer ce post</a>
-                                    </p>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <i>Il n'y a pas de remakes</i>
-                        {% endif %}
-                    </div>
-                    {# add content #}
-                    <div class="add-content-btn">
-                        <a href="#{{ child['id'] }}-add-content" class="mdl-button mdl-js-button mdl-button--fab mdl-button--accent">
-                            <i class="material-icons">add</i>
-                        </a>
-                    </div>
-                    <div id="{{ child['id'] }}-add-content">
                         {% include "post/add-content.html" %}
                     </div>
                 </div>
             </div>
         </div>
+        {# remakes #}
+        {% if child['remakes'] %}
+            {% for remake in child['remakes'] %}
+                <div>
+                    <div class="post post-remake" id="{{ remake['id'] }}" data-parentid="{{ child['id'] }}" data-path="{{ remake['path'] }}">
+                        {# content #}
+                        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ remake['content'] }}">
+                        
+                        {# post infos #}
+                        <div class="post-infos">
+                            <p class="list-inline">
+                                <a href="/u/{{ remake['author_name']|lower }}">{{ remake['author_name'] }}</a>
+                                <span>{{ remake['posted_on']|timeago }}</span>
+
+                                <button onclick="ajaxPingUrl('/vote/minus/{{ remake['id'] }}',this,updateScore)">-</button>
+                                <span class="post-score">{{ remake['score_result'] }} pts</span>
+                                <button onclick="ajaxPingUrl('/vote/plus/{{ remake['id'] }}',this,updateScore)">+</button>
+                                <span class="post-percent">({{ remake['score_percent'] }}%)</span>
+                            </p>
+                            <label for="{{ remake['id'] }}-checkbox-more">
+                                <input type="checkbox" id="{{ remake['id'] }}-checkbox-more" class="checkbox-more" data-postid="{{ remake['id'] }}">
+                                <p class="list-inline">
+                                    <i class='fa fa-ellipsis-v'></i><span class="url-like">Actions supplémentaires</span>
+                                </p>
+                            </label>
+                            <div class="post-more">
+                                <hr>
+                                <p class="list-inline">
+                                    <i class='fa fa-thumb-tack'></i>
+                                    <a href="/togglePin/{{ remake['id'] }}?redirect=/p/{{ projectId }}" >
+                                        {% if remake['has_pin'] %}
+                                            Enlever l'épingle de ce post
+                                        {% else %}
+                                            Epingler ce post
+                                        {% endif %}
+                                    </a>
+                                    
+                                    <i class='fa fa-undo fa-fw'></i> <a href="/resetPostScore/{{ remake['id'] }}?redirect=/p/{{ projectId }}">Remettre le score à zéro</a>
+                                    
+                                    <i class='fa fa-trash'></i> <a href="/delete-post/{{ remake['id'] }}?redirect=/p/{{ projectId }}">Supprimer ce post</a>
+                                    
+                                    <i class='fa fa-code-fork fa-flip-vertical'></i> <a href="#{{ remake['id'] }}-post-tree" class="tree-link" data-postid="{{ remake['id'] }}" data-scroll>Voir dans l'arborescence du projet</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
     {% endfor %}
     </div>
 </div>
