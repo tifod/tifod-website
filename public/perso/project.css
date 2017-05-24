@@ -8,6 +8,7 @@ img { width: 100%; height: auto; }
     text-decoration: underline;
     cursor: pointer;
 }
+.btn-more { position: absolute; right: 0; }
 
 .post-siblings-nav {
     display: inline-block;

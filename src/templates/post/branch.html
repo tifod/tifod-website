@@ -45,12 +45,11 @@
                         <span class="post-score">{{ child['score_result'] }} pts</span>
                         <button onclick="ajaxPingUrl('/vote/plus/{{ child['id'] }}',this,updateScore)">+</button>
                         <span class="post-percent">({{ child['score_percent'] }}%)</span>
-                    </p>
-                    <label for="{{ child['id'] }}-checkbox-more">
-                        <p class="list-inline">
+                        
+                        <label class="list-inline btn-more" for="{{ child['id'] }}-checkbox-more">
                             <i class='fa fa-ellipsis-v'></i><span class="url-like">Actions supplémentaires</span>
-                        </p>
-                    </label>
+                        </label>
+                    </p>
                     <input type="checkbox" id="{{ child['id'] }}-checkbox-more" class="checkbox-more" data-postid="{{ child['id'] }}">
                     <div class="post-more">
                         <hr>
@@ -93,13 +92,11 @@
                                 <span class="post-score">{{ remake['score_result'] }} pts</span>
                                 <button onclick="ajaxPingUrl('/vote/plus/{{ remake['id'] }}',this,updateScore)">+</button>
                                 <span class="post-percent">({{ remake['score_percent'] }}%)</span>
-                            </p>
-                            <label for="{{ remake['id'] }}-checkbox-more">
-                                <input type="checkbox" id="{{ remake['id'] }}-checkbox-more" class="checkbox-more" data-postid="{{ remake['id'] }}">
-                                <p class="list-inline">
+                                <label class="list-inline btn-more" for="{{ remake['id'] }}-checkbox-more">
                                     <i class='fa fa-ellipsis-v'></i><span class="url-like">Actions supplémentaires</span>
-                                </p>
-                            </label>
+                                </label>
+                            </p>
+                            <input type="checkbox" id="{{ remake['id'] }}-checkbox-more" class="checkbox-more" data-postid="{{ remake['id'] }}">
                             <div class="post-more">
                                 <hr>
                                 <p class="list-inline">
