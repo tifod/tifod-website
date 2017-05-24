@@ -1,8 +1,8 @@
-vendor/*
-public/img/post/*
-src/templates/twig_cache/*
+/vendor/
+/public/img/post/
+/src/templates/twig_cache/
 
-!**/.gitkeep
+!*.gitkeep
 
 # Windows image file caches
 Thumbs.db
