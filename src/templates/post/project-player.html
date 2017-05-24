@@ -77,7 +77,9 @@
             <div><a href="/delete-post/{{ project[0]['id'] }}">Supprimer ce projet</a></div>
         </div>
         {% set child = project[0] %}
-        {% include "post/add-content.html" %}
+        <div id="{{ child['id'] }}">
+            {% include "post/add-content.html" %}
+        </div>
     </div>
     <script src="/public/perso/project.js"></script>
     <script>var boards = document.getElementsByClassName('drawing-board'); for (var z = 0; z < boards.length; z++){ resetBoard(boards[z].getAttribute('id')); }</script>
