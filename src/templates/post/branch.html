@@ -9,14 +9,14 @@
             <form>
                 {% for t_child in children %}
                     <div class="group-post-link">
-                        <label class="link" data-target="{{ t_child['id'] }}">
+                        <label id="{{ t_child['id'] }}-link" class="link" data-target="{{ t_child['id'] }}">
                             <input type="radio" class="link-radio-button" id="{{ t_child['id'] }}-radio-button" name="radio-{{ post['id'] }}" {% if loop.first and (not t_child['remakes'] or t_child['remakes'][0]['has_pin'] == '0') %}checked{% endif %} />
                             <div class="link-btn"></div>
                             {% set loopfirstparent = loop.first %}
                         </label>
                         {% if t_child['remakes'] %}
                             {% for t_remake in t_child['remakes'] %}
-                                <label class="link" data-target="{{ t_remake['id'] }}">
+                                <label id="{{ t_remake['id'] }}-link" class="link" data-target="{{ t_remake['id'] }}">
                                     <input type="radio" class="link-radio-button" id="{{ t_remake['id'] }}-radio-button" name="radio-{{ post['id'] }}" {% if loopfirstparent and t_remake['has_pin'] == '1' %}checked{% endif %}/>
                                     <div class="link-btn link-btn-remake"></div>
                                 </label>
@@ -25,6 +25,16 @@
                     </div>
                 {% endfor %}
             </form>
+        </div>
+        <div>
+        {% for t_child in children %}
+            <div class="mdl-tooltip mdl-tooltip--top" for="{{ t_child['id'] }}-link">Post normal</div>
+            {% if t_child['remakes'] %}
+                {% for t_remake in t_child['remakes'] %}
+                    <div class="mdl-tooltip mdl-tooltip--top" for="{{ t_remake['id'] }}-link">Remake du post normal</div>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
         </div>
     {% endif %}
     

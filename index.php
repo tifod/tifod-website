@@ -103,6 +103,8 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
                 'parent_id' => $post['parent_id'],
                 'path' => $post['path'],
                 'score_result' => $post['score_result'],
+                'vote_minus' => $post['vote_minus'],
+                'vote_plus' => $post['vote_plus'],
                 'score_percent' => $post['score_percent'],
                 'has_pin' => $post['has_pin'],
                 'posted_on' => date($post['posted_on']),
@@ -227,7 +229,7 @@ $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
         $firstQuery = $args['vote-sign'] == 'minus' ? 'update post set vote_minus = vote_minus + 1, score_result = score_result - 1 where id = :postId ; ' : 'update post set vote_plus = vote_plus + 1, score_result = score_result + 1 where id = :postId ; ';
         $reponse = $db->prepare ($firstQuery . "update post set score_percent = (select * from (select ((vote_plus*100)/(vote_plus + vote_minus)) from post p where id = :postId) p) where id = :postId ;");
         $reponse->execute(['postId' => $args['post-id']]);
-        $reponse = $db->prepare ('select score_percent, score_result from post where id = :postId');
+        $reponse = $db->prepare ('select score_percent, score_result, vote_minus, vote_plus from post where id = :postId');
         $reponse->execute(['postId' => $args['post-id']]);
         while ($donnees[] = $reponse->fetch());
         $reponse->closeCursor();

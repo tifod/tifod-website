@@ -309,8 +309,9 @@ function getAbsoluteHeight(el) {
 }
 
 function updateScore (el, response){
-    el.parentNode.getElementsByClassName('post-score')[0].innerHTML = response['0'].score_result + ' pts';
-    el.parentNode.getElementsByClassName('post-percent')[0].innerHTML = '(' + response['0'].score_percent + '%) Merci!';
+    el.parentNode.getElementsByClassName('post-score')[0].innerHTML = response['0'].score_result;
+    el.parentNode.getElementsByClassName('post-score-plus')[0].innerHTML = response['0'].vote_plus;
+    el.parentNode.getElementsByClassName('post-score-minus')[0].innerHTML = response['0'].vote_minus;
 }
 
 function updatePin (el,response){

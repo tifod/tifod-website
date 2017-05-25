@@ -26,12 +26,6 @@
                 <i class='fa fa-fw fa-arrow-left'></i>
                 <a href="/">Revenir à la liste des projets</a>
             </span>
-            {% if project[0]['children'] %}
-                <span class="list-inline">
-                    <i class='fa fa-fw fa-code-fork fa-flip-vertical'></i>
-                    <a href="#project-tree-section" data-scroll>Voir l'arborescence du projet</a>
-                </span>
-            {% endif %}
             <span class="list-inline">
                 <i class='fa fa-fw fa-trash text-danger'></i>
                 <a class="text-danger" href="/delete-post/{{ project[0]['id'] }}">Supprimer ce projet</a>
