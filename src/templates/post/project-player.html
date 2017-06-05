@@ -16,6 +16,7 @@
 {% endblock %}
 
 {% block body %}
+{{ parent() }}
 <div class="container">
     <div class="project-header">
         <h2>{{ project[0]['content'] }}</h2>

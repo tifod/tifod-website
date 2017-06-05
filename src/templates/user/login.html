@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="container">
+    <h2>Se connecter</h2>
+    <p>
+        <form method="post" enctype="multipart/form-data" class="list-inline" action="/login">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                <label class="mdl-textfield__label" for="pseudo" >Pseudo</label>
+                <input class="mdl-textfield__input" for="pseudo" name="username" type="text">
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                <label class="mdl-textfield__label" for="password" >Mot de passe</label>
+                <input class="mdl-textfield__input" id="password" name="password" type="password">
+            </div>
+            <button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Se connecter</button>
+        </form>
+    </p>
+</div>
+{% endblock %}

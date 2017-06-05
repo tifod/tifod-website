@@ -23,6 +23,8 @@ $container['view'] = function ($container) {
         'cache' => false
     ]);
     
+    $twig->addGlobal('current_username', (empty($_SESSION['username']) ? null : $_SESSION['username'] ));
+    
     $filter = new Twig_SimpleFilter('timeago', function ($datetime) {
       $time = time() - strtotime($datetime); 
 
@@ -268,5 +270,39 @@ $app->get('/resetPostScore/{post-id}', function ($request, $response, $args) {
     }
 });
 
+$app->get('/login', function ($request, $response, $args) {
+    return $this->view->render('user/login.html');
+});
+
+$app->get('/logout', function ($request, $response, $args) {
+    session_destroy();
+    header('Location: /');
+    exit();
+});
+
+$app->post('/login', function ($request, $response, $args) {
+    // password_hash($_POST['password'], PASSWORD_BCRYPT, ['cost' => 11]);
+    
+    try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+    } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+    $reponse = $db->prepare('select user_name, user_password from user where user_name = :login');
+    $reponse->execute(['login' => $_POST['username']]);
+    while ($donnees[] = $reponse->fetch());
+    array_pop($donnees);
+    $reponse->closeCursor();
+    
+    if (empty($donnees[0]['user_name'])){
+        throw new Exception('Pseudo inexistant');
+    } else {
+        if(password_verify($_POST['password'], $donnees[0]['user_password'])) {
+            $_SESSION['username'] = $donnees[0]['user_name'];
+        } else {
+            throw new Exception('Erreur avec le mot de passe');
+        }
+    }
+    
+    header('Location: /');
+    exit();
+});
 // Run app
 $app->run();

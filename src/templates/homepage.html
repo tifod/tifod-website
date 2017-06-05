@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block body %}
+    {{ parent() }}
     <div class="container">
         <h1>Liste des projets existants</h1>
         {% for project in projects %}

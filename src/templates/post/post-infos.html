@@ -13,17 +13,20 @@
             <button id="{{ post['id'] }}-upvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="ajaxPingUrl('/vote/plus/{{ post['id'] }}',this,updateScore)"><span class="fa fa-caret-up"></span></button>
             <span class="mdl-tooltip mdl-tooltip--top post-score-plus" for="{{ post['id'] }}-upvote">{{ post['vote_plus'] }}</span>
             
-            <a id="{{ post['id'] }}-toggle-pin" href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >
-                {% if post['has_pin'] %}
+            {% if post['has_pin'] %}
+                <a id="{{ post['id'] }}-toggle-pin" href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >
                     <span class="fa-stack fa-fw">
                         <i class="fa fa-circle-o fa-stack-2x"></i>
                         <i class="fa fa-thumb-tack fa-stack-1x"></i>
                     </span>
                     <i class="fa fa-check"></i>
-                {% else %}
-                    <i class="fa fa-thumb-tack fa-lg fa-fw text-initial"></i>
-                {% endif %}
-            </a>
+                </a>
+            {% else %}
+                <a id="{{ post['id'] }}-toggle-pin" class="mdl-button mdl-js-button mdl-button--icon" href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >
+                    <i class="fa fa-thumb-tack text-initial"></i>
+                </a>
+            {% endif %}
+
             {% if post['has_pin'] %}
                 <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-toggle-pin">Post épinglé</span>
             {% else %}
