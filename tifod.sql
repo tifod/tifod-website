@@ -44,17 +44,6 @@ CREATE TABLE `post` (
   `author_id` int(11) NOT NULL DEFAULT '1',
   `is_remake` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Déchargement des données de la table `post`
---
-
-INSERT INTO `post` (`id`, `content`, `content_type`, `parent_id`, `project_id`, `path`, `vote_plus`, `vote_minus`, `score_result`, `score_percent`, `has_pin`, `posted_on`, `author_id`, `is_remake`) VALUES
-(189, '$$$', 'text', 0, 1, '/189/', 0, 0, 0, 0, 0, '2017-05-24 04:22:14', 1, 0),
-(190, 'WMRJqt-190.png', 'text', 189, 1, '/189/190/', 0, 0, 0, 0, 0, '2017-05-24 04:22:36', 1, 0),
-(191, 'SLHoD3-191.png', 'text', 190, 1, '/189/190/191/', 0, 0, 0, 0, 1, '2017-05-24 04:24:31', 1, 1),
-(197, 'xUhhjE-197.png', 'text', 190, 1, '/189/190/197/', 0, 0, 0, 0, 0, '2017-05-25 22:37:26', 1, 1);
-
 -- --------------------------------------------------------
 
 --
@@ -63,15 +52,18 @@ INSERT INTO `post` (`id`, `content`, `content_type`, `parent_id`, `project_id`, 
 
 CREATE TABLE `user` (
   `user_id` int(11) NOT NULL,
-  `user_name` varchar(100) NOT NULL
+  `user_name` varchar(100) NOT NULL,
+  `user_password` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Déchargement des données de la table `user`
 --
 
-INSERT INTO `user` (`user_id`, `user_name`) VALUES
-(1, 'Jean');
+-- mdp de jean:koala
+
+INSERT INTO `user` (`user_id`, `user_name`, `user_password`) VALUES
+(1, 'Jean', '$2y$11$56dPPsKqj/2IS2wLBGR/J.4JBgoHgL9qL62sDhD46LgXOUildcXHO');
 
 --
 -- Index pour les tables déchargées
