@@ -23,7 +23,9 @@ $container['view'] = function ($container) {
         'cache' => false
     ]);
     
-    $twig->addGlobal('current_username', (empty($_SESSION['username']) ? null : $_SESSION['username'] ));
+    $twig->addGlobal('current_user', (empty($_SESSION['current_user']) ? null : $_SESSION['current_user']));
+    
+    $twig->addGlobal("current_url", $_SERVER["REQUEST_URI"]);
     
     $filter = new Twig_SimpleFilter('timeago', function ($datetime) {
       $time = time() - strtotime($datetime); 
@@ -165,33 +167,39 @@ $app->post('/create-project', function ($request, $response) {
 });
 
 $app->post('/add-post', function ($request, $response) {
-    if ((!empty($_POST['content']) or isset($_POST['image'])) and isset($_POST['parent_id']) and isset($_POST['project_id'])){
-        try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-        } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-        
-        $reponse = $db->prepare ("INSERT INTO post(content, parent_id, project_id, path) VALUES ('file', :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id)))); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
-        $reponse->execute([
-            'parent_id' => $_POST['parent_id'],
-            'project_id' => $_POST['project_id']
-        ]);
-        $reponse->closeCursor();
-        $reponse = $db->query('SELECT LAST_INSERT_ID()');
-        $postId = $reponse->fetch()[0];
-        // need to get infos about the post
-        $fileName = MyApp\Utility\Math::getARandomString(6) . '-' . $postId . '.png';
-        $reponse->closeCursor();
-        $reponse = $db->prepare("UPDATE post SET content = :fileName WHERE id = :postId");
-        $reponse->execute(['fileName' => $fileName, 'postId' => $postId]);
-        $reponse->closeCursor();
-        
-        $img = filter_input(INPUT_POST, 'image', FILTER_SANITIZE_URL);
-        $img = str_replace(' ', '+', str_replace('data:image/png;base64,', '', $img));
-        $data = base64_decode($img);
-        file_put_contents(__DIR__ . '/public/img/post/' . $fileName, $data);
-        
-        header('Location: /p/'.$_POST['project_id']); exit();
+    if (empty($_SESSION['current_user'])){
+        header('Location: /');
+        exit();
     } else {
-        throw new Exception ('Erreur : Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "projectId")');
+        if ((!empty($_POST['content']) or isset($_POST['image'])) and isset($_POST['parent_id']) and isset($_POST['project_id'])){
+            try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+            } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+            
+            $reponse = $db->prepare ("INSERT INTO post(content, parent_id, project_id, path, author_id) VALUES ('file', :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id))), :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
+            $reponse->execute([
+                'parent_id' => $_POST['parent_id'],
+                'project_id' => $_POST['project_id'],
+                'author_id' => $_SESSION['current_user']['user_id']
+            ]);
+            $reponse->closeCursor();
+            $reponse = $db->query('SELECT LAST_INSERT_ID()');
+            $postId = $reponse->fetch()[0];
+            // need to get infos about the post
+            $fileName = MyApp\Utility\Math::getARandomString(6) . '-' . $postId . '.png';
+            $reponse->closeCursor();
+            $reponse = $db->prepare("UPDATE post SET content = :fileName WHERE id = :postId");
+            $reponse->execute(['fileName' => $fileName, 'postId' => $postId]);
+            $reponse->closeCursor();
+            
+            $img = filter_input(INPUT_POST, 'image', FILTER_SANITIZE_URL);
+            $img = str_replace(' ', '+', str_replace('data:image/png;base64,', '', $img));
+            $data = base64_decode($img);
+            file_put_contents(__DIR__ . '/public/img/post/' . $fileName, $data);
+            
+            header('Location: /p/'.$_POST['project_id']); exit();
+        } else {
+            throw new Exception ('Erreur : Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "projectId")');
+        }
     }
 });
 
@@ -201,11 +209,7 @@ $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
     $reponse = $db->prepare ("delete from post where path LIKE concat('%', (select * from (select path from post where id = :postId) p), '%')");
     $reponse->execute(['postId' => $args['post-id']]);
     $reponse->closeCursor();
-    if (!empty($_GET['redirect'])){
-        header('Location: ' . $_GET['redirect']); exit();
-    } else {
-        header('Location: /'); exit();
-    }
+    header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
 });
 
 $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
@@ -248,21 +252,19 @@ $app->get('/resetPostScore/{post-id}', function ($request, $response, $args) {
     $reponse = $db->prepare ('update post set score_percent = 0, score_result = 0, vote_minus = 0, vote_plus = 0 where id = :postId');
     $reponse->execute(['postId' => $args['post-id']]);
     $reponse->closeCursor();
-    if (!empty($_GET['redirect'])){
-        header('Location: ' . $_GET['redirect']); exit();
-    } else {
-        header('Location: /'); exit();
-    }
-});
-
-$app->get('/login', function ($request, $response, $args) {
-    return $this->view->render('user/login.html');
+    header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
 });
 
 $app->get('/logout', function ($request, $response, $args) {
-    session_destroy();
-    header('Location: /');
-    exit();
+    session_destroy(); header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
+});
+
+$app->get('/login', function ($request, $response, $args) {
+    if (empty($_SESSION['current_user']['pseudo'])){
+        return $this->view->render('user/login.html', ['redirect_to' => (empty($_GET['redirect']) ? '/' : $_GET['redirect'])]);
+    } else {
+        header('Location: /'); exit();
+    }
 });
 
 $app->post('/login', function ($request, $response, $args) {
@@ -270,7 +272,7 @@ $app->post('/login', function ($request, $response, $args) {
     
     try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
     } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-    $reponse = $db->prepare('select user_name, user_password from user where user_name = :login');
+    $reponse = $db->prepare('select * from user where user_name = :login');
     $reponse->execute(['login' => $_POST['username']]);
     while ($donnees[] = $reponse->fetch());
     array_pop($donnees);
@@ -280,14 +282,17 @@ $app->post('/login', function ($request, $response, $args) {
         throw new Exception('Pseudo inexistant');
     } else {
         if(password_verify($_POST['password'], $donnees[0]['user_password'])) {
-            $_SESSION['username'] = $donnees[0]['user_name'];
+            $_SESSION['current_user'] = [
+                'user_id' => $donnees[0]['user_id'],
+                'pseudo' => $donnees[0]['user_name'],
+                'avatar' => $donnees[0]['avatar']
+            ];
         } else {
             throw new Exception('Erreur avec le mot de passe');
         }
     }
     
-    header('Location: /');
-    exit();
+    header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
 });
 // Run app
 $app->run();

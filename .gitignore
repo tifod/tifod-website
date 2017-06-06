@@ -1,7 +1,9 @@
-/vendor/
-/public/img/post/
-/src/templates/twig_cache/
+/vendor/*
+/src/templates/twig_cache/*
+/public/img/post/*
+/public/img/user/*
 
+!/public/img/user/default.png
 !*.gitkeep
 
 # Windows image file caches

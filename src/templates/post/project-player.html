@@ -17,40 +17,19 @@
 
 {% block body %}
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-    <header class="mdl-layout__header mdl-layout__header--transparent mdl-layout__header--scroll">
-        <div class="container mdl-layout__header-row">
-            <!-- Title -->
-            <span class="mdl-layout-title">tifod</span>
-            <!-- Add spacer, to align navigation to the right -->
-            <div class="mdl-layout-spacer"></div>
-            <!-- Navigation -->
-            <nav class="mdl-navigation">
-                {% if current_username %}
-                    {{ current_username }} (<a href="/logout">Se déconnecter</a>)
-                {% else %}
-                    <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="/login" data-upgraded=",MaterialButton">Se connecter</a>
-                {% endif %}
-            </nav>
-        </div>
-    </header>
+    {% include 'header.html' %}
     <main class="mdl-layout__content">
         <div class="container">
             <div class="project-header">
                 <h2>{{ project[0]['content'] }}</h2>
-                <p>Un projet de <a href="/u/{{ project[0]['author_name']|lower }}">{{ project[0]['author_name'] }}</a></p>
-                <hr>
                 <p class="list-inline">
-                    <span class="list-inline">
-                        <i class='fa fa-fw fa-arrow-left'></i>
-                        <a href="/">Revenir à la liste des projets</a>
+                    <span>
+                        Un projet de <a href="/u/{{ project[0]['author_name']|lower }}">{{ project[0]['author_name'] }}</a>
                     </span>
-                    <span class="list-inline">
-                        <i class='fa fa-fw fa-trash text-danger'></i>
-                        <a class="text-danger" href="/delete-post/{{ project[0]['id'] }}">Supprimer ce projet</a>
-                    </span>
+                    <span>|</span>
+                    <a class="text-danger" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ project[0]['id'] }}">Supprimer ce projet</a>
                 </p>
             </div>
-        </div>
         {% if project[0]['children'] %}
             <div id="project-player">
                 <div>
@@ -66,9 +45,10 @@
                     <div id="project-tree"></div>
                 </div>            
             </div>
-        </main>
+        </div>
+    </main>
 </div>
-    
+
 <script>
     var simple_chart_config = {
     chart: { container: "#project-tree" },
@@ -85,11 +65,15 @@
     });
 </script>
 <script src="/public/perso/project.js"></script>
-{% else %}
-    <div class="container" id="{{ post['id'] }}">
-        {% include "post/add-content.html" %}
-    </div>
-    <script src="/public/perso/project.js"></script>
-    <script>var boards = document.getElementsByClassName('drawing-board'); for (var z = 0; z < boards.length; z++){ resetBoard(boards[z].getAttribute('id')); }</script>
-{% endif %}
+
+        {% else %}
+            <div class="container" id="{{ post['id'] }}">
+                {% include "post/add-content.html" %}
+            </div>
+        </div>
+    </main>
+</div>
+<script src="/public/perso/project.js"></script>
+<script>var boards = document.getElementsByClassName('drawing-board'); for (var z = 0; z < boards.length; z++){ resetBoard(boards[z].getAttribute('id')); }</script>
+        {% endif %}
 {% endblock %}
