@@ -1,19 +1,38 @@
 {% extends 'base.html' %}
 
 {% block body %}
-    {{ parent() }}
-    <div class="container">
-        <h1>Liste des projets existants</h1>
-        {% for project in projects %}
-        <h3><a href="/p/{{ project['project_id'] }}">{{ project['content'] }}</a></h3>
-        {% endfor %}
-        <p>
-            <h3>Créer un nouveau projet</h3>
-            <form action="/create-project" method="post">
-                <input name="content" type="text">
-                <input name="project_id" type="hidden" value="{{ projectId }}">
-                <button type="submit">Envoyer</button>
-            </form>
-        </p>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header mdl-layout__header--transparent mdl-layout__header--scroll">
+            <div class="mdl-layout__header-row container">
+                <!-- Title -->
+                <span class="mdl-layout-title">tifod</span>
+                <!-- Add spacer, to align navigation to the right -->
+                <div class="mdl-layout-spacer"></div>
+                <!-- Navigation -->
+                <nav class="mdl-navigation">
+                    {% if current_username %}
+                        {{ current_username }} (<a href="/logout">Se déconnecter</a>)
+                    {% else %}
+                        <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="/login" data-upgraded=",MaterialButton">Se connecter</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </header>
+        <main class="mdl-layout__content">
+            <div class="container">
+                <h1>Liste des projets existants</h1>
+                {% for project in projects %}
+                <h3><a href="/p/{{ project['project_id'] }}">{{ project['content'] }}</a></h3>
+                {% endfor %}
+                <p>
+                    <h3>Créer un nouveau projet</h3>
+                    <form action="/create-project" method="post">
+                        <input name="content" type="text">
+                        <input name="project_id" type="hidden" value="{{ projectId }}">
+                        <button type="submit">Envoyer</button>
+                    </form>
+                </p>
+            </div>
+        </main>
     </div>
 {% endblock %}

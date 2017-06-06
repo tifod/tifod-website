@@ -41,8 +41,7 @@ CREATE TABLE `post` (
   `score_percent` int(11) NOT NULL DEFAULT '0',
   `has_pin` tinyint(1) NOT NULL DEFAULT '0',
   `posted_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `author_id` int(11) NOT NULL DEFAULT '1',
-  `is_remake` tinyint(1) NOT NULL DEFAULT '0'
+  `author_id` int(11) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- --------------------------------------------------------
 

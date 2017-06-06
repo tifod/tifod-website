@@ -216,9 +216,8 @@ function goToPost (postId){
 }
 
 function showPost (postId) {
-    var t_postId = hasClass(document.getElementById(postId),'post-remake') ? document.getElementById(postId).getAttribute('data-parentid') : postId ;
     // Select '.post-level' among direct children
-    var allSiblingsLvl = document.getElementById(t_postId).parentNode.parentNode.parentNode.parentNode.childNodes;
+    var allSiblingsLvl = document.getElementById(postId).parentNode.parentNode.parentNode.parentNode.childNodes;
     var levels = [];
     for (var i = 0; i < allSiblingsLvl.length; i++) {
         if (hasClass(allSiblingsLvl[i], 'post-level')) {
@@ -231,8 +230,8 @@ function showPost (postId) {
     }
     // for finally activating only the targeted post '.post-level'
     // only if there is a '.post-level' (all post don't necessarily have children)
-    if (document.getElementById(t_postId + '-children') != null) {
-        document.getElementById(t_postId + '-children').className = 'post-level active-level';
+    if (document.getElementById(postId + '-children') != null) {
+        document.getElementById(postId + '-children').className = 'post-level active-level';
     }
     
     // same process but for .post

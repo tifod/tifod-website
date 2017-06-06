@@ -94,14 +94,15 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
         array_pop($donnees);
         $reponse->closeCursor();
 
-        if (count($donnees) == 1) return $this->view->render('post/project-player.html', ['project' => $donnees, 'projectId' => $projectId]);
+        if (count($donnees) == 1){
+            return $this->view->render('post/project-player.html', ['project' => $donnees, 'projectId' => $projectId]);
+        }
 
         // creating a comprehensive list of the projet posts
         foreach ($donnees as $k => $post){
             $posts [] = [
                 'id' => $post['id'],
                 'content' => $post['content'],
-                'is_remake' => $post['is_remake'],
                 'parent_id' => $post['parent_id'],
                 'path' => $post['path'],
                 'score_result' => $post['score_result'],
@@ -116,34 +117,20 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             if ($post['parent_id'] == 0) $topPostId = $k;
         }
         
-        $new_posts = [];
-        $all_remakes = [];
-        foreach ($posts as $a){
-            if($a['is_remake'] == '0'){
-                $new_posts[$a['id']] = $a;
-            } else {
-                $all_remakes[] = $a;
-            }
-        }
-        foreach ($all_remakes as $a){
-            $new_posts[$a['parent_id']]['remakes'][] = $a;
-        }
         $new = [];
-        foreach ($new_posts as $a){
+        foreach ($posts as $a){
             $new[$a['parent_id']][] = $a;
         }
         $project = createTree($new, array($posts[$topPostId]));
 
         $new = [];
-        foreach ($new_posts as $a){
-            if($a['is_remake'] == '0'){
-                $new[$a['parent_id']][] = [
-                    'innerHTML' => $this->view->render('post/tree-post.html', ['post' => $a]),
-                    'id' => $a['id']
-                ];
-            }
+        foreach ($posts as $a){
+            $new[$a['parent_id']][] = [
+                'innerHTML' => $this->view->render('post/tree-post.html', ['post' => $a]),
+                'id' => $a['id']
+            ];
         }
-        $project_json = createTree($new, array($posts[$topPostId]));
+        $project_json = createTree($new, array($posts[$topPostId]));        
         
         return $this->view->render('post/project-player.html', ['project' => $project, 'projectId' => $projectId, 'project_json' => $project_json]);
     } else {
@@ -182,10 +169,8 @@ $app->post('/add-post', function ($request, $response) {
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
         
-        $isremake = empty($_POST['isremake']) ? 0 : 1;
-        $reponse = $db->prepare ("INSERT INTO post(content, is_remake, parent_id, project_id, path) VALUES ('file', :is_remake, :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id)))); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
+        $reponse = $db->prepare ("INSERT INTO post(content, parent_id, project_id, path) VALUES ('file', :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id)))); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
         $reponse->execute([
-            'is_remake' => $isremake,
             'parent_id' => $_POST['parent_id'],
             'project_id' => $_POST['project_id']
         ]);

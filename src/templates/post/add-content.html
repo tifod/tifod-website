@@ -17,13 +17,6 @@
         <div class="drawing-board-wrapper">
             <div class="drawing-board" id="{{ post['id'] }}-drawing-board"></div>
         </div>
-        {% if not cant_be_remake %}
-            <p>
-                <label>
-                    <input type="checkbox" name="isremake"> Envoyer comme <span class="text-primary">un remake</span>
-                </label>
-            </p>
-        {% endif %}
         <p>
             <button>Envoyer</button>
         </p>

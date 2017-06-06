@@ -32,12 +32,10 @@
             {% else %}
                 <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-toggle-pin">Epingler ce post</span>
             {% endif %}
-            {% if not post['is_remake'] %}
-                <a id="{{ post['id'] }}-tree-link" href="#{{ post['id'] }}-post-tree" class="tree-link text-initial" data-scroll>
-                    <i class="fa fa-code-fork fa-flip-vertical fa-lg fa-fw"></i>
-                </a>
-                <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-tree-link">Voir ce post dans l'arborescence du projet</span>
-            {% endif %}
+            <a id="{{ post['id'] }}-tree-link" href="#{{ post['id'] }}-post-tree" class="tree-link text-initial" data-scroll>
+                <i class="fa fa-code-fork fa-flip-vertical fa-lg fa-fw"></i>
+            </a>
+            <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-tree-link">Voir ce post dans l'arborescence du projet</span>
         </span>
         
         <label class="list-inline btn-more" for="{{ post['id'] }}-checkbox-more">
@@ -60,8 +58,6 @@
                 <a class="text-danger" href="/delete-post/{{    post['id'] }}?redirect=/p/{{ projectId }}">Supprimer ce post</a>
             </span>
         </p>
-        {% if not post['is_remake'] %}
-            {% include "post/add-content.html" %}
-        {% endif %}
+        {% include "post/add-content.html" %}
     </div>
 </div>
