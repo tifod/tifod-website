@@ -52,7 +52,8 @@ CREATE TABLE `post` (
 CREATE TABLE `user` (
   `user_id` int(11) NOT NULL,
   `user_name` varchar(100) NOT NULL,
-  `user_password` varchar(100) NOT NULL
+  `user_password` varchar(100) NOT NULL,
+  `avatar` varchar(100) NOT NULL DEFAULT 'default.png'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
