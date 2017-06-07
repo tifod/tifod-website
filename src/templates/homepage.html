@@ -10,11 +10,13 @@
                 <h3><a href="/p/{{ project['project_id'] }}">{{ project['content'] }}</a></h3>
                 {% endfor %}
                 <p>
-                    <h3>Créer un nouveau projet</h3>
-                    <form action="/create-project" method="post">
-                        <input name="content" type="text">
+                    <form action="/create-project" class="list-inline" method="post">
+                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <label class="mdl-textfield__label" for="new_project" >Créer un nouveau projet</label>
+                            <input class="mdl-textfield__input" id="new_project" name="content" type="text">
+                        </div>
                         <input name="project_id" type="hidden" value="{{ projectId }}">
-                        <button type="submit">Envoyer</button>
+                        <button type="submit" class="mdl-button mdl-js-button">Envoyer</button>
                     </form>
                 </p>
             </div>

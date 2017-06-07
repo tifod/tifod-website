@@ -9,7 +9,7 @@
             <form>
                 {% for t_child in children %}
                     <label class="link" data-target="{{ t_child['id'] }}">
-                        <input type="radio" class="link-radio-button" name="radio-{{ post['id'] }}" {% if loop.first %}checked{% endif %} />
+                        <input type="radio" id="{{ t_child['id'] }}-radio-button" class="link-radio-button" name="radio-{{ post['id'] }}" {% if loop.first %}checked{% endif %} />
                         <div class="link-btn"></div>
                         {% set loopfirstparent = loop.first %}
                     </label>
