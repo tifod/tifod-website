@@ -1,25 +1,34 @@
-.mdl-layout-title a {
+body {
+    color: #333;
+    font-family: "Roboto","Helvetica","Arial",sans-serif;
+}
+.header { height: 56px; display: flex; }
+.header>* {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+.header-tifod-logo {
     text-decoration: none;
-    color: black;
+    color: #333;
     font-weight: 900;
     font-size: 28px;
 }
-.mdl-layout-title a:hover { color: rgb(68,138,255); }
-.mdl-layout__header, .mdl-navigation__link { color: #333; }
-.mdl-layout__header-row { padding: 0; }
-.mdl-layout__container.has-scrolling-header .mdl-layout--fixed-header .mdl-layout__content {
-  overflow-y: visible;
-  overflow-x: visible;
-  overflow: visible;
+.header-tifod-logo:hover { color: rgb(68,138,255); }
+.header-right {
+    margin-left: auto;
+    position: relative;
 }
-.mdl-navigation { position: relative; }
-.header-avatar {
+.header-user-infos {
+    display: inline-block;
+    padding: 5px;
     color: gray;
     font-weight: 700;
     cursor: pointer;
 }
-.header-avatar:hover { color: black; }
-.header-avatar img {
+.header-user-infos:hover { color: black; }
+.header-user-infos img {
     height: 2em;
     width: auto;
 }
@@ -34,10 +43,10 @@ img { width: 100%; height: auto; }
     text-decoration: underline;
     cursor: pointer;
 }
-.btn-more { position: absolute; right: 0; }
 .text-danger { color: red; }
 .text-primary { color: #448AFF; }
 .text-initial { color: initial; }
+.text-center { text-align: center; }
 
 .post-siblings-nav {
     display: inline-block;
@@ -108,11 +117,17 @@ img { width: 100%; height: auto; }
     border-radius: 3px 3px 0 0;
     border-bottom: solid 1px #ddd;
 }
-.post-infos {
+.post-more {
     margin: 1em;
 }
-.many-posts .post-infos {
+.many-posts .post-more {
     margin-bottom: 48px;
+}
+.post-more-nav {
+    display: flex;
+}
+.post-more-btn {
+    margin-left: auto;
 }
 .list-inline>* { display: inline-block; margin-right: 5px; }
 
@@ -133,8 +148,8 @@ img { width: 100%; height: auto; }
 .tree-post img { width: 100%; height: auto; }
 .tree-post:hover, .tree-post-active { background-color: rgba(0,0,0,0.2); }
 
-.checkbox-more, .post-more { display: none; }
-.checkbox-more:checked ~ .post-more { display: initial; }
+.checkbox-more, .post-more-form { display: none; }
+.checkbox-more:checked ~ .post-more-form { display: initial; }
 .drawing-board {
     position: relative;
     z-index: 10;

@@ -1,6 +1,7 @@
 [ ] sign up
 [ ] link post
 [ ] text as an option instead of image
+[ ] prevent double voting
 
 [ ] only admin can delete post
 [ ] report post button

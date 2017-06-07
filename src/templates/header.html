@@ -1,24 +1,21 @@
-<header class="mdl-layout__header mdl-layout__header--transparent mdl-layout__header--scroll">
-    <div class="container mdl-layout__header-row">
-        <span class="mdl-layout-title"><a href="/">tifod</a></span>
-        {% if not no_login_button %}
-            <div class="mdl-layout-spacer"></div>
-            <nav class="mdl-navigation">
-                {% if current_user %}
-                    <label id="header-avatar" class="header-avatar list-inline">
-                        <img src="/public/img/user/{{ current_user.avatar }}">
-                        {{ current_user.pseudo }}
-                        <i class="fa fa-caret-down"></i>
-                    </label>
-                    
-                    <div class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
-                    for="header-avatar">
-                        <a href="/logout?redirect={{ current_url }}" class="mdl-menu__item">Déconnexion</a>
-                    </div>
-                {% else %}
-                    <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="/login?redirect={{ current_url }}" data-upgraded=",MaterialButton">Connexion</a>
-                {% endif %}
-            </nav>
+<div class="header container">
+    <a class="header-tifod-logo" href="/">tifod</a>
+    {% if not no_login_button %}
+        {% if current_user %}
+            <div class="header-right">
+                <label id="header-user-infos" class="header-user-infos list-inline">
+                    <img src="/public/img/user/{{ current_user.avatar }}">
+                    {{ current_user.pseudo }}
+                    <i class="fa fa-caret-down"></i>
+                </label>
+            
+                <div class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+                for="header-user-infos">
+                    <a href="/logout?redirect={{ current_url }}" class="mdl-menu__item">Déconnexion</a>
+                </div>
+            </div>
+        {% else %}
+            <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent header-right" href="/login?redirect={{ current_url }}">Connexion</a>
         {% endif %}
-    </div>
-</header>
+    {% endif %}
+</div>

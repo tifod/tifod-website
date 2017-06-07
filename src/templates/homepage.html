@@ -1,25 +1,21 @@
 {% extends 'base.html' %}
 
 {% block body %}
-    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-        {% include 'header.html' %}
-        <main class="mdl-layout__content">
-            <div class="container">
-                <h1>Liste des projets existants</h1>
-                {% for project in projects %}
-                <h3><a href="/p/{{ project['project_id'] }}">{{ project['content'] }}</a></h3>
-                {% endfor %}
-                <p>
-                    <form action="/create-project" class="list-inline" method="post">
-                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <label class="mdl-textfield__label" for="new_project" >Créer un nouveau projet</label>
-                            <input class="mdl-textfield__input" id="new_project" name="content" type="text">
-                        </div>
-                        <input name="project_id" type="hidden" value="{{ projectId }}">
-                        <button type="submit" class="mdl-button mdl-js-button">Envoyer</button>
-                    </form>
-                </p>
-            </div>
-        </main>
+    {% include 'header.html' %}
+    <div class="container">
+        <h1>Liste des projets existants</h1>
+        {% for project in projects %}
+        <h3><a href="/p/{{ project['project_id'] }}">{{ project['content'] }}</a></h3>
+        {% endfor %}
+        <p>
+            <form action="/create-project" class="list-inline" method="post">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                    <label class="mdl-textfield__label" for="new_project" >Créer un nouveau projet</label>
+                    <input class="mdl-textfield__input" id="new_project" name="content" type="text">
+                </div>
+                <input name="project_id" type="hidden" value="{{ projectId }}">
+                <button type="submit" class="mdl-button mdl-js-button">Envoyer</button>
+            </form>
+        </p>
     </div>
 {% endblock %}

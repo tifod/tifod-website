@@ -1,6 +1,6 @@
 smoothScroll.init();
 
-$("img").unveil(500, function(){
+$("img.lazyload").unveil(500, function(){
     $(this).load(function() {
         resizePlayer();
     });
@@ -43,7 +43,7 @@ function handleImage(e){
             document.getElementById(postId + '-drawing-board').style.height = img.height + 'px';
             document.getElementById(postId + '-drawing-board').style.width = img.width + 'px';
             resetBoard(postId + '-drawing-board');
-            resizePlayer()
+            resizePlayer();
             animationsTest(function(){
                 var canvas = document.getElementById(postId + '-drawing-board').getElementsByTagName('canvas')[0];
                 var ctx = canvas.getContext('2d');

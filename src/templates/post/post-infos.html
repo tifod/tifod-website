@@ -1,16 +1,14 @@
-<div class="post-infos">
-    <p class="list-inline">
-        <span class="list-inline">
+<div class="post-more">
+    <div class="post-more-nav">
+        <div class="post-infos list-inline">
             <a href="/u/{{ post['author_name']|lower }}">{{ post['author_name'] }}</a>
             <span>{{ post['posted_on']|timeago }}</span>
-        </span>
-        <span class="list-inline">
-            <button id="{{ post['id'] }}-downvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="ajaxPingUrl('/vote/minus/{{ post['id'] }}',this,updateScore)"><span class="fa fa-caret-down"></span></button>
+            <button id="{{ post['id'] }}-downvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="{% if current_user %}ajaxPingUrl('/vote/minus/{{ post['id'] }}',this,updateScore){% else %}alert('Vous ne pouvez voter qu\'en étant connecté'){% endif %}"><span class="fa fa-caret-down"></span></button>
             <span class="mdl-tooltip mdl-tooltip--top post-score-minus" for="{{ post['id'] }}-downvote">{{ post['vote_minus'] }}</span>
             
             <span class="post-score">{{ post['score_result'] }}</span>
             
-            <button id="{{ post['id'] }}-upvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="ajaxPingUrl('/vote/plus/{{ post['id'] }}',this,updateScore)"><span class="fa fa-caret-up"></span></button>
+            <button id="{{ post['id'] }}-upvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="{% if current_user %}ajaxPingUrl('/vote/plus/{{ post['id'] }}',this,updateScore){% else %}alert('Vous ne pouvez voter qu\'en étant connecté'){% endif %}"><span class="fa fa-caret-up"></span></button>
             <span class="mdl-tooltip mdl-tooltip--top post-score-plus" for="{{ post['id'] }}-upvote">{{ post['vote_plus'] }}</span>
             
             <a id="{{ post['id'] }}-tree-link" href="#{{ post['id'] }}-post-tree" class="tree-link text-initial" data-scroll>
@@ -18,41 +16,44 @@
             </a>
             <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-tree-link">Voir ce post dans l'arborescence du projet</span>
             
-            {% if post['has_pin'] %}
-                <a id="{{ post['id'] }}-toggle-pin" href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >
-                    <span class="fa-stack fa-fw">
-                        <i class="fa fa-circle-o fa-stack-2x"></i>
-                        <i class="fa fa-thumb-tack fa-stack-1x"></i>
-                    </span>
-                    <i class="fa fa-check"></i>
-                </a>
-            {% else %}
-                <a id="{{ post['id'] }}-toggle-pin" class="mdl-button mdl-js-button mdl-button--icon" href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >
-                    <i class="fa fa-thumb-tack text-initial"></i>
-                </a>
-            {% endif %}
+            {% if current_user %}
+                {% if post['has_pin'] %}
+                    <a id="{{ post['id'] }}-toggle-pin" href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >
+                        <span class="fa-stack fa-fw">
+                            <i class="fa fa-circle-o fa-stack-2x"></i>
+                            <i class="fa fa-thumb-tack fa-stack-1x"></i>
+                        </span>
+                        <i class="fa fa-check"></i>
+                    </a>
+                {% else %}
+                    <a id="{{ post['id'] }}-toggle-pin" class="mdl-button mdl-js-button mdl-button--icon" href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >
+                        <i class="fa fa-thumb-tack text-initial"></i>
+                    </a>
+                {% endif %}
 
-            {% if post['has_pin'] %}
-                <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-toggle-pin">Post épinglé</span>
-            {% else %}
-                <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-toggle-pin">Epingler ce post</span>
-            {% endif %}
+                {% if post['has_pin'] %}
+                    <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-toggle-pin">Post épinglé</span>
+                {% else %}
+                    <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-toggle-pin">Epingler ce post</span>
+                {% endif %}
             
-            <a id="{{ post['id'] }}-delete" class="mdl-button mdl-js-button mdl-button--icon" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{    post['id'] }}?redirect=/p/{{ projectId }}"><i class='fa fa-trash text-danger fa-fw'></i></a>
-            <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-delete">Supprimer ce post</span>
-        </span>
+                <a id="{{ post['id'] }}-delete" class="mdl-button mdl-js-button mdl-button--icon" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ post['id'] }}?redirect=/p/{{ projectId }}"><i class='fa fa-trash text-danger fa-fw'></i></a>
+                <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-delete">Supprimer ce post</span>
+            {% endif %}
+        </div>
         
         {% if current_user %}
-            <label class="list-inline btn-more" for="{{ post['id'] }}-checkbox-more">
+            <label class="list-inline post-more-btn" for="{{ post['id'] }}-checkbox-more">
                 <span class="mdl-button mdl-js-button">
                     répondre
                 </span>
             </label>
         {% endif %}
-    </p>
+    </div>
+    
     {% if current_user %}
         <input type="checkbox" id="{{ post['id'] }}-checkbox-more" class="checkbox-more" data-postid="{{ post['id'] }}">
-        <div class="post-more">
+        <div class="post-more-form">
             <p class="list-inline">
                 <span class="list-inline">
                     <i class='fa fa-undo fa-fw'></i>

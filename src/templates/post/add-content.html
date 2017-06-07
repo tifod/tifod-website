@@ -9,8 +9,14 @@
             </label>
         </p>
         <p class="list-inline">
-            <label class="list-inline"><strong>Largeur</strong><input placeholder="largeur" class="drawingboard-width-input" type="text" data-postid="{{ post['id'] }}"></label>
-            <label class="list-inline"><strong>Hauteur</strong><input placeholder="hauteur" class="drawingboard-height-input" type="text" data-postid="{{ post['id'] }}"></label>
+            <div class="mdl-cell mdl-cell--3-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                <label class="mdl-textfield__label" for="{{ post['id'] }}-drawingboard-largeur" >Largeur du dessin</label>
+                <input class="mdl-textfield__input drawingboard-width-input" type="text" data-postid="{{ post['id'] }}">
+            </div>
+            <div class="mdl-cell mdl-cell--3-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                <label class="mdl-textfield__label" for="{{ post['id'] }}-drawingboard-hauteur" >Hauteur du dessin</label>
+                <input class="mdl-textfield__input drawingboard-height-input" type="text" data-postid="{{ post['id'] }}">
+            </div>
         </p>
     </form>
     <form class="drawing-form" action="/add-post" method="post">
@@ -18,7 +24,7 @@
             <div class="drawing-board" id="{{ post['id'] }}-drawing-board"></div>
         </div>
         <p>
-            <button>Envoyer</button>
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Envoyer</button>
         </p>
         
         <input type="hidden" name="image" value="">

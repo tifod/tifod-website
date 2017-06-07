@@ -156,14 +156,15 @@ $app->post('/create-project', function ($request, $response) {
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
         
-        $reponse = $db->prepare ("INSERT INTO post(content, parent_id, project_id, path) VALUES (:content, 0, :project_id, '/'); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
+        $reponse = $db->prepare ("INSERT INTO post(content, parent_id, project_id, path, author_id) VALUES (:content, 0, :project_id, '/', :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
         $reponse->execute([
             'content' => $_POST['content'],
-            'project_id' => $_POST['project_id']
+            'project_id' => $_POST['project_id'],
+            'author_id' => $_SESSION['current_user']['user_id']
         ]);
         $reponse->closeCursor();
     }
-    header('Location: /'); exit();
+    header('Location: /p/' . $_POST['project_id']); exit();
 });
 
 $app->post('/add-post', function ($request, $response) {
@@ -204,55 +205,60 @@ $app->post('/add-post', function ($request, $response) {
 });
 
 $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
-    try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-    } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-    $reponse = $db->prepare ("delete from post where path LIKE concat('%', (select * from (select path from post where id = :postId) p), '%')");
-    $reponse->execute(['postId' => $args['post-id']]);
-    $reponse->closeCursor();
+    if (!empty($_SESSION['current_user'])){
+        try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+        } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+        $reponse = $db->prepare ("delete from post where path LIKE concat('%', (select * from (select path from post where id = :postId) p), '%')");
+        $reponse->execute(['postId' => $args['post-id']]);
+        $reponse->closeCursor();
+    }
     header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
 });
 
 $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
-    // plus, minus, reset
-    if ($args['vote-sign'] == 'minus' or $args['vote-sign'] == 'plus'){
-        try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-        } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-        $firstQuery = $args['vote-sign'] == 'minus' ? 'update post set vote_minus = vote_minus + 1, score_result = score_result - 1 where id = :postId ; ' : 'update post set vote_plus = vote_plus + 1, score_result = score_result + 1 where id = :postId ; ';
-        $reponse = $db->prepare ($firstQuery . "update post set score_percent = (select * from (select ((vote_plus*100)/(vote_plus + vote_minus)) from post p where id = :postId) p) where id = :postId ;");
-        $reponse->execute(['postId' => $args['post-id']]);
-        $reponse = $db->prepare ('select score_percent, score_result, vote_minus, vote_plus from post where id = :postId');
-        $reponse->execute(['postId' => $args['post-id']]);
-        while ($donnees[] = $reponse->fetch());
-        $reponse->closeCursor();
-        die(json_encode($donnees));
-    } else {
-        die('Url invalide');
+    if (!empty($_SESSION['current_user'])){
+        // plus, minus
+        if ($args['vote-sign'] == 'minus' or $args['vote-sign'] == 'plus'){
+            try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+            } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+            $firstQuery = $args['vote-sign'] == 'minus' ? 'update post set vote_minus = vote_minus + 1, score_result = score_result - 1 where id = :postId ; ' : 'update post set vote_plus = vote_plus + 1, score_result = score_result + 1 where id = :postId ; ';
+            $reponse = $db->prepare ($firstQuery . "update post set score_percent = (select * from (select ((vote_plus*100)/(vote_plus + vote_minus)) from post p where id = :postId) p) where id = :postId ;");
+            $reponse->execute(['postId' => $args['post-id']]);
+            $reponse = $db->prepare ('select score_percent, score_result, vote_minus, vote_plus from post where id = :postId');
+            $reponse->execute(['postId' => $args['post-id']]);
+            while ($donnees[] = $reponse->fetch());
+            $reponse->closeCursor();
+            die(json_encode($donnees));
+        } else {
+            die('Url invalide');
+        }
     }
 });
 
 $app->get('/togglePin/{post-id}', function ($request, $response, $args) {
-    try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-    } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-    $reponse = $db->prepare ('update post set has_pin = not has_pin where id = :postId');
-    $reponse->execute(['postId' => $args['post-id']]);
-    $reponse = $db->prepare ('select has_pin from post where id = :postId');
-    $reponse->execute(['postId' => $args['post-id']]);
-    while ($donnees[] = $reponse->fetch());
-    $reponse->closeCursor();
-    if (!empty($_GET['redirect'])){
-        header ('Location: ' . $_GET['redirect']); exit();
-    } else {
-        die(json_encode($donnees));
+    if (!empty($_SESSION['current_user'])){
+        try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+        } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+        $reponse = $db->prepare ('update post set has_pin = not has_pin where id = :postId');
+        $reponse->execute(['postId' => $args['post-id']]);
+        // $reponse = $db->prepare ('select has_pin from post where id = :postId');
+        // $reponse->execute(['postId' => $args['post-id']]);
+        // while ($donnees[] = $reponse->fetch());
+        // die(json_encode($donnees));
+        $reponse->closeCursor();
+        header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
     }
 });
 
 $app->get('/resetPostScore/{post-id}', function ($request, $response, $args) {
-    try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-    } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-    $reponse = $db->prepare ('update post set score_percent = 0, score_result = 0, vote_minus = 0, vote_plus = 0 where id = :postId');
-    $reponse->execute(['postId' => $args['post-id']]);
-    $reponse->closeCursor();
-    header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
+    if (!empty($_SESSION['current_user'])){
+        try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+        } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+        $reponse = $db->prepare ('update post set score_percent = 0, score_result = 0, vote_minus = 0, vote_plus = 0 where id = :postId');
+        $reponse->execute(['postId' => $args['post-id']]);
+        $reponse->closeCursor();
+        header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
+    }
 });
 
 $app->get('/logout', function ($request, $response, $args) {
