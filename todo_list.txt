@@ -1,0 +1,9 @@
+[ ] sign up
+[ ] link post
+[ ] text as an option instead of image
+
+[ ] only admin can delete post
+[ ] report post button
+[ ] report pannel accessible to admin only
+[ ] hide post on more than 2 report
+[ ] make post un-reportable (post verified by admin)
