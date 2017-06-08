@@ -216,7 +216,7 @@ $app->post('/add-post', function ($request, $response) {
 });
 
 $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
-    if (!empty($_SESSION['current_user'])){
+    if (!empty($_SESSION['current_user']) and $_SESSION['current_user']['pseudo'] == 'Jean'){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
         $reponse = $db->prepare("SELECT content, content_type FROM post WHERE id = :post_id");

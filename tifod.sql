@@ -73,6 +73,8 @@ CREATE TABLE `user` (
 
 INSERT INTO `user` (`user_id`, `user_name`, `user_password`, `avatar`) VALUES
 (1, 'Jean', '$2y$11$J21le9nLsqQivIU7qzbLJOg7NasJ6HzbS82heiZQwqqkwU1WISoSa', 'default.png');
+INSERT INTO `user` (`user_name`, `user_password`, `avatar`) VALUES
+('Guest', '$2y$11$PcJnv6tavBaOs4nSGSXHq.btaT/XRdsAvRgeOivbiEvqWFXTATU8e', 'default.png');
 
 --
 -- Index pour les tables exportées

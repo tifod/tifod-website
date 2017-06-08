@@ -3,6 +3,7 @@
 [x] prevent double voting
 [x] share a post url
 
+[ ] user profile as a project
 [x] deleting a post delete also the file attached to it
 [x] deleting a post delete also the votes attached to it
 [ ] only admin users can delete post
