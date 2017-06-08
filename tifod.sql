@@ -1,15 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 4.7.0
+-- version 4.6.6
 -- https://www.phpmyadmin.net/
 --
--- Hôte : localhost
--- Généré le :  ven. 02 juin 2017 à 19:42
--- Version du serveur :  5.6.35-80.0-log
--- Version de PHP :  7.0.16-3+0~20170222101552.24+jessie~1.gbpb3eec3
+-- Client :  localhost
+-- Généré le :  Jeu 08 Juin 2017 à 07:56
+-- Version du serveur :  10.1.19-MariaDB
+-- Version de PHP :  7.1.3
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
-START TRANSACTION;
 SET time_zone = "+00:00";
 
 
@@ -31,7 +29,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `post` (
   `id` int(11) NOT NULL,
   `content` text,
-  `content_type` varchar(20) NOT NULL DEFAULT 'text',
+  `content_type` varchar(50) NOT NULL,
   `parent_id` int(11) NOT NULL,
   `project_id` int(11) NOT NULL,
   `path` text,
@@ -39,10 +37,23 @@ CREATE TABLE `post` (
   `vote_minus` int(11) NOT NULL DEFAULT '0',
   `score_result` int(11) NOT NULL DEFAULT '0',
   `score_percent` int(11) NOT NULL DEFAULT '0',
-  `user_id_pin` tinyint(1) NOT NULL DEFAULT '0',
+  `user_id_pin` int(11) NOT NULL DEFAULT '0',
   `posted_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `author_id` int(11) NOT NULL DEFAULT '1'
+  `author_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `post_vote`
+--
+
+CREATE TABLE `post_vote` (
+  `post_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `is_upvote` tinyint(4) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- --------------------------------------------------------
 
 --
@@ -57,16 +68,14 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Déchargement des données de la table `user`
+-- Contenu de la table `user`
 --
 
--- mdp de jean:koala
-
-INSERT INTO `user` (`user_id`, `user_name`, `user_password`) VALUES
-(1, 'Jean', '$2y$11$56dPPsKqj/2IS2wLBGR/J.4JBgoHgL9qL62sDhD46LgXOUildcXHO');
+INSERT INTO `user` (`user_id`, `user_name`, `user_password`, `avatar`) VALUES
+(1, 'Jean', '$2y$11$J21le9nLsqQivIU7qzbLJOg7NasJ6HzbS82heiZQwqqkwU1WISoSa', 'default.png');
 
 --
--- Index pour les tables déchargées
+-- Index pour les tables exportées
 --
 
 --
@@ -76,26 +85,31 @@ ALTER TABLE `post`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Index pour la table `post_vote`
+--
+ALTER TABLE `post_vote`
+  ADD PRIMARY KEY (`post_id`,`user_id`);
+
+--
 -- Index pour la table `user`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`user_id`);
 
 --
--- AUTO_INCREMENT pour les tables déchargées
+-- AUTO_INCREMENT pour les tables exportées
 --
 
 --
 -- AUTO_INCREMENT pour la table `post`
 --
 ALTER TABLE `post`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=198;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=245;
 --
 -- AUTO_INCREMENT pour la table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;COMMIT;
-
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

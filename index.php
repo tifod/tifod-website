@@ -216,11 +216,13 @@ $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
     if (!empty($_SESSION['current_user'])){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-        $reponse = $db->prepare ("DELETE FROM post_vote WHERE post_vote.post_id IN (SELECT id FROM post WHERE path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%')); DELETE FROM post_vote WHERE post_id = :post_id; DELETE FROM post WHERE path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%')");
+        $reponse = $db->prepare("SELECT content, content_type FROM post WHERE id = :post_id");
+        $reponse->execute([ 'post_id' => $args['post-id'] ]);
+        while ($donnees [] = $reponse->fetch());
+        if ($donnees[0]['content_type'] == 'file') unlink(__DIR__ . '/public/img/post/'.$donnees[0]['content']);
         
-        $reponse->execute([
-            'post_id' => $args['post-id']
-        ]);
+        $reponse = $db->prepare ("DELETE FROM post_vote WHERE post_vote.post_id IN (SELECT id FROM post WHERE path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%')); DELETE FROM post_vote WHERE post_id = :post_id; DELETE FROM post WHERE path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%')");
+        $reponse->execute([ 'post_id' => $args['post-id'] ]);
         $reponse->closeCursor();
     }
     header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
