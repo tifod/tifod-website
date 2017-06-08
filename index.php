@@ -27,6 +27,8 @@ $container['view'] = function ($container) {
     
     $twig->addGlobal("current_url", $_SERVER["REQUEST_URI"]);
     
+    $twig->addGlobal("server_name", $_SERVER["SERVER_NAME"]);
+    
     $filter = new Twig_SimpleFilter('timeago', function ($datetime) {
       $time = time() - strtotime($datetime); 
 
@@ -185,12 +187,12 @@ $app->post('/add-post', function ($request, $response) {
             ]);
             $reponse->closeCursor();
             $reponse = $db->query('SELECT LAST_INSERT_ID()');
-            $postId = $reponse->fetch()[0];
+            $post_id = $reponse->fetch()[0];
             // need to get infos about the post
-            $fileName = MyApp\Utility\Math::getARandomString(6) . '-' . $postId . '.png';
+            $fileName = MyApp\Utility\Math::getARandomString(6) . '-' . $post_id . '.png';
             $reponse->closeCursor();
-            $reponse = $db->prepare("UPDATE post SET content = :fileName WHERE id = :postId");
-            $reponse->execute(['fileName' => $fileName, 'postId' => $postId]);
+            $reponse = $db->prepare("UPDATE post SET content = :fileName WHERE id = :post_id");
+            $reponse->execute(['fileName' => $fileName, 'post_id' => $post_id]);
             $reponse->closeCursor();
             
             $img = filter_input(INPUT_POST, 'image', FILTER_SANITIZE_URL);
@@ -198,7 +200,7 @@ $app->post('/add-post', function ($request, $response) {
             $data = base64_decode($img);
             file_put_contents(__DIR__ . '/public/img/post/' . $fileName, $data);
             
-            header('Location: /p/'.$_POST['project_id']); exit();
+            header('Location: /p/'.$_POST['project_id'].'#'.$post_id); exit();
         } else {
             throw new Exception ('Erreur : Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "projectId")');
         }
@@ -209,8 +211,8 @@ $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
     if (!empty($_SESSION['current_user'])){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-        $reponse = $db->prepare ("delete from post where path LIKE concat('%', (select * from (select path from post where id = :postId) p), '%')");
-        $reponse->execute(['postId' => $args['post-id']]);
+        $reponse = $db->prepare ("delete from post where path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%')");
+        $reponse->execute(['post_id' => $args['post-id']]);
         $reponse->closeCursor();
     }
     header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
@@ -222,11 +224,31 @@ $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
         if ($args['vote-sign'] == 'minus' or $args['vote-sign'] == 'plus'){
             try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
             } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-            $firstQuery = $args['vote-sign'] == 'minus' ? 'update post set vote_minus = vote_minus + 1, score_result = score_result - 1 where id = :postId ; ' : 'update post set vote_plus = vote_plus + 1, score_result = score_result + 1 where id = :postId ; ';
-            $reponse = $db->prepare ($firstQuery . "update post set score_percent = (select * from (select ((vote_plus*100)/(vote_plus + vote_minus)) from post p where id = :postId) p) where id = :postId ;");
-            $reponse->execute(['postId' => $args['post-id']]);
-            $reponse = $db->prepare ('select score_percent, score_result, vote_minus, vote_plus from post where id = :postId');
-            $reponse->execute(['postId' => $args['post-id']]);
+            $reponse = $db->prepare ('select is_upvote from post_vote where user_id = :user_id and post_id = :post_id');
+            $reponse->execute([
+                'user_id' => $_SESSION['current_user']['user_id'],
+                'post_id' => $args['post-id']
+            ]);
+            while ($donnees[] = $reponse->fetch());
+            
+            if (!($donnees[0]['is_upvote'] === '1' and $args['vote-sign'] == 'plus') and !($donnees[0]['is_upvote'] === '0' and $args['vote-sign'] == 'minus')){
+                if ($donnees[0] === false){
+                    $t = ($args['vote-sign'] == 'minus') ? ['vote_minus', '-', '0'] : ['vote_plus', '+', '1'];
+                    $query = 'update post set ' . $t[0] . ' = ' . $t[0] . ' + 1, score_result = score_result ' . $t[1] . ' 1 where id = :post_id; INSERT INTO post_vote (post_id, user_id, is_upvote) VALUES (:post_id, :user_id, ' . $t[2] . ');';
+                } else if (($donnees[0]['is_upvote'] === '1' and $args['vote-sign'] == 'minus') or ($donnees[0]['is_upvote'] === '0' and $args['vote-sign'] == 'plus')) {
+                    $t = ($args['vote-sign'] == 'minus') ? ['vote_plus', '-'] : ['vote_minus', '+'];
+                    $query = 'delete from post_vote where post_id = :post_id and user_id = :user_id; update post set ' . $t[0] . ' = ' . $t[0] . ' - 1, score_result = score_result ' . $t[1] . ' 1 where id = :post_id;';
+                }
+                $reponse = $db->prepare ($query . ' update post set score_percent = (select * from (select ((vote_plus*100)/(vote_plus + vote_minus)) from post p where id = :post_id) p) where id = :post_id ;');
+                $reponse->execute([
+                    'post_id' => $args['post-id'],
+                    'user_id' => $_SESSION['current_user']['user_id']
+                ]);
+            }
+            
+            $reponse = $db->prepare ('select score_percent, score_result, vote_minus, vote_plus from post where id = :post_id');
+            $reponse->execute(['post_id' => $args['post-id']]);
+            $donnees = [];
             while ($donnees[] = $reponse->fetch());
             $reponse->closeCursor();
             die(json_encode($donnees));
@@ -240,17 +262,17 @@ $app->get('/togglePin/{post-id}', function ($request, $response, $args) {
     if (!empty($_SESSION['current_user'])){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-        $reponse = $db->prepare ('UPDATE post SET user_id_pin = (IF (user_id_pin = 0,:user_id_pin,0)) where id = :postId');
+        $reponse = $db->prepare ('UPDATE post SET user_id_pin = (IF (user_id_pin = 0,:user_id_pin,0)) where id = :post_id');
         $reponse->execute([
             'user_id_pin' => $_SESSION['current_user']['user_id'],
-            'postId' => $args['post-id']
+            'post_id' => $args['post-id']
         ]);
-        // $reponse = $db->prepare ('select user_id_pin from post where id = :postId');
-        // $reponse->execute(['postId' => $args['post-id']]);
+        // $reponse = $db->prepare ('select user_id_pin from post where id = :post_id');
+        // $reponse->execute(['post_id' => $args['post-id']]);
         // while ($donnees[] = $reponse->fetch());
         // die(json_encode($donnees));
         $reponse->closeCursor();
-        header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
+        header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'].'#'.$args['post-id'])); exit();
     }
 });
 
@@ -258,8 +280,8 @@ $app->get('/resetPostScore/{post-id}', function ($request, $response, $args) {
     if (!empty($_SESSION['current_user'])){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-        $reponse = $db->prepare ('update post set score_percent = 0, score_result = 0, vote_minus = 0, vote_plus = 0 where id = :postId');
-        $reponse->execute(['postId' => $args['post-id']]);
+        $reponse = $db->prepare ('update post set score_percent = 0, score_result = 0, vote_minus = 0, vote_plus = 0 where id = :post_id; delete from post_vote where post_id = :post_id;');
+        $reponse->execute(['post_id' => $args['post-id']]);
         $reponse->closeCursor();
         header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
     }

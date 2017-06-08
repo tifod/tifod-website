@@ -12,6 +12,7 @@
 <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 <link rel="stylesheet" href="/public/drawingboard/drawingboard.min.css">
 <script src="/public/drawingboard/drawingboard.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.6.1/clipboard.min.js"></script>
 {{ parent() }}
 {% endblock %}
 
@@ -44,6 +45,10 @@
             <div id="project-tree"></div>
         </div>            
     </div>
+    <div id="snackbar" class="mdl-js-snackbar mdl-snackbar">
+        <div class="mdl-snackbar__text"></div>
+        <button class="mdl-snackbar__action" type="button"></button>
+    </div>
     <script>
         var simple_chart_config = {
         chart: { container: "#project-tree" },
@@ -64,6 +69,10 @@
     {% set post = project[0] %}
     <div class="container" id="{{ post['id'] }}">
         {% include "post/add-content.html" %}
+    </div>
+    <div id="snackbar" class="mdl-js-snackbar mdl-snackbar">
+        <div class="mdl-snackbar__text"></div>
+        <button class="mdl-snackbar__action" type="button"></button>
     </div>
     <script src="/public/perso/project.js"></script>
     <script>var boards = document.getElementsByClassName('drawing-board'); for (var z = 0; z < boards.length; z++){ resetBoard(boards[z].getAttribute('id')); }</script>

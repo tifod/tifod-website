@@ -1,4 +1,22 @@
+function goToPostBasedOnHash () {
+    var hash = window.location.hash.slice(1);
+    if (/^\d+$/.test(hash)){
+        goToPost(hash);
+    }
+};
+animationsTest(goToPostBasedOnHash);
+window.onhashchange = goToPostBasedOnHash;
+
 smoothScroll.init();
+
+new Clipboard (".btn-copy-js");
+var snackbarContainer = document.getElementById("snackbar");
+var snackbarBtns = document.getElementsByClassName('btn-copy-js');
+for (var z = 0; z < snackbarBtns.length; z++){
+    snackbarBtns[z].onclick = function() {
+        snackbarContainer.MaterialSnackbar.showSnackbar({message: this.getAttribute("data-msg")});
+    };
+}
 
 $("img.lazyload").unveil(500, function(){
     $(this).load(function() {
@@ -80,7 +98,7 @@ function resetBoard (elId){
                 return false;
             } else {
                 //put the drawingboard content in the form field to send it to the server
-                $(this).find('input[name=image]').val(imgInput);
+                $(this).find('input[name=image]').val(img);
                 
                 //we can also assume that everything goes well server-side
                 //and directly clear webstorage here so that the drawing isn't shown again after form submission

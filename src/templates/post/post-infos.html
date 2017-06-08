@@ -16,6 +16,11 @@
             </a>
             <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-tree-link">Voir ce post dans l'arborescence du projet</span>
             
+            <button id="{{ post['id'] }}-share-btn" data-msg="URL copié" class="mdl-button mdl-js-button mdl-button--icon btn-copy-js" data-clipboard-text="{{ server_name }}/p/{{ projectId }}#{{ post['id'] }}">
+                <i class="fa fa-fw fa-link"></i>
+            </button>
+            <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-share-btn">Copier l'URL de ce post</span>
+            
             {% if post['user_id_pin'] != 0 %}
                 <span>
                     {% if current_user %}<a href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >{% endif %}
@@ -38,6 +43,11 @@
             {% if current_user %}
                 <a id="{{ post['id'] }}-delete" class="mdl-button mdl-js-button mdl-button--icon" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ post['id'] }}?redirect=/p/{{ projectId }}"><i class="fa fa-trash text-danger fa-fw"></i></a>
                 <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-delete">Supprimer ce post</span>
+                
+                <a id="{{ post['id'] }}-resetScore" class="mdl-button mdl-js-button mdl-button--icon" href="/resetPostScore/{{ post['id'] }}?redirect=/p/{{ projectId }}">
+                    <i class="fa fa-undo fa-fw"></i>
+                </a>
+                <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-resetScore">Ramener le score à zéro</span>
             {% endif %}
         </div>
         
@@ -53,12 +63,6 @@
     {% if current_user %}
         <input type="checkbox" id="{{ post['id'] }}-checkbox-more" class="checkbox-more" data-postid="{{ post['id'] }}">
         <div class="post-more-form">
-            <p class="list-inline">
-                <span class="list-inline">
-                    <i class="fa fa-undo fa-fw"></i>
-                    <a href="/resetPostScore/{{ post['id'] }}?redirect=/p/{{ projectId }}">Remettre le score à zéro</a>
-                </span>
-            </p>
             {% include "post/add-content.html" %}
         </div>
     {% endif %}
