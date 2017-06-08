@@ -11,27 +11,6 @@ for (var z = 0; z < radioBtns.length; z++){
     if (radioBtns[z].checked == true) showPost(radioBtns[z].parentNode.getAttribute('data-target'));
 }
 
-function doubleScroll(element) {
-    if (element.parentNode.firstChild.className != 'dblscrollbar'){
-        var scrollbar= document.createElement('div');
-        scrollbar.appendChild(document.createElement('div'));
-        scrollbar.className = 'dblscrollbar';
-        scrollbar.style.overflow= 'auto';
-        scrollbar.style.overflowY= 'hidden';
-        scrollbar.style.marginBottom= '1em';
-        scrollbar.firstChild.style.width= element.scrollWidth+'px';
-        scrollbar.firstChild.style.paddingTop= '1px';
-        scrollbar.firstChild.appendChild(document.createTextNode('\xA0'));
-        scrollbar.onscroll= function() {
-            element.scrollLeft= scrollbar.scrollLeft;
-        };
-        element.onscroll= function() {
-            scrollbar.scrollLeft= element.scrollLeft;
-        };
-        element.parentNode.insertBefore(scrollbar, element);
-    }
-}
-
 function handleImage(e){
     var postId = event.target.getAttribute('data-postid');
     
@@ -90,24 +69,24 @@ function resetBoard (elId){
             droppable: true
         });
         
-        doubleScroll(document.getElementById(elId).parentNode);
-        
         $('#' + elId).parent().parent().on('submit', drawingSubmit);
         
         function drawingSubmit(){
-           //get drawingboard content
-          var img = mainBoard.getImg();
-          
-          //we keep drawingboard content only if it's not the 'blank canvas'
-          var imgInput = (mainBoard.blankCanvas == img) ? '' : img;
-          
-          //put the drawingboard content in the form field to send it to the server
-          $(this).find('input[name=image]').val( imgInput );
+            //get drawingboard content
+            var img = mainBoard.getImg();
 
-          //we can also assume that everything goes well server-side
-          //and directly clear webstorage here so that the drawing isn't shown again after form submission
-          //but the best would be to do when the server answers that everything went well
-          mainBoard.clearWebStorage();
+            if (mainBoard.blankCanvas == img){
+                alert("Impossible d'envoyer un dessin vide");
+                return false;
+            } else {
+                //put the drawingboard content in the form field to send it to the server
+                $(this).find('input[name=image]').val(imgInput);
+                
+                //we can also assume that everything goes well server-side
+                //and directly clear webstorage here so that the drawing isn't shown again after form submission
+                //but the best would be to do when the server answers that everything went well
+                mainBoard.clearWebStorage();
+            }
         }
     }
 }

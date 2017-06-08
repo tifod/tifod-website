@@ -91,7 +91,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
     unset($project);
     
     if (in_array($projectId,$projectsId)){
-        $reponse = $db->query ('select *, (select user_name from user u where u.user_id = p.author_id) author_name from post p where project_id = ' . $projectId . ' order by has_pin desc, score_percent desc');
+        $reponse = $db->query ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin from post p where project_id = ' . $projectId . ' order by user_id_pin desc, score_percent desc');
         while ($donnees[] = $reponse->fetch());
         array_pop($donnees);
         $reponse->closeCursor();
@@ -111,7 +111,8 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
                 'vote_minus' => $post['vote_minus'],
                 'vote_plus' => $post['vote_plus'],
                 'score_percent' => $post['score_percent'],
-                'has_pin' => $post['has_pin'],
+                'user_id_pin' => $post['user_id_pin'],
+                'user_pseudo_pin' => $post['user_pseudo_pin'],
                 'posted_on' => date($post['posted_on']),
                 'author_id' => $post['author_id'],
                 'author_name' => $post['author_name'],
@@ -239,9 +240,12 @@ $app->get('/togglePin/{post-id}', function ($request, $response, $args) {
     if (!empty($_SESSION['current_user'])){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-        $reponse = $db->prepare ('update post set has_pin = not has_pin where id = :postId');
-        $reponse->execute(['postId' => $args['post-id']]);
-        // $reponse = $db->prepare ('select has_pin from post where id = :postId');
+        $reponse = $db->prepare ('UPDATE post SET user_id_pin = (IF (user_id_pin = 0,:user_id_pin,0)) where id = :postId');
+        $reponse->execute([
+            'user_id_pin' => $_SESSION['current_user']['user_id'],
+            'postId' => $args['post-id']
+        ]);
+        // $reponse = $db->prepare ('select user_id_pin from post where id = :postId');
         // $reponse->execute(['postId' => $args['post-id']]);
         // while ($donnees[] = $reponse->fetch());
         // die(json_encode($donnees));
