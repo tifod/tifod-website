@@ -107,6 +107,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             $posts [] = [
                 'id' => $post['id'],
                 'content' => $post['content'],
+                'content_type' => $post['content_type'],
                 'parent_id' => $post['parent_id'],
                 'path' => $post['path'],
                 'score_result' => $post['score_result'],
@@ -159,7 +160,7 @@ $app->post('/create-project', function ($request, $response) {
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
         
-        $reponse = $db->prepare ("INSERT INTO post(content, parent_id, project_id, path, author_id) VALUES (:content, 0, :project_id, '/', :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
+        $reponse = $db->prepare ("INSERT INTO post(content, content_type, parent_id, project_id, path, author_id) VALUES (:content, 'text', 0, :project_id, '/', :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
         $reponse->execute([
             'content' => $_POST['content'],
             'project_id' => $_POST['project_id'],
@@ -175,32 +176,36 @@ $app->post('/add-post', function ($request, $response) {
         header('Location: /');
         exit();
     } else {
-        if ((!empty($_POST['content']) or isset($_POST['image'])) and isset($_POST['parent_id']) and isset($_POST['project_id'])){
+        if ((!empty($_POST['content']) or !empty($_POST['image'])) and isset($_POST['parent_id']) and isset($_POST['project_id'])){
             try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
             } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
             
-            $reponse = $db->prepare ("INSERT INTO post(content, parent_id, project_id, path, author_id) VALUES ('file', :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id))), :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
+            $reponse = $db->prepare ("INSERT INTO post(content, content_type, parent_id, project_id, path, author_id) VALUES (:content, :content_type, :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id))), :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
             $reponse->execute([
+                'content' => (empty($_POST['content'])?'file':$_POST['content']),
+                'content_type' => (empty($_POST['content']) ? 'file' : 'text'),
                 'parent_id' => $_POST['parent_id'],
                 'project_id' => $_POST['project_id'],
                 'author_id' => $_SESSION['current_user']['user_id']
             ]);
             $reponse->closeCursor();
-            $reponse = $db->query('SELECT LAST_INSERT_ID()');
-            $post_id = $reponse->fetch()[0];
-            // need to get infos about the post
-            $fileName = MyApp\Utility\Math::getARandomString(6) . '-' . $post_id . '.png';
-            $reponse->closeCursor();
-            $reponse = $db->prepare("UPDATE post SET content = :fileName WHERE id = :post_id");
-            $reponse->execute(['fileName' => $fileName, 'post_id' => $post_id]);
-            $reponse->closeCursor();
-            
-            $img = filter_input(INPUT_POST, 'image', FILTER_SANITIZE_URL);
-            $img = str_replace(' ', '+', str_replace('data:image/png;base64,', '', $img));
-            $data = base64_decode($img);
-            file_put_contents(__DIR__ . '/public/img/post/' . $fileName, $data);
-            
-            header('Location: /p/'.$_POST['project_id'].'#'.$post_id); exit();
+            if (empty($_POST['content'])){
+                $reponse = $db->query('SELECT LAST_INSERT_ID()');
+                $post_id = $reponse->fetch()[0];
+                // need to get infos about the post
+                $fileName = MyApp\Utility\Math::getARandomString(6) . '-' . $post_id . '.png';
+                $reponse->closeCursor();
+                $reponse = $db->prepare("UPDATE post SET content = :fileName WHERE id = :post_id");
+                $reponse->execute(['fileName' => $fileName, 'post_id' => $post_id]);
+                $reponse->closeCursor();
+                
+                $img = filter_input(INPUT_POST, 'image', FILTER_SANITIZE_URL);
+                $img = str_replace(' ', '+', str_replace('data:image/png;base64,', '', $img));
+                $data = base64_decode($img);
+                file_put_contents(__DIR__ . '/public/img/post/' . $fileName, $data);
+                header('Location: /p/'.$_POST['project_id'].'#'.$post_id); exit();
+            }
+            header('Location: /p/'.$_POST['project_id']); exit();
         } else {
             throw new Exception ('Erreur : Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "projectId")');
         }
@@ -211,8 +216,11 @@ $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
     if (!empty($_SESSION['current_user'])){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-        $reponse = $db->prepare ("delete from post where path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%')");
-        $reponse->execute(['post_id' => $args['post-id']]);
+        $reponse = $db->prepare ("DELETE FROM post_vote WHERE post_vote.post_id IN (SELECT id FROM post WHERE path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%')); DELETE FROM post_vote WHERE post_id = :post_id; DELETE FROM post WHERE path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%')");
+        
+        $reponse->execute([
+            'post_id' => $args['post-id']
+        ]);
         $reponse->closeCursor();
     }
     header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();

@@ -26,7 +26,11 @@
             <div class="post{% if loop.first %} active-post{% endif %}" id="{{ child['id'] }}" data-path="{{ child['path'] }}">
         
                 {# content #}
-                <img class="lazyload" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ child['content'] }}" alt="image sans description">
+                {% if child['content_type'] == 'file' %}
+                    <img class="lazyload" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ child['content'] }}" alt="image sans description">
+                {% else %}
+                    <div class="post-text">{{ child['content'] }}</div>
+                {% endif %}
                 
                 {# post infos #}
                 {% include "/post/post-infos.html" with {'post':child} %}

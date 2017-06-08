@@ -1,3 +1,7 @@
 <p class="tree-post" id="{{ post['id'] }}-post-tree" data-path="{{ post['path'] }}" data-id="{{ post['id'] }}">
-    <img src="/public/img/post/{{ post['content'] }}">
+    {% if post['content_type'] == 'file' %}
+        <img src="/public/img/post/{{ post['content'] }}">
+    {% else %}
+        {{ post['content'] }}
+    {% endif %}
 </p>

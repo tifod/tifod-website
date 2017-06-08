@@ -1,8 +1,11 @@
 [ ] sign up
-[ ] link post
-[ ] text as an option instead of image
+[x] text as an option instead of image
 [x] prevent double voting
 [x] share a post url
 
-[ ] only admin can delete post
+[ ] deleting a post delete also the file attached to it
+[x] deleting a post delete also the votes attached to it
+[ ] only admin users can delete post
+[ ] only project manager can toggle the pin (of his own project only)
 [ ] report post section
+[ ] markdown syntax support in post text
