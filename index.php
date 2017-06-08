@@ -156,19 +156,22 @@ $app->get('/', function ($request, $response) {
 })->setName('homepage');
 
 $app->post('/create-project', function ($request, $response) {
-    if (!(empty($_POST['content']) or empty($_POST['project_id']))){
-        try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-        } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-        
-        $reponse = $db->prepare ("INSERT INTO post(content, content_type, parent_id, project_id, path, author_id) VALUES (:content, 'text', 0, :project_id, '/', :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
-        $reponse->execute([
-            'content' => $_POST['content'],
-            'project_id' => $_POST['project_id'],
-            'author_id' => $_SESSION['current_user']['user_id']
-        ]);
-        $reponse->closeCursor();
+    if (!empty($_SESSION['current_user'])){
+        if (!(empty($_POST['content']) or empty($_POST['project_id']))){
+            try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+            } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+            
+            $reponse = $db->prepare ("INSERT INTO post(content, content_type, parent_id, project_id, path, author_id) VALUES (:content, 'text', 0, :project_id, '/', :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
+            $reponse->execute([
+                'content' => $_POST['content'],
+                'project_id' => $_POST['project_id'],
+                'author_id' => $_SESSION['current_user']['user_id']
+            ]);
+            $reponse->closeCursor();
+        }
+        header('Location: /p/' . $_POST['project_id']); exit();
     }
-    header('Location: /p/' . $_POST['project_id']); exit();
+    header('Location: /login'); exit();
 });
 
 $app->post('/add-post', function ($request, $response) {
