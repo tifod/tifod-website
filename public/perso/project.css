@@ -119,6 +119,7 @@ img { width: 100%; height: auto; }
 }
 .post-text {
     font-size: 28px;
+    line-height: 1;
     text-align: center;
     margin: 1em;
 }
