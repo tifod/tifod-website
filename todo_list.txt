@@ -1,12 +1,24 @@
 [ ] sign up
+    [ ] signup only whith an email
+    [ ] receive email with a link to /new-account?token=trucmachinchouette
+    [ ] init password AND pseudo at this URL
+    [ ] pseudo and password can be modified in /settings
+    [ ] reset password sends a link to the email adress
+    [ ] possibility to add a recovering-email-adress
 [x] text as an option instead of image
 [x] prevent double voting
 [x] share a post url
 
-[ ] user profile as a project
 [x] deleting a post delete also the file attached to it
 [x] deleting a post delete also the votes attached to it
-[ ] only admin users can delete post
-[ ] only project manager can manage their project (pin, delete)
-[ ] report post section
-[ ] markdown syntax support in post text
+[ ] only admin can delete
+[ ] only director/admin can pin a post AND can pin an edit of a post
+[ ] only owner/director/admin can edit a post
+[ ] reporting system (send an email to staff)
+[ ] markdown syntax supported in post text
+[ ] Pouvoir éditer un post une fois ce dernier posté (mais garder toutes les versions de ce post)
+
+[ ] user profile as a project
+[ ] Moyen alternatifs de s'identifier pour poster (pseudo + email, ou oauth)
+[ ] Notification system
+[ ] Bookmark system
