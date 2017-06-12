@@ -317,19 +317,20 @@ $app->post('/login', function ($request, $response, $args) {
     
     try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
     } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
-    $reponse = $db->prepare('select * from user where user_name = :login');
-    $reponse->execute(['login' => $_POST['username']]);
+    $reponse = $db->prepare('select * from user where email = :email');
+    $reponse->execute(['email' => $_POST['email']]);
     while ($donnees[] = $reponse->fetch());
     array_pop($donnees);
     $reponse->closeCursor();
     
-    if (empty($donnees[0]['user_name'])){
+    if (empty($donnees[0]['email'])){
         throw new Exception('Pseudo inexistant');
     } else {
         if(password_verify($_POST['password'], $donnees[0]['user_password'])) {
             $_SESSION['current_user'] = [
                 'user_id' => $donnees[0]['user_id'],
                 'pseudo' => $donnees[0]['user_name'],
+                'email' => $donnees[0]['email'],
                 'avatar' => $donnees[0]['avatar']
             ];
         } else {
