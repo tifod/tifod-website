@@ -3,12 +3,12 @@
         <div class="post-infos list-inline">
             <a href="/u/{{ post['author_name']|lower }}">{{ post['author_name'] }}</a>
             <span>{{ post['posted_on']|timeago }}</span>
-            <button id="{{ post['id'] }}-downvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="{% if current_user %}ajaxPingUrl('/vote/minus/{{ post['id'] }}',this,updateScore){% else %}alert('Vous ne pouvez voter qu\'en étant connecté'){% endif %}"><span class="fa fa-caret-down"></span></button>
+            <button id="{{ post['id'] }}-downvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="{% if 'vote_post'|is_allowed %}ajaxPingUrl('/vote/minus/{{ post['id'] }}',this,updateScore){% else %}alert('Vous ne pouvez voter qu\'en étant connecté'){% endif %}"><span class="fa fa-caret-down"></span></button>
             <span class="mdl-tooltip mdl-tooltip--top post-score-minus" for="{{ post['id'] }}-downvote">{{ post['vote_minus'] }}</span>
             
             <span class="post-score">{{ post['score_result'] }}</span>
             
-            <button id="{{ post['id'] }}-upvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="{% if current_user %}ajaxPingUrl('/vote/plus/{{ post['id'] }}',this,updateScore){% else %}alert('Vous ne pouvez voter qu\'en étant connecté'){% endif %}"><span class="fa fa-caret-up"></span></button>
+            <button id="{{ post['id'] }}-upvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="{% if 'vote_post'|is_allowed %}ajaxPingUrl('/vote/plus/{{ post['id'] }}',this,updateScore){% else %}alert('Vous ne pouvez voter qu\'en étant connecté'){% endif %}"><span class="fa fa-caret-up"></span></button>
             <span class="mdl-tooltip mdl-tooltip--top post-score-plus" for="{{ post['id'] }}-upvote">{{ post['vote_plus'] }}</span>
             
             <a id="{{ post['id'] }}-tree-link" href="#{{ post['id'] }}-post-tree" class="tree-link mdl-button mdl-js-button mdl-button--icon" data-scroll>
@@ -23,16 +23,16 @@
             
             {% if post['user_id_pin'] != 0 %}
                 <span>
-                    {% if current_user %}<a href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >{% endif %}
+                    {% if 'pin_post'|is_allowed %}<a href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >{% endif %}
                         <span id="{{ post['id'] }}-toggle-pin" class="fa-stack fa-fw fa-lg">
                             <i class="fa fa-circle fa-stack-2x"></i>
                             <i class="fa fa-thumb-tack fa-inverse fa-stack-1x"></i>
                         </span>
-                    {% if current_user %}</a>{% endif %}
+                    {% if 'pin_post'|is_allowed %}</a>{% endif %}
                     <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-toggle-pin">Épinglé par <strong>{% if current_user.user_id == post['user_id_pin'] %}vous-même{% else %}{{ post['user_pseudo_pin'] }}{% endif %}</strong></span>
                 </span>
             {% else %}
-                {% if current_user %}
+                {% if 'pin_post'|is_allowed %}
                     <a id="{{ post['id'] }}-toggle-pin"class="mdl-button mdl-js-button mdl-button--icon"  href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >
                         <i class="fa fa-thumb-tack fa-fw"></i>
                     </a>
@@ -40,7 +40,7 @@
                 {% endif %}
             {% endif %}
             
-            {% if current_user %}
+            {% if 'delete_post'|is_allowed %}
                 <a id="{{ post['id'] }}-delete" class="mdl-button mdl-js-button mdl-button--icon" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ post['id'] }}?redirect=/p/{{ projectId }}"><i class="fa fa-trash text-danger fa-fw"></i></a>
                 <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-delete">Supprimer ce post</span>
                 
@@ -51,7 +51,7 @@
             {% endif %}
         </div>
         
-        {% if current_user %}
+        {% if 'add_post'|is_allowed %}
             <label class="list-inline post-more-btn" for="{{ post['id'] }}-checkbox-more">
                 <span class="mdl-button mdl-js-button">
                     répondre
@@ -60,7 +60,7 @@
         {% endif %}
     </div>
     
-    {% if current_user %}
+    {% if 'add_post'|is_allowed %}
         <input type="checkbox" id="{{ post['id'] }}-checkbox-more" class="checkbox-more" data-postid="{{ post['id'] }}">
         <div class="post-more-form">
             {% include "post/add-content.html" %}

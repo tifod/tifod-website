@@ -19,28 +19,22 @@
             </div>
         </p>
     </form>
-    <form class="drawing-form" action="/add-post" method="post">
+    <form class="drawing-form text-center" action="/add-post" method="post">
         <div class="drawing-board-wrapper">
             <div class="drawing-board" id="{{ post['id'] }}-drawing-board"></div>
         </div>
-        <div class="text-center">
-            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Envoyer votre dessin</button>
-        </div>
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Envoyer votre dessin</button>
         
         <input type="hidden" name="image" value="">
         <input type="hidden" name="parent_id" value="{{ post['id'] }}">
         <input type="hidden" name="project_id" value="{{ projectId }}">
     </form>
-    <hr>
-    <div>
-        Si vous n'arrivez vraiment pas à dessiner, dites le avec des mots
-    </div>
     <form class="list-inline text-center" action="/add-post" method="post">
-        <div class="mdl-cell mdl-cell--8-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <label class="mdl-textfield__label">Envoyer du texte</label>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <label class="mdl-textfield__label">Ou bien, envoyer du texte</label>
             <input class="mdl-textfield__input drawingboard-height-input" type="text" name="content" data-postid="{{ post['id'] }}">
         </div>
-        <button class="mdl-button mdl-js-button mdl-button--raised">Envoyer votre texte</button>
+        <button class="mdl-button mdl-js-button mdl-button--raised">Envoyer</button>
         
         <input type="hidden" name="parent_id" value="{{ post['id'] }}">
         <input type="hidden" name="project_id" value="{{ projectId }}">

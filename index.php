@@ -15,6 +15,25 @@ $container['dbinfos'] = [
     'password' => ''
 ];
 
+function user_can_do ($action_name) {
+    $permissions = [
+        'open_public' => [
+            'add_post' => ['anyone', 'creator', 'moderator'],
+            'view_project' => ['visitor', 'anyone', 'creator', 'moderator'],
+            'vote_post' => ['anyone', 'creator', 'moderator'],
+            'create_project' => ['creator'],
+            'delete_project' => ['creator'],
+            'delete_post' => ['creator'],
+            'pin_post' => ['creator', 'moderator'],
+            'edit_post' => ['creator', 'moderator'],
+        ]
+    ];
+    $default_project_type = 'open_public';
+    
+    $current_project_type = empty($_SESSION['current_project_type']) ? $default_project_type : $_SESSION['current_project_type'];
+    return in_array((empty($_SESSION['current_user']['current_project_role']) ? 'visitor' : $_SESSION['current_user']['current_project_role']), $permissions[$current_project_type][$action_name]) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin');
+}
+
 // Register component on container
 $container['view'] = function ($container) {
     $loader = new Twig_Loader_Filesystem(__DIR__ . '/src/templates');
@@ -29,6 +48,9 @@ $container['view'] = function ($container) {
     
     $twig->addGlobal("server_name", $_SERVER["SERVER_NAME"]);
     
+    $filter = new Twig_SimpleFilter('is_allowed', function ($action_name) { return user_can_do($action_name); });
+    $twig->addFilter($filter);
+        
     $filter = new Twig_SimpleFilter('timeago', function ($datetime) {
       $time = time() - strtotime($datetime); 
 
@@ -87,60 +109,76 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
     array_pop($donnees);
     $reponse->closeCursor();
     $projectsId = [];
-    foreach ($donnees as $project){ $projectsId[] = $project['project_id']; }
-    unset($reponse);
-    unset($donnees);
-    unset($project);
+    foreach ($donnees as $each_project){ $projectsId[] = $each_project['project_id']; }
     
     if (in_array($projectId,$projectsId)){
-        $reponse = $db->query ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin from post p where project_id = ' . $projectId . ' order by user_id_pin desc, score_percent desc');
-        while ($donnees[] = $reponse->fetch());
-        array_pop($donnees);
-        $reponse->closeCursor();
-
-        if (count($donnees) == 1){
-            return $this->view->render('post/project-player.html', ['project' => $donnees, 'projectId' => $projectId]);
-        }
-
-        // creating a comprehensive list of the projet posts
-        foreach ($donnees as $k => $post){
-            $posts [] = [
-                'id' => $post['id'],
-                'content' => $post['content'],
-                'content_type' => $post['content_type'],
-                'parent_id' => $post['parent_id'],
-                'path' => $post['path'],
-                'score_result' => $post['score_result'],
-                'vote_minus' => $post['vote_minus'],
-                'vote_plus' => $post['vote_plus'],
-                'score_percent' => $post['score_percent'],
-                'user_id_pin' => $post['user_id_pin'],
-                'user_pseudo_pin' => $post['user_pseudo_pin'],
-                'posted_on' => date($post['posted_on']),
-                'author_id' => $post['author_id'],
-                'author_name' => $post['author_name'],
-            ];
-            if ($post['parent_id'] == 0) $topPostId = $k;
+        $reponse = $db->prepare ('select project_type from project where project_id = :project_id');
+        $reponse->execute([ 'project_id' => $projectId ]);
+        $_SESSION['current_project_type'] = $reponse->fetch()['project_type'];
+        
+        if (!empty($_SESSION['current_user'])){
+            $reponse = $db->prepare ('select project_role from project_role where project_id = :project_id and user_id = :user_id');
+            $reponse->execute([
+                'project_id' => $projectId,
+                'user_id' => $_SESSION['current_user']['user_id']
+            ]);
+            $role = $reponse->fetch()['project_role'];
+            $_SESSION['current_user']['current_project_role'] = empty($role) ? 'anyone' : $role;
         }
         
-        $new = [];
-        foreach ($posts as $a){
-            $new[$a['parent_id']][] = $a;
-        }
-        $project = createTree($new, array($posts[$topPostId]));
+        if (user_can_do('view_project')){
+            $reponse = $db->query ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin from post p where project_id = ' . $projectId . ' order by user_id_pin desc, score_percent desc');
+            $donnees = [];
+            while ($donnees[] = $reponse->fetch());
+            array_pop($donnees);
+            $reponse->closeCursor();
 
-        $new = [];
-        foreach ($posts as $a){
-            $new[$a['parent_id']][] = [
-                'innerHTML' => $this->view->render('post/tree-post.html', ['post' => $a]),
-                'id' => $a['id']
-            ];
+            if (count($donnees) == 1){
+                return $this->view->render('post/project-player.html', ['project' => $donnees, 'projectId' => $projectId]);
+            }
+
+            // creating a comprehensive list of the projet posts
+            foreach ($donnees as $k => $post){
+                $posts [] = [
+                    'id' => $post['id'],
+                    'content' => $post['content'],
+                    'content_type' => $post['content_type'],
+                    'parent_id' => $post['parent_id'],
+                    'path' => $post['path'],
+                    'score_result' => $post['score_result'],
+                    'vote_minus' => $post['vote_minus'],
+                    'vote_plus' => $post['vote_plus'],
+                    'score_percent' => $post['score_percent'],
+                    'user_id_pin' => $post['user_id_pin'],
+                    'user_pseudo_pin' => $post['user_pseudo_pin'],
+                    'posted_on' => date($post['posted_on']),
+                    'author_id' => $post['author_id'],
+                    'author_name' => $post['author_name'],
+                ];
+                if ($post['parent_id'] == 0) $topPostId = $k;
+            }
+            
+            $new = [];
+            foreach ($posts as $a){
+                $new[$a['parent_id']][] = $a;
+            }
+            $project = createTree($new, array($posts[$topPostId]));
+
+            $new = [];
+            foreach ($posts as $a){
+                $new[$a['parent_id']][] = [
+                    'innerHTML' => $this->view->render('post/tree-post.html', ['post' => $a]),
+                    'id' => $a['id']
+                ];
+            }
+            $project_json = createTree($new, array($posts[$topPostId]));        
+            
+            return $this->view->render('post/project-player.html', ['project' => $project, 'projectId' => $projectId, 'project_json' => $project_json]);
+        } else {
+            return $this->view->render('error.html', ['message' => "Désolé, vous n'êtes pas autorisé à consulter ce projet"]);
         }
-        $project_json = createTree($new, array($posts[$topPostId]));        
-        
-        return $this->view->render('post/project-player.html', ['project' => $project, 'projectId' => $projectId, 'project_json' => $project_json]);
     } else {
-        echo "Hm. Désolé, ce projet n'existe pas, <a href='/'>revenez à la page d'accueil</a>";
+        return $this->view->render('error.html', ['message' => "Désolé, ce projet n'existe pas"]);
     }
 });
 
@@ -156,16 +194,18 @@ $app->get('/', function ($request, $response) {
 })->setName('homepage');
 
 $app->post('/create-project', function ($request, $response) {
-    if (!empty($_SESSION['current_user'])){
+    $project_type = 'open_public';
+    if (user_can_do('create_project')){
         if (!(empty($_POST['content']) or empty($_POST['project_id']))){
             try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
             } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
             
-            $reponse = $db->prepare ("INSERT INTO post(content, content_type, parent_id, project_id, path, author_id) VALUES (:content, 'text', 0, :project_id, '/', :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
+            $reponse = $db->prepare ("INSERT INTO post(content, content_type, parent_id, project_id, path, author_id) VALUES (:content, 'text', 0, :project_id, '/', :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID()); INSERT INTO project_role (project_id, user_id, project_role) VALUES (:project_id,:author_id,'creator'); INSERT INTO project (project_id, project_type, project_root_post_id) VALUES (:project_id,:project_type,(SELECT LAST_INSERT_ID()));");
             $reponse->execute([
                 'content' => $_POST['content'],
                 'project_id' => $_POST['project_id'],
-                'author_id' => $_SESSION['current_user']['user_id']
+                'author_id' => $_SESSION['current_user']['user_id'],
+                'project_type' => $project_type
             ]);
             $reponse->closeCursor();
         }
@@ -175,10 +215,7 @@ $app->post('/create-project', function ($request, $response) {
 });
 
 $app->post('/add-post', function ($request, $response) {
-    if (empty($_SESSION['current_user'])){
-        header('Location: /');
-        exit();
-    } else {
+    if (in_array((empty($_SESSION['current_user']['current_project_role']) ? 'anyone' : $_SESSION['current_user']['current_project_role']), $this->permissions[$_SESSION['current_project_type']]['add_post']) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin')){
         if ((!empty($_POST['content']) or !empty($_POST['image'])) and isset($_POST['parent_id']) and isset($_POST['project_id'])){
             try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
             } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
@@ -212,11 +249,14 @@ $app->post('/add-post', function ($request, $response) {
         } else {
             throw new Exception ('Erreur : Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "projectId")');
         }
+    } else {
+        header ('Location: /');
+        exit();
     }
 });
 
 $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
-    if (!empty($_SESSION['current_user']) and $_SESSION['current_user']['pseudo'] == 'Jean'){
+    if (in_array((empty($_SESSION['current_user']['current_project_role']) ? 'anyone' : $_SESSION['current_user']['current_project_role']), $this->permissions[$_SESSION['current_project_type']]['delete_post']) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin')){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
         $reponse = $db->prepare("SELECT content, content_type FROM post WHERE id = :post_id");
@@ -232,7 +272,7 @@ $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
 });
 
 $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
-    if (!empty($_SESSION['current_user'])){
+    if (in_array((empty($_SESSION['current_user']['current_project_role']) ? 'anyone' : $_SESSION['current_user']['current_project_role']), $this->permissions[$_SESSION['current_project_type']]['vote_post']) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin')){
         // plus, minus
         if ($args['vote-sign'] == 'minus' or $args['vote-sign'] == 'plus'){
             try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
@@ -272,7 +312,7 @@ $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
 });
 
 $app->get('/togglePin/{post-id}', function ($request, $response, $args) {
-    if (!empty($_SESSION['current_user'])){
+    if (in_array((empty($_SESSION['current_user']['current_project_role']) ? 'anyone' : $_SESSION['current_user']['current_project_role']), $this->permissions[$_SESSION['current_project_type']]['pin_post']) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin')){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
         $reponse = $db->prepare ('UPDATE post SET user_id_pin = (IF (user_id_pin = 0,:user_id_pin,0)) where id = :post_id');
@@ -290,7 +330,7 @@ $app->get('/togglePin/{post-id}', function ($request, $response, $args) {
 });
 
 $app->get('/resetPostScore/{post-id}', function ($request, $response, $args) {
-    if (!empty($_SESSION['current_user'])){
+    if (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin'){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
         $reponse = $db->prepare ('update post set score_percent = 0, score_result = 0, vote_minus = 0, vote_plus = 0 where id = :post_id; delete from post_vote where post_id = :post_id;');
@@ -305,7 +345,7 @@ $app->get('/logout', function ($request, $response, $args) {
 });
 
 $app->get('/login', function ($request, $response, $args) {
-    if (empty($_SESSION['current_user']['pseudo'])){
+    if (empty($_SESSION['current_user'])){
         return $this->view->render('user/login.html', ['redirect_to' => (empty($_GET['redirect']) ? '/' : $_GET['redirect'])]);
     } else {
         header('Location: /'); exit();
@@ -331,7 +371,9 @@ $app->post('/login', function ($request, $response, $args) {
                 'user_id' => $donnees[0]['user_id'],
                 'pseudo' => $donnees[0]['user_name'],
                 'email' => $donnees[0]['email'],
-                'avatar' => $donnees[0]['avatar']
+                'avatar' => $donnees[0]['avatar'],
+                'platform_role' => $donnees[0]['platform_role'],
+                'current_project_role' => 'none'
             ];
         } else {
             throw new Exception('Erreur avec le mot de passe');
