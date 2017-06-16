@@ -1,7 +1,6 @@
 [ ] sign up
     [ ] signup only whith an email
-        [ ] check that no one has already this email adress
-    [ ] receive email with a link to /new-account?token=trucmachinchouette
+    [ ] receive email with a link to /new-account/token
     [ ] init password AND pseudo at this URL
     [ ] pseudo and password can be modified in /settings
     [ ] reset password sends a link to the email adress
@@ -16,8 +15,13 @@
 [ ] reporting system (send an email to staff)
 [ ] markdown syntax supported in post text
 
-[ ] user profile as a project
 [ ] Moyen alternatifs de s'identifier pour poster (pseudo/email)
 [ ] Oauth login/signup
 [ ] Notification system
+    [ ] Someone answered you
+    [ ] Someone mentionned URL of your profile/post/project
 [ ] Bookmark system
+[ ] User profile
+    [ ] Personnal description (markdown syntax)
+    [ ] Best posts/project
+    [ ] Achievements

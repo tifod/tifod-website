@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Erreur interne{% endblock %}
+
+{% block body %}
+    {% include 'header.html' with {'no_login_button':true} %}
+    <div class="container text-center">
+        <h2>Une erreur s'est produite</h2>
+        <p>(> ~ <') Désolé, en espérant que le problème n'aura pas eu de conséquences trop graves!</p>
+        <p>Si le problème est grave, contactez l'équipe tifod, on ne vous laissera pas tomber!</p>
+        <p>Détails sur l'erreur : <span class="text-primary">{{ error.getMessage }}</span> at line <span class="text-primary">{{ error.getLine }}</span> in <span class="text-primary">{{ error.getFile }}</span></p>
+    </div>
+{% endblock %}

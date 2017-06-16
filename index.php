@@ -15,23 +15,47 @@ $container['dbinfos'] = [
     'password' => ''
 ];
 
-function user_can_do ($action_name) {
+function user_can_do ($action_name, $project_type) {
     $permissions = [
+        'platform' => [
+            'create_project' => ['creator']
+        ],
         'open_public' => [
             'add_post' => ['anyone', 'creator', 'moderator'],
             'view_project' => ['visitor', 'anyone', 'creator', 'moderator'],
             'vote_post' => ['anyone', 'creator', 'moderator'],
-            'create_project' => ['creator'],
+            'delete_project' => ['creator'],
+            'delete_post' => ['creator'],
+            'pin_post' => ['creator', 'moderator'],
+            'edit_post' => ['creator', 'moderator'],
+        ],
+        'closed_public' => [
+            'add_post' => ['creator', 'moderator'],
+            'view_project' => ['visitor', 'anyone', 'creator', 'moderator'],
+            'vote_post' => ['anyone', 'creator', 'moderator'],
+            'delete_project' => ['creator'],
+            'delete_post' => ['creator'],
+            'pin_post' => ['creator', 'moderator'],
+            'edit_post' => ['creator', 'moderator'],
+        ],
+        'closed_private' => [
+            'add_post' => ['creator', 'moderator'],
+            'view_project' => ['creator', 'moderator'],
+            'vote_post' => ['creator', 'moderator'],
             'delete_project' => ['creator'],
             'delete_post' => ['creator'],
             'pin_post' => ['creator', 'moderator'],
             'edit_post' => ['creator', 'moderator'],
         ]
     ];
-    $default_project_type = 'open_public';
+    $default_project_type = 'platform';
+    $default_platform_role = 'visitor';
     
-    $current_project_type = empty($_SESSION['current_project_type']) ? $default_project_type : $_SESSION['current_project_type'];
-    return in_array((empty($_SESSION['current_user']['current_project_role']) ? 'visitor' : $_SESSION['current_user']['current_project_role']), $permissions[$current_project_type][$action_name]) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin');
+    $current_project_type = empty($project_type) ? $default_project_type : $project_type;
+    if (empty($permissions[$current_project_type][$action_name])){
+        throw new Exception("Nom d'action inconnue ($action_name, $current_project_type)");
+    }
+    return in_array((empty($_SESSION['current_user']['current_project_role']) ? $default_platform_role : $_SESSION['current_user']['current_project_role']), $permissions[$current_project_type][$action_name]) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin');
 }
 
 // Register component on container
@@ -48,7 +72,7 @@ $container['view'] = function ($container) {
     
     $twig->addGlobal("server_name", $_SERVER["SERVER_NAME"]);
     
-    $filter = new Twig_SimpleFilter('is_allowed', function ($action_name) { return user_can_do($action_name); });
+    $filter = new Twig_SimpleFilter('is_allowed_for', function ($action_name, $project_type) { return user_can_do($action_name, $project_type); });
     $twig->addFilter($filter);
         
     $filter = new Twig_SimpleFilter('timeago', function ($datetime) {
@@ -82,9 +106,33 @@ $container['notFoundHandler'] = function ($c) {
         return $c['response']
             ->withStatus(404)
             ->withHeader('Content-Type', 'text/html')
-            ->write($c['view']->render('error.html', [ 'message' => '404 - Page inexistante' ]));
+            ->write($c['view']->render('error/404.html'));
     };
 };
+//Override the default php Error Handler
+$container['phpErrorHandler'] = function ($c) {
+    return function ($request, $response, $error) use ($c) {
+        return $c['response']
+            ->withStatus(500)
+            ->withHeader('Content-Type', 'text/html')
+            ->write($c['view']->render('error/error.html', ['title' => 'Erreur interne', 'error' => $error]));
+    };
+};
+$container['errorHandler'] = function ($c) {
+    return function ($request, $response, $error) use ($c) {
+        return $c['response']
+            ->withStatus(500)
+            ->withHeader('Content-Type', 'text/html')
+            ->write($c['view']->render('error/error.html', ['title' => 'Erreur interne', 'error' => $error]));
+    };
+};
+set_error_handler(function ($severity, $message, $file, $line) {
+    if (!(error_reporting() & $severity)) {
+        // This error code is not included in error_reporting, so ignore it
+        return;
+    }
+    throw new \ErrorException($message, 0, $severity, $file, $line);
+});
 
 // personnal functions
 function createTree($children_list, $children){
@@ -100,10 +148,10 @@ function createTree($children_list, $children){
 
 // Define app routes
 $app->get('/p/{projectId}', function ($request, $response, $args) {
-    $projectId = $args['projectId'];
+    $projectId = $args['projectId'];    
     
     try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-    } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+    } catch(Exception $e) { throw $e; }
     $reponse = $db->query ('select project_id from post where parent_id = 0');
     while ($donnees[] = $reponse->fetch());
     array_pop($donnees);
@@ -114,7 +162,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
     if (in_array($projectId,$projectsId)){
         $reponse = $db->prepare ('select project_type from project where project_id = :project_id');
         $reponse->execute([ 'project_id' => $projectId ]);
-        $_SESSION['current_project_type'] = $reponse->fetch()['project_type'];
+        $project_type = $reponse->fetch()['project_type'];
         
         if (!empty($_SESSION['current_user'])){
             $reponse = $db->prepare ('select project_role from project_role where project_id = :project_id and user_id = :user_id');
@@ -126,7 +174,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             $_SESSION['current_user']['current_project_role'] = empty($role) ? 'anyone' : $role;
         }
         
-        if (user_can_do('view_project')){
+        if (user_can_do('view_project',$project_type)){
             $reponse = $db->query ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin from post p where project_id = ' . $projectId . ' order by user_id_pin desc, score_percent desc');
             $donnees = [];
             while ($donnees[] = $reponse->fetch());
@@ -134,7 +182,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             $reponse->closeCursor();
 
             if (count($donnees) == 1){
-                return $this->view->render('post/project-player.html', ['project' => $donnees, 'projectId' => $projectId]);
+                return $this->view->render('post/project-player.html', ['project' => $donnees, 'project_type' => $project_type, 'projectId' => $projectId]);
             }
 
             // creating a comprehensive list of the projet posts
@@ -173,7 +221,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             }
             $project_json = createTree($new, array($posts[$topPostId]));        
             
-            return $this->view->render('post/project-player.html', ['project' => $project, 'projectId' => $projectId, 'project_json' => $project_json]);
+            return $this->view->render('post/project-player.html', ['project' => $project, 'project_type' => $project_type, 'projectId' => $projectId, 'project_json' => $project_json]);
         } else {
             return $this->view->render('error.html', ['message' => "Désolé, vous n'êtes pas autorisé à consulter ce projet"]);
         }
@@ -184,7 +232,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
 
 $app->get('/', function ($request, $response) {
     try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-    } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+    } catch(Exception $e) { throw $e; }
     $reponse = $db->query ('select id, project_id, content from post where parent_id = 0');
     while ($donnees[] = $reponse->fetch());
     array_pop($donnees);
@@ -195,10 +243,10 @@ $app->get('/', function ($request, $response) {
 
 $app->post('/create-project', function ($request, $response) {
     $project_type = 'open_public';
-    if (user_can_do('create_project')){
+    if (user_can_do('create_project','platform')){
         if (!(empty($_POST['content']) or empty($_POST['project_id']))){
             try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-            } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+            } catch(Exception $e) { throw $e; }
             
             $reponse = $db->prepare ("INSERT INTO post(content, content_type, parent_id, project_id, path, author_id) VALUES (:content, 'text', 0, :project_id, '/', :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID()); INSERT INTO project_role (project_id, user_id, project_role) VALUES (:project_id,:author_id,'creator'); INSERT INTO project (project_id, project_type, project_root_post_id) VALUES (:project_id,:project_type,(SELECT LAST_INSERT_ID()));");
             $reponse->execute([
@@ -215,10 +263,13 @@ $app->post('/create-project', function ($request, $response) {
 });
 
 $app->post('/add-post', function ($request, $response) {
-    if (in_array((empty($_SESSION['current_user']['current_project_role']) ? 'anyone' : $_SESSION['current_user']['current_project_role']), $this->permissions[$_SESSION['current_project_type']]['add_post']) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin')){
-        if ((!empty($_POST['content']) or !empty($_POST['image'])) and isset($_POST['parent_id']) and isset($_POST['project_id'])){
-            try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-            } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+    try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+    } catch(Exception $e) { throw $e; }
+    $reponse = $db->prepare ('select project_type from project where project_id = :project_id');
+    $reponse->execute([ 'project_id' => $projectId ]);
+    $project_type = $reponse->fetch()['project_type'];
+    if ((!empty($_POST['content']) or !empty($_POST['image'])) and isset($_POST['parent_id']) and isset($_POST['project_id'])){
+        if (user_can_do('add_post',$project_type)){
             
             $reponse = $db->prepare ("INSERT INTO post(content, content_type, parent_id, project_id, path, author_id) VALUES (:content, :content_type, :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id))), :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
             $reponse->execute([
@@ -247,18 +298,17 @@ $app->post('/add-post', function ($request, $response) {
             }
             header('Location: /p/'.$_POST['project_id']); exit();
         } else {
-            throw new Exception ('Erreur : Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "projectId")');
+            throw new Exception ("Vous n'êtes pas autorisés à poster dans ce projet, veuillez contacter le créateur de ce projet, ou bien vous adressez à l'équipe tifod si vous pensez que c'est un bug");
         }
     } else {
-        header ('Location: /');
-        exit();
+        throw new Exception ('Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "projectId")');
     }
 });
 
 $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
     if (in_array((empty($_SESSION['current_user']['current_project_role']) ? 'anyone' : $_SESSION['current_user']['current_project_role']), $this->permissions[$_SESSION['current_project_type']]['delete_post']) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin')){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-        } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+        } catch(Exception $e) { throw $e; }
         $reponse = $db->prepare("SELECT content, content_type FROM post WHERE id = :post_id");
         $reponse->execute([ 'post_id' => $args['post-id'] ]);
         while ($donnees [] = $reponse->fetch());
@@ -276,7 +326,7 @@ $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
         // plus, minus
         if ($args['vote-sign'] == 'minus' or $args['vote-sign'] == 'plus'){
             try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-            } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+            } catch(Exception $e) { throw $e; }
             $reponse = $db->prepare ('select is_upvote from post_vote where user_id = :user_id and post_id = :post_id');
             $reponse->execute([
                 'user_id' => $_SESSION['current_user']['user_id'],
@@ -314,7 +364,7 @@ $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
 $app->get('/togglePin/{post-id}', function ($request, $response, $args) {
     if (in_array((empty($_SESSION['current_user']['current_project_role']) ? 'anyone' : $_SESSION['current_user']['current_project_role']), $this->permissions[$_SESSION['current_project_type']]['pin_post']) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin')){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-        } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+        } catch(Exception $e) { throw $e; }
         $reponse = $db->prepare ('UPDATE post SET user_id_pin = (IF (user_id_pin = 0,:user_id_pin,0)) where id = :post_id');
         $reponse->execute([
             'user_id_pin' => $_SESSION['current_user']['user_id'],
@@ -332,7 +382,7 @@ $app->get('/togglePin/{post-id}', function ($request, $response, $args) {
 $app->get('/resetPostScore/{post-id}', function ($request, $response, $args) {
     if (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin'){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-        } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+        } catch(Exception $e) { throw $e; }
         $reponse = $db->prepare ('update post set score_percent = 0, score_result = 0, vote_minus = 0, vote_plus = 0 where id = :post_id; delete from post_vote where post_id = :post_id;');
         $reponse->execute(['post_id' => $args['post-id']]);
         $reponse->closeCursor();
@@ -356,7 +406,7 @@ $app->post('/login', function ($request, $response, $args) {
     // password_hash($_POST['password'], PASSWORD_BCRYPT, ['cost' => 11]);
     
     try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-    } catch(Exception $e) { die('Erreur avec la base de donnée : '.$e->getMessage()); }
+    } catch(Exception $e) { throw $e; }
     $reponse = $db->prepare('select * from user where email = :email');
     $reponse->execute(['email' => $_POST['email']]);
     while ($donnees[] = $reponse->fetch());
@@ -381,6 +431,14 @@ $app->post('/login', function ($request, $response, $args) {
     }
     
     header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
+});
+
+$app->get('/signup', function ($request, $response, $args) {
+    if (empty($_SESSION['current_user'])){
+        return $this->view->render('user/signup.html');
+    } else {
+        header('Location: /'); exit();
+    }
 });
 // Run app
 $app->run();

@@ -1,29 +1,27 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
     {% include 'header.html' with {'no_login_button':true} %}
-    <main class="mdl-layout__content">
-        <div class="container text-center">
-            <h2>Se connecter</h2>
-            <p>
-                <form method="post" enctype="multipart/form-data" action="/login?redirect={{ redirect_to }}">
-                    <div>
-                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <label class="mdl-textfield__label">Email</label>
-                            <input class="mdl-textfield__input" name="email" type="text">
-                        </div>
+    <div class="container text-center">
+        <div class="form-card">
+            <h3>Se connecter</h3>
+            <form method="post" enctype="multipart/form-data" action="/login?redirect={{ redirect_to }}">
+                <div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <label class="mdl-textfield__label">Email</label>
+                        <input class="mdl-textfield__input" name="email" type="text">
                     </div>
-                    <div>
-                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <label class="mdl-textfield__label">Mot de passe</label>
-                            <input class="mdl-textfield__input" name="password" type="password">
-                        </div>
+                </div>
+                <div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <label class="mdl-textfield__label">Mot de passe</label>
+                        <input class="mdl-textfield__input" name="password" type="password">
                     </div>
-                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Connexion</button>
-                </form>
-            </p>
+                </div>
+                <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Connexion</button>
+            </form>
+            <p>Vous êtes nouveau? <a href="/signup">Inscrivez-vous</a></p>
         </div>
-    </main>
-</div>
+        <p><a href="/password_reset">Vous avez oublié votre mot de passe?</a></p>
+    </div>
 {% endblock %}

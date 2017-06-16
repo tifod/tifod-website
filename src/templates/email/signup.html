@@ -1,0 +1,8 @@
+{% extends 'email/base.html' %}
+
+{% block content %}
+    <p style="margin: 20px 0;">Merci de vous êtres inscrit sur tifod! Pour activer votre compte, suivez le lien ci dessous:</p>
+    <p style="margin: 20px 0;"><a href="http://{{ server_name }}/signup/{{ token }}">http://{{ server_name }}/signup/{{ token }}</a></p>
+    <p style="margin: 20px 0;">Amusez vous bien, et n'hésitez pas à nous contacter pour nous donner votre avis.</p>
+    <p style="margin: 20px 0;">L'équipe Tifod<br><a href="http://{{ server_name }}">http://{{ server_name }}</a></p>
+{% endblock %}

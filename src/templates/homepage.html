@@ -7,7 +7,7 @@
         {% for project in projects %}
         <h3><a href="/p/{{ project['project_id'] }}">{{ project['content'] }}</a></h3>
         {% endfor %}
-        {% if 'create_project'|is_allowed %}
+        {% if 'create_project'|is_allowed_for('platform') %}
             <form action="/create-project" class="list-inline" method="post">
                 <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                     <label class="mdl-textfield__label" for="new_project" >Créer un nouveau projet</label>
