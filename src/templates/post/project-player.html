@@ -3,17 +3,17 @@
 {% block title %}{{ project[0]['content'] }}{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="/public/treant/Treant.css"/>
-<script src="/public/treant/vendor/raphael.js"></script>
-<script src="/public/treant/Treant.js"></script>
-<script src="/public/smooth-scroll.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script type="text/javascript">$(document).bind("mobileinit", function(){$.extend(  $.mobile , {autoInitializePage: false})});</script>
 <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-<link rel="stylesheet" href="/public/drawingboard/drawingboard.min.css">
-<script src="/public/drawingboard/drawingboard.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.6.1/clipboard.min.js"></script>
-{{ parent() }}
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium|Material+Icons">
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css">
+<link rel="stylesheet" href="https://opensource.keycdn.com/fontawesome/4.7.0/font-awesome.min.css">
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+<link rel="stylesheet" href="/min/?f=/public/perso/project.css,/public/treant/Treant.css,/public/drawingboard/drawingboard.min.css"/>
+<script src="/min/?f=/public/unveil.js,/public/drawingboard/drawingboard.min.js,/public/treant/vendor/raphael.js,/public/treant/Treant.js,/public/smooth-scroll.min.js"></script>
 {% endblock %}
 
 {% block body %}

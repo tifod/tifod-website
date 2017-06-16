@@ -440,5 +440,19 @@ $app->get('/signup', function ($request, $response, $args) {
         header('Location: /'); exit();
     }
 });
+$app->post('/signup', function ($request, $response, $args) {
+    null;
+});
+
+$app->get('/password_reset', function ($request, $response, $args) {
+    if (empty($_SESSION['current_user'])){
+        return $this->view->render('user/password_reset.html');
+    } else {
+        header('Location: /'); exit();
+    }
+});
+$app->post('/password_reset', function ($request, $response, $args) {
+    null;
+});
 // Run app
 $app->run();

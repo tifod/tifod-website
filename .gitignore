@@ -1,9 +1,9 @@
-/vendor/*
-/src/templates/twig_cache/*
-/public/img/post/*
-/public/img/user/*
+vendor
+src/templates/twig_cache
+public/img/post
+public/img/user
 
-!/public/img/user/default.png
+!public/img/user/default.png
 !*.gitkeep
 
 # Windows image file caches
@@ -53,3 +53,4 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+composer.lock
