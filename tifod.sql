@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Client :  localhost
--- Généré le :  Jeu 15 Juin 2017 à 16:37
+-- Généré le :  Sam 17 Juin 2017 à 18:52
 -- Version du serveur :  10.1.19-MariaDB
 -- Version de PHP :  7.1.3
 
@@ -82,6 +82,21 @@ CREATE TABLE IF NOT EXISTS `project_role` (
   `project_id` int(11) NOT NULL,
   `project_role` varchar(100) NOT NULL DEFAULT 'none',
   PRIMARY KEY (`user_id`,`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `token`
+--
+
+CREATE TABLE IF NOT EXISTS `token` (
+  `token_id` int(11) NOT NULL AUTO_INCREMENT,
+  `action` varchar(100) NOT NULL,
+  `token_key` varchar(100) NOT NULL,
+  `expiration_date` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `email` varchar(100) NOT NULL,
+  PRIMARY KEY (`token_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
