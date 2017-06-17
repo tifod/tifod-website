@@ -454,7 +454,7 @@ $app->get('/signup', function ($request, $response, $args) {
             $reponse->closeCursor();
             
             // send email with the token
-            mail($_GET['email'], 'Valider la création de votre compte Tifod', $this->view->render('email/signup.html',['token_key' => $token_key]), "From: contact@tifod.com\r\nReply-To: contact@tifod.com\r\nX-Mailer: PHP\/".phpversion());
+            mail($_GET['email'], 'Valider la création de votre compte Tifod', $this->view->render('email/signup.html',['token_key' => $token_key]), "MIME-Version: 1.0\r\nContent-type: text/html; charset=utf-8\r\nFrom: contact@tifod.com\r\nReply-To: contact@tifod.com");
             
             return $this->view->render('connexion/signup.html',['token_sent' => true, 'email' => $_GET['email']]);
         } else {
@@ -488,7 +488,7 @@ $app->get('/password_reset', function ($request, $response, $args) {
             $reponse->closeCursor();
             
             // send email with the token
-            mail($_GET['email'], 'Valider la création de votre compte Tifod', $this->view->render('email/password_reset.html',['token_key' => $token_key]), "From: contact@tifod.com\r\nReply-To: contact@tifod.com\r\nX-Mailer: PHP\/".phpversion());
+            mail($_GET['email'], 'Valider la création de votre compte Tifod', $this->view->render('email/password_reset.html',['token_key' => $token_key]), "MIME-Version: 1.0\r\nContent-type: text/html; charset=utf-8\r\nFrom: contact@tifod.com\r\nReply-To: contact@tifod.com");
             
             return $this->view->render('connexion/password_reset.html',['token_sent' => true, 'email' => $_GET['email']]);
         } else {
