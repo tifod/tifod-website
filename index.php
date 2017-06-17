@@ -557,6 +557,7 @@ $app->post('/settings', function ($request, $response, $args) {
         } elseif ($_POST['action'] == 'new_user_name'){
             $action = 'user_name';
             $new_value = $_POST['new_value'];
+            $_SESSION['current_user']['pseudo'] = $new_value;
         }
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { throw $e; }
