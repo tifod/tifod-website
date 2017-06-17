@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}Erreur interne{% endblock %}
+{% block title %}Erreur{% endblock %}
 
 {% block body %}
     {% include 'header.html' with {'no_login_button':true} %}
     <div class="container text-center">
-        <h2>Une erreur s'est produite</h2>
+        <h2><strong>Attention</strong> {{ error.getMessage|raw }}</h2>
+        {% if dev_mode %}<p>A la ligne <span class="text-primary">{{ error.getLine }}</span> du fichier <span class="text-primary">{{ error.getFile }}</span></p>{% endif %}
         <p>(> ~ <') Désolé, en espérant que le problème n'aura pas eu de conséquences trop graves!</p>
-        <p>Si le problème est grave, contactez l'équipe tifod, on ne vous laissera pas tomber!</p>
-        <p>Détails sur l'erreur : <span class="text-primary">{{ error.getMessage }}</span> at line <span class="text-primary">{{ error.getLine }}</span> in <span class="text-primary">{{ error.getFile }}</span></p>
+        <p>Si le problème persiste ou est grâve, <a href="mailto:contact@tifod.com?subject=Signalement d'erreur">contactez l'équipe tifod</a>, on ne vous laissera pas tomber!</p>
     </div>
 {% endblock %}

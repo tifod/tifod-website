@@ -63,6 +63,7 @@ img { width: 100%; height: auto; }
 .text-initial { color: initial; }
 .text-center { text-align: center; }
 
+.text-help { color: darkgray; font-size: 80%; margin-left: 3px; }
 .post-siblings-nav {
     display: inline-block;
     bottom: 24px;

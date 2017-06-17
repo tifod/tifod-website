@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Paramètres{% endblock %}
+
+{% block body %}
+    {% include 'header.html' %}
+    <div class="container text-center">
+        <h2>Paramètres</h2>
+        <form method="post" class="list-inline" action="/settings">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                <label class="mdl-textfield__label">Pseudo</label>
+                <input class="mdl-textfield__input" value="{{ current_user.pseudo }}" name="new_value" type="text">
+            </div>
+            <input type="hidden" name="action" value="new_user_name">
+            <button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Modifier</button>
+        </form>
+        <a href="/settings/new_password" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Changer de mot de passe</button>
+    </div>
+{% endblock %}

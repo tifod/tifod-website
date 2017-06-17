@@ -3,6 +3,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 session_start();
 
+date_default_timezone_set('Europe/Paris');
+
 // Create and configure Slim app
 $app = new \Slim\App(['settings' => [ 'addContentLengthHeader' => false, "displayErrorDetails" => true]]);
 
@@ -71,6 +73,8 @@ $container['view'] = function ($container) {
     $twig->addGlobal("current_url", $_SERVER["REQUEST_URI"]);
     
     $twig->addGlobal("server_name", $_SERVER["SERVER_NAME"]);
+    
+    $twig->addGlobal("dev_mode", $container['settings']['displayErrorDetails']);
     
     $filter = new Twig_SimpleFilter('is_allowed_for', function ($action_name, $project_type) { return user_can_do($action_name, $project_type); });
     $twig->addFilter($filter);
@@ -263,12 +267,12 @@ $app->post('/create-project', function ($request, $response) {
 });
 
 $app->post('/add-post', function ($request, $response) {
-    try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-    } catch(Exception $e) { throw $e; }
-    $reponse = $db->prepare ('select project_type from project where project_id = :project_id');
-    $reponse->execute([ 'project_id' => $projectId ]);
-    $project_type = $reponse->fetch()['project_type'];
     if ((!empty($_POST['content']) or !empty($_POST['image'])) and isset($_POST['parent_id']) and isset($_POST['project_id'])){
+        try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+        } catch(Exception $e) { throw $e; }
+        $reponse = $db->prepare ('select project_type from project where project_id = :project_id');
+        $reponse->execute(['project_id' => $_POST['project_id']]);
+        $project_type = $reponse->fetch()['project_type'];
         if (user_can_do('add_post',$project_type)){
             
             $reponse = $db->prepare ("INSERT INTO post(content, content_type, parent_id, project_id, path, author_id) VALUES (:content, :content_type, :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id))), :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
@@ -301,7 +305,7 @@ $app->post('/add-post', function ($request, $response) {
             throw new Exception ("Vous n'êtes pas autorisés à poster dans ce projet, veuillez contacter le créateur de ce projet, ou bien vous adressez à l'équipe tifod si vous pensez que c'est un bug");
         }
     } else {
-        throw new Exception ('Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "projectId")');
+        throw new Exception ('Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "project_id")');
     }
 });
 
@@ -396,25 +400,22 @@ $app->get('/logout', function ($request, $response, $args) {
 
 $app->get('/login', function ($request, $response, $args) {
     if (empty($_SESSION['current_user'])){
-        return $this->view->render('user/login.html', ['redirect_to' => (empty($_GET['redirect']) ? '/' : $_GET['redirect'])]);
+        return $this->view->render('connexion/login.html', ['email' => (empty($_GET['email'])? false : $_GET['email']), 'redirect_to' => (empty($_GET['redirect']) ? '/' : $_GET['redirect'])]);
     } else {
         header('Location: /'); exit();
     }
 });
 
 $app->post('/login', function ($request, $response, $args) {
-    // password_hash($_POST['password'], PASSWORD_BCRYPT, ['cost' => 11]);
-    
     try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
     } catch(Exception $e) { throw $e; }
     $reponse = $db->prepare('select * from user where email = :email');
     $reponse->execute(['email' => $_POST['email']]);
     while ($donnees[] = $reponse->fetch());
-    array_pop($donnees);
     $reponse->closeCursor();
     
     if (empty($donnees[0]['email'])){
-        throw new Exception('Pseudo inexistant');
+        throw new Exception("Email incorrect");
     } else {
         if(password_verify($_POST['password'], $donnees[0]['user_password'])) {
             $_SESSION['current_user'] = [
@@ -422,11 +423,10 @@ $app->post('/login', function ($request, $response, $args) {
                 'pseudo' => $donnees[0]['user_name'],
                 'email' => $donnees[0]['email'],
                 'avatar' => $donnees[0]['avatar'],
-                'platform_role' => $donnees[0]['platform_role'],
-                'current_project_role' => 'none'
+                'platform_role' => $donnees[0]['platform_role']
             ];
         } else {
-            throw new Exception('Erreur avec le mot de passe');
+            throw new Exception('Mot de passe incorrect');
         }
     }
     
@@ -435,24 +435,143 @@ $app->post('/login', function ($request, $response, $args) {
 
 $app->get('/signup', function ($request, $response, $args) {
     if (empty($_SESSION['current_user'])){
-        return $this->view->render('user/signup.html');
+        if (!empty($_GET['email'])){
+            try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+            } catch(Exception $e) { throw $e; }
+            // check if user already exists
+            $reponse = $db->prepare("SELECT user_id FROM user WHERE email = :email");
+            $reponse->execute(['email' => $_GET['email']]);
+            if ($reponse->fetch() !== false){ header('Location: /login?email='.$_GET['email']); exit(); }
+            
+            $token_key = md5(MyApp\Utility\Math::getARandomString().$_GET['email']);
+            // insert in DB and delete all expired entries
+            $reponse = $db->prepare("DELETE FROM token WHERE email = :email; INSERT INTO token (action, token_key, expiration_date, email) VALUES ('signup', :token_key, :expiration_date, :email); DELETE FROM token WHERE expiration_date < NOW();");
+            $reponse->execute([
+                'token_key' => $token_key,
+                'expiration_date' => date("Y-m-d H:i:s",strtotime('+1 day')),
+                'email' => $_GET['email']
+            ]);
+            $reponse->closeCursor();
+            
+            // send email with the token
+            mail($_GET['email'], 'Valider la création de votre compte Tifod', $this->view->render('email/signup.html',['token_key' => $token_key]), "From: contact@tifod.com\r\nReply-To: contact@tifod.com\r\nX-Mailer: PHP\/".phpversion());
+            
+            return $this->view->render('connexion/signup.html',['token_sent' => true, 'email' => $_GET['email']]);
+        } else {
+            return $this->view->render('connexion/signup.html');
+        }
     } else {
         header('Location: /'); exit();
     }
-});
-$app->post('/signup', function ($request, $response, $args) {
-    null;
 });
 
 $app->get('/password_reset', function ($request, $response, $args) {
     if (empty($_SESSION['current_user'])){
-        return $this->view->render('user/password_reset.html');
+        if (!empty($_GET['email'])){
+            // create token
+            $token_key = md5(MyApp\Utility\Math::getARandomString().$_GET['email']);
+            
+            try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+            } catch(Exception $e) { throw $e; }
+            // check if user already exists
+            $reponse = $db->prepare("SELECT user_id FROM user WHERE email = :email");
+            $reponse->execute(['email' => $_GET['email']]);
+            if ($reponse->fetch() === false){ header('Location: /signup?email='.$_GET['email']); exit(); }
+            
+            // insert token in DB and delete all expired entries
+            $reponse = $db->prepare("DELETE FROM token WHERE email = :email; INSERT INTO token (action, token_key, expiration_date, email) VALUES ('password_reset', :token_key, :expiration_date, :email); DELETE FROM token WHERE expiration_date < NOW();");
+            $reponse->execute([
+                'token_key' => $token_key,
+                'expiration_date' => date("Y-m-d H:i:s",strtotime('+1 hour')),
+                'email' => $_GET['email']
+            ]);
+            $reponse->closeCursor();
+            
+            // send email with the token
+            mail($_GET['email'], 'Valider la création de votre compte Tifod', $this->view->render('email/password_reset.html',['token_key' => $token_key]), "From: contact@tifod.com\r\nReply-To: contact@tifod.com\r\nX-Mailer: PHP\/".phpversion());
+            
+            return $this->view->render('connexion/password_reset.html',['token_sent' => true, 'email' => $_GET['email']]);
+        } else {
+            return $this->view->render('connexion/password_reset.html');
+        }
     } else {
         header('Location: /'); exit();
     }
 });
-$app->post('/password_reset', function ($request, $response, $args) {
-    null;
+
+$app->get('/token/{token_key}', function ($request, $response, $args) {
+    // delete expired token_keys, then get token_key data
+    try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+    } catch(Exception $e) { throw $e; }
+    $db->query('DELETE FROM token WHERE expiration_date < NOW();');
+    $reponse = $db->prepare("SELECT email, action FROM token WHERE token_key = :token_key");
+    $reponse->execute(['token_key' => $args['token_key']]);
+    $donnees = $reponse->fetch();
+    if ($donnees !== false){
+        $email = $donnees['email'];
+        $action = $donnees['action'];
+        if ($action == 'signup'){
+            // query to test
+            $reponse = $db->prepare("INSERT INTO user (email) VALUES (:email); UPDATE user SET user_name = CONCAT('user-',(SELECT LAST_INSERT_ID())) WHERE email = :email;");
+            $reponse->execute(['email' => $email]);
+        }
+        $reponse = $db->prepare("DELETE FROM token WHERE email = :email");
+        $reponse->execute(['email' => $email]);
+        $reponse = $db->prepare('SELECT * FROM user WHERE email = :email');
+        $reponse->execute(['email' => $email]);
+        $donnees = [];
+        while ($donnees[] = $reponse->fetch());
+        $_SESSION['current_user'] = [
+            'user_id' => $donnees[0]['user_id'],
+            'pseudo' => $donnees[0]['user_name'],
+            'email' => $donnees[0]['email'],
+            'avatar' => $donnees[0]['avatar'],
+            'platform_role' => $donnees[0]['platform_role']
+        ];
+        $reponse->closeCursor();
+        header('Location: /settings/new_password'); exit();
+    } else {
+        $reponse->closeCursor();
+        throw new Exception ("Ce lien a expiré et n'est plus utilisable");
+    }
+});
+
+$app->get('/settings', function ($request, $response, $args) {
+    if (empty($_SESSION['current_user'])){
+        header('Location: /login?redirect=/settings');
+        exit();
+    } else {
+        return $this->view->render('user/settings.html');
+    }
+});
+$app->get('/settings/new_password', function ($request, $response, $args) {
+    return $this->view->render('user/new_password.html');
+});
+$app->post('/settings', function ($request, $response, $args) {
+    if (empty($_POST['action']) or empty($_POST['new_value'])){
+        throw new Exception("Vous ne pouvez pas laisser le champs vide");
+    } else {
+        if ($_POST['action'] == 'new_password'){
+            $action = 'user_password';
+            $new_value = password_hash($_POST['new_value'], PASSWORD_BCRYPT, ['cost' => 12]);
+        } elseif ($_POST['action'] == 'new_user_name'){
+            $action = 'user_name';
+            $new_value = $_POST['new_value'];
+        }
+        try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+        } catch(Exception $e) { throw $e; }
+        $reponse = $db->prepare("UPDATE user SET $action = :new_value WHERE user_id = :current_user_id");
+        $reponse->execute([
+            'new_value' => $new_value,
+            'current_user_id' => $_SESSION['current_user']['user_id']
+        ]);
+        $reponse->closeCursor();
+        header ('Location: /settings'); exit();
+    }
+});
+
+$app->get('/preview_template/{template}', function ($request, $response, $args) {
+    return $this->view->render('user/new_password.html');
 });
 // Run app
 $app->run();

@@ -26,7 +26,7 @@
     <h2>{{ project[0]['content'] }}</h2>
     <p class="list-inline">
         <span>
-            Un projet de <a href="/u/{{ project[0]['author_id'] }}">{{ project[0]['author_name'] }}</a>
+            Un projet de <a href="/u/{{ project[0]['author_id'] }}">{{ project[0]['author_name'] }}</a><span title="utilisateur n°{{ project[0]['author_id'] }}" class="text-help">#{{ project[0]['author_id'] }}</span>
         </span>
         {% if 'delete_project'|is_allowed_for(project_type) %}
         <span>|</span>

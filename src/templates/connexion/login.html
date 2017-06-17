@@ -9,7 +9,7 @@
                 <div>
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                         <label class="mdl-textfield__label">Email</label>
-                        <input class="mdl-textfield__input" name="email" type="text">
+                        <input class="mdl-textfield__input" {% if email %}value="{{ email }}"{% endif %} name="email" type="email">
                     </div>
                 </div>
                 <div>
