@@ -1,10 +1,11 @@
-[ ] sign up
-    [ ] signup only whith an email
-    [ ] receive email with a link to /new-account/token
-    [ ] init password AND pseudo at this URL
-    [ ] pseudo and password can be modified in /settings
-    [ ] reset password sends a link to the email adress
+[x] sign up
+    [x] signup only whith an email
+    [x] receive email with a link to /new-account/token
+    [x] init password AND pseudo at this URL
+    [x] pseudo and password can be modified in /settings
+    [x] reset password sends a link to the email adress
     [ ] possibility to add a recovering-email-adress
+    [ ] be warn when password is changed
 [x] text as an option instead of image
 [x] prevent double voting
 [x] share a post url
