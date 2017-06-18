@@ -78,6 +78,9 @@ $container['view'] = function ($container) {
     
     $filter = new Twig_SimpleFilter('is_allowed_for', function ($action_name, $project_type) { return user_can_do($action_name, $project_type); });
     $twig->addFilter($filter);
+    
+    $filter = new Twig_SimpleFilter('markdown', function ($text) { return Michelf\Markdown::defaultTransform($text); });
+    $twig->addFilter($filter);
         
     $filter = new Twig_SimpleFilter('timeago', function ($datetime) {
       $time = time() - strtotime($datetime); 

@@ -127,13 +127,13 @@ img { width: 100%; height: auto; }
     border-bottom-width: 3px;
     background-color: white;
 }
-.post img {
+.post>img {
     margin-left: 1px;
     width: calc(100% - 1px);
     border-radius: 3px 3px 0 0;
     border-bottom: solid 1px #ddd;
 }
-.post-text {
+.post-text>* {
     font-size: 28px;
     line-height: 1;
     text-align: center;
@@ -168,6 +168,7 @@ img { width: 100%; height: auto; }
     border-width: 0 1px 2px 1px;
     transition: background-color .5s;
 }
+.tree-post p { margin: 0; }
 .tree-post img { width: 100%; height: auto; }
 .tree-post:hover, .tree-post-active { background-color: rgba(0,0,0,0.2); }
 
