@@ -26,7 +26,7 @@ function user_can_do ($action_name, $project_type) {
             'add_post' => ['anyone', 'creator', 'moderator'],
             'view_project' => ['visitor', 'anyone', 'creator', 'moderator'],
             'vote_post' => ['anyone', 'creator', 'moderator'],
-            'reset_score_post' => [],
+            'reset_score_post' => [ null ],
             'delete_project' => ['creator'],
             'delete_post' => ['creator'],
             'pin_post' => ['creator', 'moderator'],
