@@ -14,7 +14,7 @@
 [x] permissions system
 [ ] editing post
 [ ] reporting system (send an email to staff)
-[ ] markdown syntax supported in post text
+[x] markdown syntax supported in post text
 
 [ ] Moyen alternatifs de s'identifier pour poster (pseudo/email)
 [ ] Oauth login/signup

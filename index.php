@@ -26,6 +26,7 @@ function user_can_do ($action_name, $project_type) {
             'add_post' => ['anyone', 'creator', 'moderator'],
             'view_project' => ['visitor', 'anyone', 'creator', 'moderator'],
             'vote_post' => ['anyone', 'creator', 'moderator'],
+            'reset_score_post' => [],
             'delete_project' => ['creator'],
             'delete_post' => ['creator'],
             'pin_post' => ['creator', 'moderator'],
@@ -35,6 +36,7 @@ function user_can_do ($action_name, $project_type) {
             'add_post' => ['creator', 'moderator'],
             'view_project' => ['visitor', 'anyone', 'creator', 'moderator'],
             'vote_post' => ['anyone', 'creator', 'moderator'],
+            'reset_score_post' => ['creator'],
             'delete_project' => ['creator'],
             'delete_post' => ['creator'],
             'pin_post' => ['creator', 'moderator'],
@@ -44,6 +46,7 @@ function user_can_do ($action_name, $project_type) {
             'add_post' => ['creator', 'moderator'],
             'view_project' => ['creator', 'moderator'],
             'vote_post' => ['creator', 'moderator'],
+            'reset_score_post' => ['creator'],
             'delete_project' => ['creator'],
             'delete_post' => ['creator'],
             'pin_post' => ['creator', 'moderator'],
@@ -277,7 +280,6 @@ $app->post('/add-post', function ($request, $response) {
         $reponse->execute(['project_id' => $_POST['project_id']]);
         $project_type = $reponse->fetch()['project_type'];
         if (user_can_do('add_post',$project_type)){
-            
             $reponse = $db->prepare ("INSERT INTO post(content, content_type, parent_id, project_id, path, author_id) VALUES (:content, :content_type, :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id))), :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
             $reponse->execute([
                 'content' => (empty($_POST['content'])?'file':$_POST['content']),
@@ -313,9 +315,12 @@ $app->post('/add-post', function ($request, $response) {
 });
 
 $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
-    if (in_array((empty($_SESSION['current_user']['current_project_role']) ? 'anyone' : $_SESSION['current_user']['current_project_role']), $this->permissions[$_SESSION['current_project_type']]['delete_post']) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin')){
-        try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-        } catch(Exception $e) { throw $e; }
+    try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+    } catch(Exception $e) { throw $e; }
+    $reponse = $db->prepare ('select project_type from project where project_id = (SELECT project_id FROM post WHERE id = :post_id)');
+    $reponse->execute(['post_id' => $args['post-id']]);
+    $project_type = $reponse->fetch()['project_type'];
+    if (user_can_do('delete_post',$project_type)){
         $reponse = $db->prepare("SELECT content, content_type FROM post WHERE id = :post_id");
         $reponse->execute([ 'post_id' => $args['post-id'] ]);
         while ($donnees [] = $reponse->fetch());
@@ -329,7 +334,12 @@ $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
 });
 
 $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
-    if (in_array((empty($_SESSION['current_user']['current_project_role']) ? 'anyone' : $_SESSION['current_user']['current_project_role']), $this->permissions[$_SESSION['current_project_type']]['vote_post']) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin')){
+    try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+    } catch(Exception $e) { throw $e; }
+    $reponse = $db->prepare ('select project_type from project where project_id = (SELECT project_id FROM post WHERE id = :post_id)');
+    $reponse->execute(['post_id' => $args['post-id']]);
+    $project_type = $reponse->fetch()['project_type'];
+    if (user_can_do('vote_post', $project_type)){
         // plus, minus
         if ($args['vote-sign'] == 'minus' or $args['vote-sign'] == 'plus'){
             try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
@@ -369,9 +379,12 @@ $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
 });
 
 $app->get('/togglePin/{post-id}', function ($request, $response, $args) {
-    if (in_array((empty($_SESSION['current_user']['current_project_role']) ? 'anyone' : $_SESSION['current_user']['current_project_role']), $this->permissions[$_SESSION['current_project_type']]['pin_post']) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin')){
-        try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-        } catch(Exception $e) { throw $e; }
+    try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+    } catch(Exception $e) { throw $e; }
+    $reponse = $db->prepare ('select project_type from project where project_id = (SELECT project_id FROM post WHERE id = :post_id)');
+    $reponse->execute(['post_id' => $args['post-id']]);
+    $project_type = $reponse->fetch()['project_type'];
+    if (user_can_do('pin_post',$project_type)){
         $reponse = $db->prepare ('UPDATE post SET user_id_pin = (IF (user_id_pin = 0,:user_id_pin,0)) where id = :post_id');
         $reponse->execute([
             'user_id_pin' => $_SESSION['current_user']['user_id'],

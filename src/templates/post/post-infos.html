@@ -45,7 +45,9 @@
             {% if 'delete_post'|is_allowed_for(project_type) %}
                 <a id="{{ post['id'] }}-delete" class="mdl-button mdl-js-button mdl-button--icon" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ post['id'] }}?redirect=/p/{{ projectId }}"><i class="fa fa-trash text-danger fa-fw"></i></a>
                 <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-delete">Supprimer ce post</span>
+            {% endif %}
                 
+            {% if 'reset_score_post'|is_allowed_for(project_type) %}
                 <a id="{{ post['id'] }}-resetScore" class="mdl-button mdl-js-button mdl-button--icon" href="/resetPostScore/{{ post['id'] }}?redirect=/p/{{ projectId }}">
                     <i class="fa fa-undo fa-fw"></i>
                 </a>
@@ -56,7 +58,7 @@
         {% if 'add_post'|is_allowed_for(project_type) %}
             <label class="list-inline post-more-btn" for="{{ post['id'] }}-checkbox-more">
                 <span class="mdl-button mdl-js-button">
-                    répondre
+                    Ajouter une suite
                 </span>
             </label>
         {% endif %}
