@@ -4,4 +4,5 @@
     {% else %}
         {{ post['content']|markdown|raw }}
     {% endif %}
+    <p class="text-help">{{ post['author_name'] ~ ', ' ~ post['posted_on']|timeago }}</p>
 </div>
