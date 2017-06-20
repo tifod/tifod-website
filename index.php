@@ -185,7 +185,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
         }
         
         if (user_can_do('view_project',$project_type)){
-            $reponse = $db->query ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin from post p where project_id = ' . $projectId . ' order by user_id_pin desc, score_percent desc');
+            $reponse = $db->query ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar from post p where project_id = ' . $projectId . ' order by user_id_pin desc, score_percent desc');
             $donnees = [];
             while ($donnees[] = $reponse->fetch());
             array_pop($donnees);
@@ -212,6 +212,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
                     'posted_on' => date($post['posted_on']),
                     'author_id' => $post['author_id'],
                     'author_name' => $post['author_name'],
+                    'author_avatar' => $post['author_avatar']
                 ];
                 if ($post['parent_id'] == 0) $topPostId = $k;
             }
@@ -449,6 +450,41 @@ $app->post('/login', function ($request, $response, $args) {
     header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
 });
 
+$app->get('/u', function ($request, $response, $args) {
+    try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+    } catch(Exception $e) { throw $e; }
+    $reponse = $db->query("SELECT user_name, avatar, platform_role, user_id, (SELECT COUNT(id) FROM post AS p WHERE p.author_id = u.user_id) post_amount FROM user AS u ORDER BY user_id LIMIT 10");
+    while ($donnees[] = $reponse->fetch());
+    array_pop($donnees);
+    $reponse->closeCursor();
+    return $this->view->render('user/user_list.html', ['users' => $donnees]);
+});
+$app->get('/u/{user_id}', function ($request, $response, $args) {
+    try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+    } catch(Exception $e) { throw $e; }
+    $reponse = $db->prepare("SELECT user_name, avatar, platform_role FROM user WHERE user_id = :user_id");
+    $reponse->execute(['user_id' => $args['user_id']]);
+    while ($donnees[] = $reponse->fetch());
+    $reponse = $db->prepare("SELECT * FROM post WHERE author_id = :user_id");
+    $reponse->execute(['user_id' => $args['user_id']]);
+    while ($posts[] = $reponse->fetch());
+    array_pop($posts);
+    $reponse->closeCursor();
+    
+    if (empty($donnees[0])){
+        throw new Exception("Utilisateur inconnu");
+    } else {
+        $user = [
+            'user_id' => $args['user_id'],
+            'pseudo' => $donnees[0]['user_name'],
+            'avatar' => $donnees[0]['avatar'],
+            'platform_role' => $donnees[0]['platform_role'],
+            'posts' => $posts
+        ];
+        return $this->view->render('user/profile.html', ['user' => $user]);
+    }
+});
+
 $app->get('/signup', function ($request, $response, $args) {
     if (empty($_SESSION['current_user'])){
         if (!empty($_GET['email'])){
@@ -564,16 +600,25 @@ $app->get('/settings/new_password', function ($request, $response, $args) {
     return $this->view->render('user/new_password.html');
 });
 $app->post('/settings', function ($request, $response, $args) {
-    if (empty($_POST['action']) or empty($_POST['new_value'])){
-        throw new Exception("Vous ne pouvez pas laisser le champs vide");
+    if (empty($_POST['action'])){
+        throw new Exception("Vous ne pouvez pas envoyer un formulaire vide");
     } else {
         if ($_POST['action'] == 'new_password'){
             $action = 'user_password';
             $new_value = password_hash($_POST['new_value'], PASSWORD_BCRYPT, ['cost' => 12]);
         } elseif ($_POST['action'] == 'new_user_name'){
+            if (empty($_POST['new_value'])) throw new Exception ("Vous ne pouvez pas avoir de pseudo vide");
             $action = 'user_name';
             $new_value = $_POST['new_value'];
             $_SESSION['current_user']['pseudo'] = $new_value;
+        } elseif ($_POST['action'] == 'new_avatar'){
+            $action = 'avatar';
+            $file_name = $_SESSION['current_user']['user_id'] . '-' . $_FILES["new_value"]["name"];
+            if (!move_uploaded_file($_FILES["new_value"]["tmp_name"], __DIR__ . '/public/img/user/' . basename($file_name))) throw new Exception("Erreur d'upload du fichier!");
+            
+            $new_value = $file_name;
+            unlink(__DIR__ . '/public/img/user/' . $_SESSION['current_user']['avatar']);
+            $_SESSION['current_user']['avatar'] = $file_name;
         }
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { throw $e; }

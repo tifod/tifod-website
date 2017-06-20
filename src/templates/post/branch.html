@@ -24,7 +24,6 @@
         {% set lastChild = children[children|length - 1] %}        
         <div>
             <div class="post{% if loop.first %} active-post{% endif %}" id="{{ child['id'] }}" data-path="{{ child['path'] }}">
-        
                 {# content #}
                 {% if child['content_type'] == 'file' %}
                     <img class="lazyload" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ child['content'] }}" alt="image sans description">

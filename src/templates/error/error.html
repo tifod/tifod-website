@@ -3,7 +3,7 @@
 {% block title %}Erreur{% endblock %}
 
 {% block body %}
-    {% include 'header.html' with {'no_login_button':true} %}
+    {% include 'header.html' %}
     <div class="container text-center">
         <h2><strong>Attention</strong> {{ error.getMessage|raw }}</h2>
         {% if dev_mode %}<p>A la ligne <span class="text-primary">{{ error.getLine }}</span> du fichier <span class="text-primary">{{ error.getFile }}</span></p>{% endif %}

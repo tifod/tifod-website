@@ -34,6 +34,8 @@ body {
     width: auto;
 }
 
+.profile_pic { height: 1em; width: auto; }
+
 .form-card {
     margin: 1em 0;
     display: inline-block;
@@ -63,7 +65,7 @@ img { width: 100%; height: auto; }
 .text-initial { color: initial; }
 .text-center { text-align: center; }
 
-.text-help { color: darkgray; font-size: 80%; margin-left: 3px; }
+.text-help { color: darkgray; font-size: 80%; }
 .post-siblings-nav {
     display: inline-block;
     bottom: 24px;

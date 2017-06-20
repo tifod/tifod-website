@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.pseudo }}{% endblock %}
+
+{% block body %}
+    {% include 'header.html' %}
+    <div class="container text-center">
+        <div style="font-size: 100px;"><img class="profile_pic" src="/public/img/user/{{ user.avatar }}" alt="{{ user.pseudo }} avatar"></div>
+        <h2>{{ user.pseudo }}<span class="text-help" title="utilisateur #{{ user.user_id }}">#{{ user.user_id }}</span></h2>
+        {% for post in user.posts %}
+            <div class="post">
+                {# content #}
+                {% if post['content_type'] == 'file' %}
+                    <img class="lazyload" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ post['content'] }}" alt="image sans description">
+                {% else %}
+                    <div class="post-text">{{ post['content']|markdown|raw }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Profil des utilisateurs{% endblock %}
+
+{% block body %}
+    {% include 'header.html' %}
+    <div class="container">
+        <h2 class="text-center">Profil des utilisateurs</h2>
+        {% for user in users %}
+            <div>
+                <big class="list-inline">
+                    <img class="profile_pic" src="/public/img/user/{{ user.avatar }}" alt="{{ user.user_name }} avatar"><a href="/u/{{ user.user_id }}">{{ user.user_name }}</a><span class="text-help">#{{ user.user_id }}</span><span>A posté {{ user.post_amount }} posts</span>
+                </big>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

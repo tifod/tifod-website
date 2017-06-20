@@ -6,6 +6,7 @@
     [x] reset password sends a link to the email adress
     [ ] possibility to add a recovering-email-adress
     [ ] be warn when password is changed
+    [ ] edit profile picture
 [x] text as an option instead of image
 [x] prevent double voting
 [x] share a post url
@@ -25,4 +26,5 @@
 [ ] User profile
     [ ] Personnal description (markdown syntax)
     [ ] Best posts/project
+    [x] All posts created
     [ ] Achievements
