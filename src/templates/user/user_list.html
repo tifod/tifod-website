@@ -9,7 +9,7 @@
         {% for user in users %}
             <div>
                 <big class="list-inline">
-                    <img class="profile_pic" src="/public/img/user/{{ user.avatar }}" alt="{{ user.user_name }} avatar"><a href="/u/{{ user.user_id }}">{{ user.user_name }}</a><span class="text-help">#{{ user.user_id }}</span><span>A posté {{ user.post_amount }} posts</span>
+                    <img class="profil_pic" src="/public/img/user/{{ user.avatar }}" alt="{{ user.user_name }} avatar"><a href="/u/{{ user.user_id }}">{{ user.user_name }}</a><span class="text-help">#{{ user.user_id }}</span><span>A posté {{ user.post_amount }} posts</span>
                 </big>
             </div>
         {% endfor %}

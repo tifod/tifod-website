@@ -6,14 +6,20 @@
     {% include 'header.html' %}
     <div class="container text-center">
         <h2>Paramètres</h2>
-        <h1><img class="profile_pic" src="/public/img/user/{{ current_user.avatar }}" alt="{{ current_user.pseudo }} avatar"></h1>
+        <h1><img class="profil_pic" src="/public/img/user/{{ current_user.avatar }}" alt="{{ current_user.pseudo }} avatar"></h1>
         
+        <h5>Votre photo de profil</h5>
         <form method="post" action="/settings" enctype="multipart/form-data">
-            <input type="file" name="new_value">
+            <label>
+                <span type="submit" class="mdl-button mdl-js-button mdl-button--raised"><i class="fa fa-fw fa-camera"></i></span>
+                <input type="file" name="new_value">
+            </label>
+            <button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Valider</button>
             <input type="hidden" name="action" value="new_avatar">
             <input type="submit">
         </form>
         
+        <h5>Votre pseudo</h5>
         <form method="post" class="list-inline" action="/settings">
             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                 <label class="mdl-textfield__label">Pseudo</label>
@@ -22,6 +28,19 @@
             <input type="hidden" name="action" value="new_user_name">
             <button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Modifier</button>
         </form>
-        <a href="/settings/new_password" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Changer de mot de passe</button>
+        
+        <h5>Votre description</h5>
+        <form method="post" action="/settings" enctype="multipart/form-data">
+            <div class="mdl-textfield mdl-js-textfield">
+                <label class="mdl-textfield__label" for="description">Modifier votre description</label>
+                <textarea class="mdl-textfield__input" name="new_value" id="description" type="text" rows= "3" >{{ current_user.description }}</textarea>
+            </div>
+            <div><button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Modifier</button></div>
+            <div class="text-help text-center">Nous supportons <a href="https://seps.flibuste.net/markdown_help">la syntaxe Markdown</a></div>
+            <input type="hidden" name="action" value="new_description">
+        </form>
+        
+        <h5>Votre mot de passe</h5>
+        <p><a href="/settings/new_password" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Changer de mot de passe</button></p>
     </div>
 {% endblock %}

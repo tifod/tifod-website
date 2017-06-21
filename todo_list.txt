@@ -4,9 +4,7 @@
     [x] init password AND pseudo at this URL
     [x] pseudo and password can be modified in /settings
     [x] reset password sends a link to the email adress
-    [ ] possibility to add a recovering-email-adress
-    [ ] be warn when password is changed
-    [ ] edit profile picture
+    [x] edit profile picture
 [x] text as an option instead of image
 [x] prevent double voting
 [x] share a post url
@@ -17,14 +15,6 @@
 [ ] reporting system (send an email to staff)
 [x] markdown syntax supported in post text
 
-[ ] Moyen alternatifs de s'identifier pour poster (pseudo/email)
-[ ] Oauth login/signup
-[ ] Notification system
-    [ ] Someone answered you
-    [ ] Someone mentionned URL of your profile/post/project
-[ ] Bookmark system
 [ ] User profile
     [ ] Personnal description (markdown syntax)
-    [ ] Best posts/project
-    [x] All posts created
-    [ ] Achievements
+    [x] Best posts/project

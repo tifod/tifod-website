@@ -440,6 +440,7 @@ $app->post('/login', function ($request, $response, $args) {
                 'pseudo' => $donnees[0]['user_name'],
                 'email' => $donnees[0]['email'],
                 'avatar' => $donnees[0]['avatar'],
+                'description' => $donnees[0]['description'],
                 'platform_role' => $donnees[0]['platform_role']
             ];
         } else {
@@ -453,7 +454,7 @@ $app->post('/login', function ($request, $response, $args) {
 $app->get('/u', function ($request, $response, $args) {
     try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
     } catch(Exception $e) { throw $e; }
-    $reponse = $db->query("SELECT user_name, avatar, platform_role, user_id, (SELECT COUNT(id) FROM post AS p WHERE p.author_id = u.user_id) post_amount FROM user AS u ORDER BY user_id LIMIT 10");
+    $reponse = $db->query("SELECT user_name, avatar, platform_role, user_id, (SELECT COUNT(id) FROM post AS p WHERE p.author_id = u.user_id) post_amount FROM user AS u ORDER BY user_id");
     while ($donnees[] = $reponse->fetch());
     array_pop($donnees);
     $reponse->closeCursor();
@@ -462,10 +463,10 @@ $app->get('/u', function ($request, $response, $args) {
 $app->get('/u/{user_id}', function ($request, $response, $args) {
     try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
     } catch(Exception $e) { throw $e; }
-    $reponse = $db->prepare("SELECT user_name, avatar, platform_role FROM user WHERE user_id = :user_id");
+    $reponse = $db->prepare("SELECT * FROM user WHERE user_id = :user_id");
     $reponse->execute(['user_id' => $args['user_id']]);
     while ($donnees[] = $reponse->fetch());
-    $reponse = $db->prepare("SELECT * FROM post WHERE author_id = :user_id");
+    $reponse = $db->prepare("SELECT * FROM post WHERE author_id = :user_id ORDER BY user_id_pin DESC, score_percent DESC");
     $reponse->execute(['user_id' => $args['user_id']]);
     while ($posts[] = $reponse->fetch());
     array_pop($posts);
@@ -479,6 +480,7 @@ $app->get('/u/{user_id}', function ($request, $response, $args) {
             'pseudo' => $donnees[0]['user_name'],
             'avatar' => $donnees[0]['avatar'],
             'platform_role' => $donnees[0]['platform_role'],
+            'description' => $donnees[0]['description'],
             'posts' => $posts
         ];
         return $this->view->render('user/profile.html', ['user' => $user]);
@@ -619,6 +621,10 @@ $app->post('/settings', function ($request, $response, $args) {
             $new_value = $file_name;
             unlink(__DIR__ . '/public/img/user/' . $_SESSION['current_user']['avatar']);
             $_SESSION['current_user']['avatar'] = $file_name;
+        } elseif ($_POST['action'] == 'new_description'){
+            $action = 'description';
+            $new_value = $_POST['new_value'];
+            $_SESSION['current_user']['description'] = $new_value;
         }
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { throw $e; }
