@@ -13,7 +13,7 @@
             <label>
                 <img id="settings-preview" src="#" alt="profil picture preview">
                 <span type="submit" class="mdl-button mdl-js-button mdl-button--raised"><i class="fa fa-fw fa-camera"></i></span>
-                <input type="file" id="profil-pic-input" style="display: none;" onchange="var input = this; if (input.files && input.files[0]) { var reader = new FileReader(); reader.onload = function (e) { $('#settings-preview').attr('src', e.target.result); } reader.readAsDataURL(input.files[0]); }" name="new_value">
+                <input type="file" id="profil-pic-input" style="display: none;" name="new_value">
             </label>
             <button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Valider</button>
             <input type="hidden" name="action" value="new_avatar">
