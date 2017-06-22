@@ -8,8 +8,6 @@ function readURL(input) {
     }
 }
 
-$("#profil-pic-input").change(function(){ console.log('koala!'); readUrl(this); });
-
 function goToPostBasedOnHash () {
     var hash = window.location.hash.slice(1);
     if (/^\d+$/.test(hash)){
