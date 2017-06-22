@@ -11,12 +11,12 @@
         <h5>Votre photo de profil</h5>
         <form method="post" action="/settings" enctype="multipart/form-data">
             <label>
+                <img id="settings-preview" src="#" alt="profil picture preview">
                 <span type="submit" class="mdl-button mdl-js-button mdl-button--raised"><i class="fa fa-fw fa-camera"></i></span>
-                <input type="file" name="new_value">
+                <input type="file" style="display: none;" name="new_value">
             </label>
             <button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Valider</button>
             <input type="hidden" name="action" value="new_avatar">
-            <input type="submit">
         </form>
         
         <h5>Votre pseudo</h5>
