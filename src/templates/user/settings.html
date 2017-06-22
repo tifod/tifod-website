@@ -2,7 +2,7 @@
 
 {% block title %}Paramètres{% endblock %}
 
-{% block head %}<script defer src="/public/unveil.js"></script>{% endblock %}
+{% block head %}{{ parent() }}<script defer src="/public/unveil.js"></script>{% endblock %}
 
 {% block body %}
     {% include 'header.html' %}
