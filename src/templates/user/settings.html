@@ -5,7 +5,18 @@
 {% block head %}
     {{ parent() }}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="/min/?f=/public/unveil.js,/public/drawingboard/drawingboard.min.js,/public/treant/vendor/raphael.js,/public/treant/Treant.js,/public/smooth-scroll.min.js,/public/perso/project.js"></script>
+    <script>
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#settings-preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        $("#profil-pic-input").change(function(){ console.log('koala'); readURL(this); });
+    </script>
 {% endblock %}
 
 {% block body %}
