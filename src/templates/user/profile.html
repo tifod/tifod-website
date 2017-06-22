@@ -15,7 +15,7 @@
                         {% if post['content_type'] == 'file' %}
                             <img src="/public/img/post/{{ post['content'] }}" alt="image sans description">
                         {% else %}
-                            <div class="post-text">{{ post['content']|markdown|striptags('<p>')|raw }}</div>
+                            <div class="post-text">{{ post['content']|markdown|striptags('<p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
                         {% endif %}
                     <div class="post-more">
                         <div class="post-more-nav">
