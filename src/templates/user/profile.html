@@ -13,7 +13,7 @@
                 <div class="post">
                     {# content #}
                         {% if post['content_type'] == 'file' %}
-                            <img class="lazyload" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ post['content'] }}" alt="image sans description">
+                            <img src="/public/img/post/{{ post['content'] }}" alt="image sans description">
                         {% else %}
                             <div class="post-text">{{ post['content']|markdown|raw }}</div>
                         {% endif %}
