@@ -1,14 +1,3 @@
-function readURL(input) {
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            $('#settings-preview').attr('src', e.target.result);
-        }
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-$("#profil-pic-input").change(function(){ console.log('koala'); readURL(this); });
-
 function goToPostBasedOnHash () {
     var hash = window.location.hash.slice(1);
     if (/^\d+$/.test(hash)){
