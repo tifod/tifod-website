@@ -7,6 +7,7 @@ function readURL(input) {
         reader.readAsDataURL(input.files[0]);
     }
 }
+$("#profil-pic-input").change(function(){ readURL(this); });
 
 function goToPostBasedOnHash () {
     var hash = window.location.hash.slice(1);
