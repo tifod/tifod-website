@@ -619,7 +619,7 @@ $app->post('/settings', function ($request, $response, $args) {
             if (!move_uploaded_file($_FILES["new_value"]["tmp_name"], __DIR__ . '/public/img/user/' . basename($file_name))) throw new Exception("Erreur d'upload du fichier!");
             
             $new_value = $file_name;
-            if ($_SESSION['current_user']['avatar'] != 'default.png') unlink(__DIR__ . '/public/img/user/' . $_SESSION['current_user']['avatar']);
+            if ($_SESSION['current_user']['avatar'] != 'default.png' and file_exists(__DIR__ . '/public/img/user/' . $_SESSION['current_user']['avatar'])) unlink(__DIR__ . '/public/img/user/' . $_SESSION['current_user']['avatar']);
             $_SESSION['current_user']['avatar'] = $file_name;
         } elseif ($_POST['action'] == 'new_description'){
             $action = 'description';
