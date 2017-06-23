@@ -20,7 +20,7 @@ $container['dbinfos'] = [
 function user_can_do ($action_name, $project_type) {
     $permissions = [
         'platform' => [
-            'create_project' => ['creator']
+            'create_project' => ['anyone', 'creator', 'moderator']
         ],
         'open_public' => [
             'add_post' => ['anyone', 'creator', 'moderator'],
