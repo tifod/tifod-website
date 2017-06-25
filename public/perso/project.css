@@ -163,7 +163,7 @@ img { width: 100%; height: auto; }
 }
 .post-more-menus>*{
 	position: absolute;
-	top: 0;
+	top: 0 !important;
 	transform: translate(50%,0);
 }
 
