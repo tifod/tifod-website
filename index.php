@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . '/vendor/autoload.php';
 
 session_start();
@@ -651,3 +650,4 @@ $app->get('/preview_template/{template}', function ($request, $response, $args) 
 });
 // Run app
 $app->run();
+echo ';)';
