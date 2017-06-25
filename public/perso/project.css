@@ -161,7 +161,11 @@ img { width: 100%; height: auto; }
 	top: 0;
     left: 50%;
 }
-.post-more-menus>*{ transform: translate(50%,0); }
+.post-more-menus>*{
+	position: absolute;
+	top: 0;
+	transform: translate(50%,0);
+}
 
 #project-tree-section { position: relative; z-index: 1; }
 .tree-post {
