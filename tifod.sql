@@ -1,13 +1,15 @@
 -- phpMyAdmin SQL Dump
--- version 4.6.6
+-- version 4.7.1
 -- https://www.phpmyadmin.net/
 --
--- Client :  localhost
--- Généré le :  Sam 17 Juin 2017 à 18:52
--- Version du serveur :  10.1.19-MariaDB
--- Version de PHP :  7.1.3
+-- Hôte : localhost
+-- Généré le :  Dim 25 juin 2017 à 13:28
+-- Version du serveur :  5.7.18-log
+-- Version de PHP :  7.1.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
 SET time_zone = "+00:00";
 
 
@@ -108,12 +110,14 @@ CREATE TABLE IF NOT EXISTS `token` (
 CREATE TABLE IF NOT EXISTS `user` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `user_name` varchar(100) NOT NULL,
+  `description` text NOT NULL,
   `user_password` varchar(100) NOT NULL,
   `avatar` varchar(100) NOT NULL DEFAULT 'default.png',
   `email` varchar(255) NOT NULL,
   `platform_role` varchar(100) NOT NULL DEFAULT 'anyone',
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
