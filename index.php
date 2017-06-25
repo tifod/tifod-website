@@ -241,10 +241,10 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             
             return $this->view->render('post/project-player.html', ['project' => $project, 'project_type' => $project_type, 'projectId' => $projectId, 'project_json' => $project_json]);
         } else {
-            return $this->view->render('error.html', ['message' => "Désolé, vous n'êtes pas autorisé à consulter ce projet"]);
+            return $this->view->render('error/error.html', ['message' => "Désolé, vous n'êtes pas autorisé à consulter ce projet"]);
         }
     } else {
-        return $this->view->render('error.html', ['message' => "Désolé, ce projet n'existe pas"]);
+        return $this->view->render('error/error.html', ['message' => "Désolé, ce projet n'existe pas"]);
     }
 });
 

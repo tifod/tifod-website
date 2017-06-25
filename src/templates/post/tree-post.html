@@ -2,7 +2,7 @@
     {% if post['content_type'] == 'file' %}
         <img src="/public/img/post/{{ post['content'] }}">
     {% else %}
-        {{ post['content']|striptags|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}
+        {{ post['content']|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}
     {% endif %}
     <p class="text-help">{{ post['author_name'] ~ ', ' ~ post['posted_on']|timeago }}</p>
 </div>
