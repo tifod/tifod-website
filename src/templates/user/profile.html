@@ -8,7 +8,7 @@
     <div class="container text-center">
         <div style="font-size: 100px;"><img class="profil_pic" src="/public/img/user/{{ user.avatar }}" alt="{{ user.pseudo }} avatar"></div>
         <h2>{{ user.pseudo }}<span class="text-help" title="utilisateur #{{ user.user_id }}">#{{ user.user_id }}</span></h2>
-        <p><i>{% if user.description %}{{ user.description|markdown|raw }}{% else %}{{ user.pseudo }} n'a pas de description{% endif %}</i></p>
+        <p><i>{% if user.description %}{{ user.description|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}{% else %}{{ user.pseudo }} n'a pas de description{% endif %}</i></p>
         {% for post in user.posts %}
             <a href="/p/{{ post['project_id'] }}#{{ post['id'] }}">
                 <div class="post">

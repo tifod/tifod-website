@@ -1,0 +1,11 @@
+{% set children = post['children'] %}
+
+{% for child in children %}
+	{% include "post/post-more-menu.html" %}
+{% endfor %}
+
+{% for post in children %}
+	{% if post['children'] %}
+		{% include "post/post-more-branch.html" %}
+	{% endif %}
+{% endfor %}

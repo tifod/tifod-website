@@ -26,7 +26,7 @@
     <h2>{{ project[0]['content'] }}</h2>
     <p class="list-inline">
         <span>
-            Un projet de <img class="profil_pic" src="/public/img/user/{{ project[0].author_avatar }}"><a href="/u/{{ project[0]['author_id'] }}">{{ project[0]['author_name'] }}</a><span title="utilisateur #{{ project[0]['author_id'] }}" class="text-help">#{{ project[0]['author_id'] }}</span>
+            Un projet de <img class="profil_pic" src="/public/img/user/{{ project[0].author_avatar }}"><a href="/u/{{ project[0]['author_id'] }}">{{ project[0]['author_name'] }}</a>
         </span>
         {% if 'delete_project'|is_allowed_for(project_type) %}
         <span>|</span>
@@ -43,6 +43,9 @@
         <div>
             {% include "post/branch.html" with {'post':project[0]} %}
         </div>
+		<div class="post-more-menus">
+            {% include "post/post-more-branch.html" with {'post':project[0]} %}
+		</div>
     </div>
     <div class="container">
         <div id="project-tree-section">

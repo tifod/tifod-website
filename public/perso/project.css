@@ -2,6 +2,7 @@ body {
     color: #333;
     font-family: "Roboto","Helvetica","Arial",sans-serif;
 }
+.list-inline>* { display: inline-block; margin-right: 5px; }
 .header { height: 56px; display: flex; }
 .header>* {
     display: inline-block;
@@ -154,7 +155,13 @@ img { width: 100%; height: auto; }
 .post-more-btn {
     margin-left: auto;
 }
-.list-inline>* { display: inline-block; margin-right: 5px; }
+.post-more-menus {
+	position: fixed;
+	z-index: 10;
+	top: 50%;
+    left: 50%;
+}
+.post-more-menus>*{ transform: translate(50%,-100%); }
 
 #project-tree-section { position: relative; z-index: 1; }
 .tree-post {
