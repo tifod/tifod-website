@@ -241,10 +241,10 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             
             return $this->view->render('post/project-player.html', ['project' => $project, 'project_type' => $project_type, 'projectId' => $projectId, 'project_json' => $project_json]);
         } else {
-            throw new Exception("Désolé, vous n'êtes pas autorisé à consulter ce projet");
+            throw new Exception("Vous n'êtes pas autorisé à consulter ce projet");
         }
     } else {
-		throw new Exception("Désolé, ce projet n'existe pas");
+		throw new Exception("Ce projet n'existe pas");
     }
 });
 
