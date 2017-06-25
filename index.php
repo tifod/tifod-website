@@ -157,7 +157,7 @@ function createTree($children_list, $children){
 }
 
 // Define app routes
-$app->get('/update-from-github', function ($request, $response, $args) {
+$app->post('/update-from-github', function ($request, $response, $args) {
     $result = [];
 	$output = '';
     exec("git pull", $result);
