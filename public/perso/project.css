@@ -158,13 +158,13 @@ img { width: 100%; height: auto; }
 .post-more-menus {
 	position: fixed;
 	z-index: 10;
-	top: 0;
+	top: 50% !important;
     left: 50%;
 }
 .post-more-menus>*{
 	position: absolute;
 	top: 0 !important;
-	transform: translate(50%,0);
+	transform: translate(50%,-50%);
 }
 
 #project-tree-section { position: relative; z-index: 1; }
