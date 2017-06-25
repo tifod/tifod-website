@@ -157,6 +157,13 @@ function createTree($children_list, $children){
 }
 
 // Define app routes
+$app->get('/update-from-github', function ($request, $response, $args) {
+    $result = [];
+	$output = '';
+    exec("git pull", $result);
+    foreach ($result as $line) $output .= $line."\n";
+	return "<pre>$output</pre>";
+});
 $app->get('/p/{projectId}', function ($request, $response, $args) {
     $projectId = $args['projectId'];    
     
