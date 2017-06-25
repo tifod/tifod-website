@@ -650,4 +650,3 @@ $app->get('/preview_template/{template}', function ($request, $response, $args) 
 });
 // Run app
 $app->run();
-echo ';)';
