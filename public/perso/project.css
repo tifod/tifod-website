@@ -158,10 +158,10 @@ img { width: 100%; height: auto; }
 .post-more-menus {
 	position: fixed;
 	z-index: 10;
-	top: 50%;
+	top: 0;
     left: 50%;
 }
-.post-more-menus>*{ transform: translate(50%,-100%); }
+.post-more-menus>*{ transform: translate(50%,0); }
 
 #project-tree-section { position: relative; z-index: 1; }
 .tree-post {
