@@ -13,32 +13,35 @@
 			{% if 'delete_user'|is_allowed_for('platform') and user.user_id != current_user.user_id %}<a href="/delete-user/{{ user.user_id }}" class="text-danger">Supprimer cet utilisateur</a>{% endif %}
 			<a href="/u">Voir tous les utilisateurs</a>
 		</p>
-        {% for post in user.posts %}
-            <a href="/p/{{ post['project_id'] }}#{{ post['id'] }}">
-                <div class="post">
-                    {# content #}
-                        {% if post['content_type'] == 'file' %}
-                            <img src="/public/img/post/{{ post['content'] }}" alt="image sans description">
-                        {% else %}
-                            <div class="post-text">{{ post['content']|markdown|striptags('<p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
-                        {% endif %}
-                    <div class="post-more">
-						{% if post.parent_id == 0 %}<hr>{% endif %}
-                        <div class="post-more-nav">
-							<div class="post-infos list-inline{% if post.parent_id == 0 %} text-center{% endif %}">
-								{% if post.parent_id == 0 %}
-									<div><span class="fa fa-fw fa-book"></span> Projet créé <span title="{{ post.posted_on }}">{{ post.posted_on|timeago }}</span></div>
-								{% else %}
-									<div><span title="{{ post.posted_on }}">{{ post.posted_on|timeago }}</span> dans "<strong>{{ post.project_name }}</strong>"</div>
-								{% endif %}
+	</div>
+	{% if not user.posts %}
+		<div class="container"><em>{{ user.pseudo }} n'a pas encore créé de contenu</em></div>
+	{% else %}
+		<div class="posts">
+			{% for post in user.posts %}
+				<a href="/p/{{ post['project_id'] }}#{{ post['id'] }}">
+					<div class="post">
+						{# content #}
+							{% if post['content_type'] == 'file' %}
+								<img src="/public/img/post/{{ post['content'] }}" alt="image sans description">
+							{% else %}
+								<div class="post-text">{{ post['content']|markdown|striptags('<p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
+							{% endif %}
+						<div class="post-more">
+							{% if post.parent_id == 0 %}<hr>{% endif %}
+							<div class="post-more-nav">
+								<div class="post-infos list-inline{% if post.parent_id == 0 %} text-center{% endif %}">
+									{% if post.parent_id == 0 %}
+										<div><span class="fa fa-fw fa-book"></span> Projet créé <span title="{{ post.posted_on }}">{{ post.posted_on|timeago }}</span></div>
+									{% else %}
+										<div><span title="{{ post.posted_on }}">{{ post.posted_on|timeago }}</span> dans "<strong>{{ post.project_name }}</strong>"</div>
+									{% endif %}
+								</div>
 							</div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        {% endfor %}
-		{% if not user.posts %}
-		<em>{{ user.pseudo }} n'a pas encore créé de contenu</em>
-		{% endif %}
-    </div>
+						</div>
+					</div>
+				</a>
+			{% endfor %}
+		</div>
+	{% endif %}
 {% endblock %}
