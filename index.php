@@ -283,9 +283,14 @@ $app->post('/add-post', function ($request, $response) {
     if ((!empty($_POST['content']) or !empty($_POST['image'])) and isset($_POST['parent_id']) and isset($_POST['project_id'])){
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { throw $e; }
-        $reponse = $db->prepare ('select project_type from project where project_id = :project_id');
-        $reponse->execute(['project_id' => $_POST['project_id']]);
-        $project_type = $reponse->fetch()['project_type'];
+        $reponse = $db->prepare ('select project_type, (SELECT COUNT(*) FROM post WHERE id = :parent_id) AS id_parent_id_valid from project where project_id = :project_id');
+        $reponse->execute([
+			'project_id' => $_POST['project_id'],
+			'parent_id' => $_POST['parent_id']
+		]);
+        $donnees = $reponse->fetch();
+		$project_type = $donnees['project_type'];
+		if ($donnees['id_parent_id_valid'] == 0) throw new Exception ("Vous tentez de répondre à un post qui n'existe plus (il a été supprimé)");
         if (user_can_do('add_post',$project_type)){
             $reponse = $db->prepare ("INSERT INTO post(content, content_type, parent_id, project_id, path, author_id) VALUES (:content, :content_type, :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id))), :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
             $reponse->execute([
