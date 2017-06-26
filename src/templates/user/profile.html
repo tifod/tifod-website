@@ -6,7 +6,7 @@
     {% include 'header.html' %}
     <style>.post { color: initial; }</style>
     <div class="container text-center">
-        <div style="font-size: 100px;"><img class="profil_pic" src="/public/img/user/{{ user.avatar }}" alt="{{ user.pseudo }} avatar"></div>
+        <div style="font-size: 200px;"><img class="profil_pic" src="/public/img/user/{{ user.avatar }}" alt="{{ user.pseudo }} avatar"></div>
         <h2>{{ user.pseudo }}</h2>
         {% if user.description %}<p>{{ user.description|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</p>{% endif %}
 		<p class="list-inline">

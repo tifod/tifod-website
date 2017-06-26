@@ -26,7 +26,7 @@
     {% include 'header.html' %}
     <div class="container text-center">
         <h2>Paramètres</h2>
-        <h1><img class="profil_pic" src="/public/img/user/{{ current_user.avatar }}" alt="{{ current_user.pseudo }} avatar"></h1>
+        <div style="font-size: 200px;"><img class="profil_pic" src="/public/img/user/{{ current_user.avatar }}" alt="{{ current_user.pseudo }} avatar"></div>
         
         <h5>Votre photo de profil</h5>
         <form method="post" action="/settings" enctype="multipart/form-data">
