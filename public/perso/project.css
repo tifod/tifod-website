@@ -118,7 +118,7 @@ img { width: 100%; height: auto; }
 }
 .posts::-webkit-scrollbar { display: none; }
 .posts > * { display: inline-block; white-space: initial; }
-.profile-posts > * { display: block; }
+.profile-posts, .profile-posts > * { display: block; margin: auto; }
 .post-siblings {
     display: inline-block;
     position: relative;

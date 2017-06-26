@@ -296,9 +296,9 @@ $app->post('/add-post', function ($request, $response) {
                 'author_id' => $_SESSION['current_user']['user_id']
             ]);
             $reponse->closeCursor();
+			$reponse = $db->query('SELECT LAST_INSERT_ID()');
+			$post_id = $reponse->fetch()[0];
             if (empty($_POST['content'])){
-                $reponse = $db->query('SELECT LAST_INSERT_ID()');
-                $post_id = $reponse->fetch()[0];
                 // need to get infos about the post
                 $fileName = MyApp\Utility\Math::getARandomString(6) . '-' . $post_id . '.png';
                 $reponse->closeCursor();
@@ -312,7 +312,7 @@ $app->post('/add-post', function ($request, $response) {
                 file_put_contents(__DIR__ . '/public/img/post/' . $fileName, $data);
                 header('Location: /p/'.$_POST['project_id'].'#'.$post_id); exit();
             }
-            header('Location: /p/'.$_POST['project_id']); exit();
+            header('Location: /p/'.$_POST['project_id'].'#'.$post_id); exit();
         } else {
             throw new Exception ("Vous n'êtes pas autorisés à poster dans ce projet, veuillez contacter le créateur de ce projet, ou bien vous adressez à l'équipe tifod si vous pensez que c'est un bug");
         }
