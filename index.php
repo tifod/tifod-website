@@ -250,7 +250,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
 $app->get('/', function ($request, $response) {
     try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
     } catch(Exception $e) { throw $e; }
-    $reponse = $db->query ('select id, project_id, content from post where parent_id = 0');
+    $reponse = $db->query ('select *, (SELECT COUNT(*) FROM post tp WHERE tp.project_id = p.project_id) post_count, (select user_name from user u where u.user_id = p.author_id) author_name from post p where parent_id = 0');
     while ($donnees[] = $reponse->fetch());
     array_pop($donnees);
     $lastProjectId = count($donnees) > 0 ? $donnees[count($donnees) - 1]['project_id'] + 1 : 1;
