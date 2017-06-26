@@ -23,8 +23,9 @@
                             <div class="post-text">{{ post['content']|markdown|striptags('<p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
                         {% endif %}
                     <div class="post-more">
+						{% if post.parent_id == 0 %}<hr>{% endif %}
                         <div class="post-more-nav">
-							<div class="post-infos list-inline text-center">
+							<div class="post-infos list-inline{% if post.parent_id == 0 %} text-center{% endif %}">
 								{% if post.parent_id == 0 %}
 									<div><span class="fa fa-fw fa-book"></span> Projet créé <span title="{{ post.posted_on }}">{{ post.posted_on|timeago }}</span></div>
 								{% else %}

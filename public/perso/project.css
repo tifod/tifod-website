@@ -64,7 +64,7 @@ img { width: 100%; height: auto; }
 .text-danger { color: red; }
 .text-primary { color: #448AFF; }
 .text-initial { color: initial; }
-.text-center { text-align: center; }
+.text-center { text-align: center; margin: auto; }
 
 .text-help { color: darkgray; font-size: 80%; }
 .post-siblings-nav {
