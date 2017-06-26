@@ -5,7 +5,7 @@
                 <img class="profil_pic" src="/public/img/user/{{ post.author_avatar }}">
                 <a href="/u/{{ post['author_id'] }}">{{ post['author_name'] }}</a>
             </span>
-            <span>{{ post['posted_on']|timeago }}</span>
+            <span title="{{ post.posted_on }}">{{ post.posted_on|timeago }}</span>
             <button id="{{ post['id'] }}-downvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="{% if 'vote_post'|is_allowed_for(project_type) %}ajaxPingUrl('/vote/minus/{{ post['id'] }}',this,updateScore){% else %}alert('Vous ne pouvez voter qu\'en étant connecté'){% endif %}"><span class="fa fa-caret-down"></span></button>
             <span class="mdl-tooltip mdl-tooltip--top post-score-minus" for="{{ post['id'] }}-downvote">{{ post['vote_minus'] }}</span>
             

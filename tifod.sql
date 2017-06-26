@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost
--- Généré le :  Dim 25 juin 2017 à 13:28
+-- Généré le :  Dim 25 juin 2017 à 22:43
 -- Version du serveur :  5.7.18-log
 -- Version de PHP :  7.1.6
 
@@ -109,9 +109,9 @@ CREATE TABLE IF NOT EXISTS `token` (
 
 CREATE TABLE IF NOT EXISTS `user` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_name` varchar(100) NOT NULL,
-  `description` text NOT NULL,
-  `user_password` varchar(100) NOT NULL,
+  `user_name` varchar(100) DEFAULT NULL,
+  `description` text,
+  `user_password` varchar(100) DEFAULT NULL,
   `avatar` varchar(100) NOT NULL DEFAULT 'default.png',
   `email` varchar(255) NOT NULL,
   `platform_role` varchar(100) NOT NULL DEFAULT 'anyone',

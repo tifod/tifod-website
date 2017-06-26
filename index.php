@@ -20,7 +20,8 @@ $container['dbinfos'] = [
 function user_can_do ($action_name, $project_type) {
     $permissions = [
         'platform' => [
-            'create_project' => ['anyone', 'creator', 'moderator']
+            'create_project' => ['anyone', 'creator', 'moderator'],
+			'delete_user' => [ null ]
         ],
         'open_public' => [
             'add_post' => ['anyone', 'creator', 'moderator'],
@@ -53,14 +54,12 @@ function user_can_do ($action_name, $project_type) {
             'edit_post' => ['creator', 'moderator'],
         ]
     ];
-    $default_project_type = 'platform';
-    $default_platform_role = 'visitor';
     
-    $current_project_type = empty($project_type) ? $default_project_type : $project_type;
+    $current_project_type = empty($project_type) ? 'platform' : $project_type;
     if (empty($permissions[$current_project_type][$action_name])){
         throw new Exception("Nom d'action inconnue ($action_name, $current_project_type)");
     }
-    return in_array((empty($_SESSION['current_user']['current_project_role']) ? $default_platform_role : $_SESSION['current_user']['current_project_role']), $permissions[$current_project_type][$action_name]) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin');
+    return in_array((empty($_SESSION['current_user']['current_project_role']) ? (empty($_SESSION['current_user']) ? 'visitor' : 'anyone') : $_SESSION['current_user']['current_project_role']), $permissions[$current_project_type][$action_name]) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin');
 }
 
 // Register component on container
@@ -260,9 +259,9 @@ $app->get('/', function ($request, $response) {
 })->setName('homepage');
 
 $app->post('/create-project', function ($request, $response) {
-    $project_type = 'open_public';
     if (user_can_do('create_project','platform')){
         if (!(empty($_POST['content']) or empty($_POST['project_id']))){
+			$default_project_type = 'open_public';
             try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
             } catch(Exception $e) { throw $e; }
             
@@ -271,7 +270,7 @@ $app->post('/create-project', function ($request, $response) {
                 'content' => $_POST['content'],
                 'project_id' => $_POST['project_id'],
                 'author_id' => $_SESSION['current_user']['user_id'],
-                'project_type' => $project_type
+                'project_type' => $default_project_type
             ]);
             $reponse->closeCursor();
         }
@@ -334,7 +333,7 @@ $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
         while ($donnees [] = $reponse->fetch());
         if ($donnees[0]['content_type'] == 'file' and file_exists(__DIR__ . '/public/img/post/'.$donnees[0]['content'])) unlink(__DIR__ . '/public/img/post/'.$donnees[0]['content']);
         
-        $reponse = $db->prepare ("DELETE FROM post_vote WHERE post_vote.post_id IN (SELECT id FROM post WHERE path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%')); DELETE FROM post_vote WHERE post_id = :post_id; DELETE FROM post WHERE path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%')");
+        $reponse = $db->prepare ("DELETE FROM post_vote WHERE post_vote.post_id IN (SELECT id FROM post WHERE path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%')); DELETE FROM post_vote WHERE post_id = :post_id; DELETE FROM post WHERE path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%'); DELETE FROM project_role WHERE project_id = (SELECT project_id FROM project WHERE project_root_post_id = :post_id); DELETE FROM project WHERE project_root_post_id = :post_id;");
         $reponse->execute([ 'post_id' => $args['post-id'] ]);
         $reponse->closeCursor();
     }
@@ -408,14 +407,18 @@ $app->get('/togglePin/{post-id}', function ($request, $response, $args) {
 });
 
 $app->get('/resetPostScore/{post-id}', function ($request, $response, $args) {
-    if (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin'){
-        try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
-        } catch(Exception $e) { throw $e; }
-        $reponse = $db->prepare ('update post set score_percent = 0, score_result = 0, vote_minus = 0, vote_plus = 0 where id = :post_id; delete from post_vote where post_id = :post_id;');
+	try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+	} catch(Exception $e) { throw $e; }
+	$reponse = $db->prepare ('select project_type from project where project_id = (SELECT project_id FROM post WHERE id = :post_id)');
+    $reponse->execute(['post_id' => $args['post-id']]);
+    $project_type = $reponse->fetch()['project_type'];
+    if (user_can_do('reset_score_post',$project_type)){
+		$reponse = $db->prepare ('update post set score_percent = 0, score_result = 0, vote_minus = 0, vote_plus = 0 where id = :post_id; delete from post_vote where post_id = :post_id;');
         $reponse->execute(['post_id' => $args['post-id']]);
-        $reponse->closeCursor();
-        header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
+        header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect']));
     }
+	$reponse->closeCursor();
+	exit();
 });
 
 $app->get('/logout', function ($request, $response, $args) {
@@ -447,7 +450,7 @@ $app->post('/login', function ($request, $response, $args) {
                 'pseudo' => $donnees[0]['user_name'],
                 'email' => $donnees[0]['email'],
                 'avatar' => $donnees[0]['avatar'],
-                'description' => $donnees[0]['description'],
+                'description' => base64_decode($donnees[0]['description']),
                 'platform_role' => $donnees[0]['platform_role']
             ];
         } else {
@@ -473,7 +476,7 @@ $app->get('/u/{user_id}', function ($request, $response, $args) {
     $reponse = $db->prepare("SELECT * FROM user WHERE user_id = :user_id");
     $reponse->execute(['user_id' => $args['user_id']]);
     while ($donnees[] = $reponse->fetch());
-    $reponse = $db->prepare("SELECT * FROM post WHERE author_id = :user_id ORDER BY user_id_pin DESC, score_percent DESC");
+    $reponse = $db->prepare("SELECT *, (SELECT content FROM post WHERE id = (SELECT project_root_post_id FROM project WHERE project.project_id = p.project_id)) AS project_name FROM post AS p WHERE author_id = :user_id ORDER BY p.project_id DESC, posted_on DESC");
     $reponse->execute(['user_id' => $args['user_id']]);
     while ($posts[] = $reponse->fetch());
     array_pop($posts);
@@ -487,7 +490,7 @@ $app->get('/u/{user_id}', function ($request, $response, $args) {
             'pseudo' => $donnees[0]['user_name'],
             'avatar' => $donnees[0]['avatar'],
             'platform_role' => $donnees[0]['platform_role'],
-            'description' => $donnees[0]['description'],
+            'description' => base64_decode($donnees[0]['description']),
             'posts' => $posts
         ];
         return $this->view->render('user/profile.html', ['user' => $user]);
@@ -515,7 +518,11 @@ $app->get('/signup', function ($request, $response, $args) {
             $reponse->closeCursor();
             
             // send email with the token
-            mail($_GET['email'], 'Valider la création de votre compte Tifod', $this->view->render('email/signup.html',['token_key' => $token_key]), "MIME-Version: 1.0\r\nContent-type: text/html; charset=utf-8\r\nFrom: Tifod <contact@tifod.com>\r\nReply-To: Tifod <contact@tifod.com>");
+            try {
+				mail($_GET['email'], 'Valider la création de votre compte Tifod', $this->view->render('email/signup.html',['token_key' => $token_key]), "MIME-Version: 1.0\r\nContent-type: text/html; charset=utf-8\r\nFrom: Tifod <contact@tifod.com>\r\nReply-To: Tifod <contact@tifod.com>");
+			} catch (Throwable $e) {
+				$_GET['email'] .= ' ou <a href="/token/'.$token_key.'">cliquez ici</a>';
+			}
             
             return $this->view->render('connexion/signup.html',['token_sent' => true, 'email' => $_GET['email']]);
         } else {
@@ -549,7 +556,11 @@ $app->get('/password_reset', function ($request, $response, $args) {
             $reponse->closeCursor();
             
             // send email with the token
-            mail($_GET['email'], 'Réinitialiser votre mot de passe sur Tifod', $this->view->render('email/password_reset.html',['token_key' => $token_key]), "MIME-Version: 1.0\r\nContent-type: text/html; charset=utf-8\r\nFrom: Tifod <contact@tifod.com>\r\nReply-To: Tifod <contact@tifod.com>");
+			try {
+				mail($_GET['email'], 'Réinitialiser votre mot de passe sur Tifod', $this->view->render('email/password_reset.html',['token_key' => $token_key]), "MIME-Version: 1.0\r\nContent-type: text/html; charset=utf-8\r\nFrom: Tifod <contact@tifod.com>\r\nReply-To: Tifod <contact@tifod.com>");
+			} catch (Throwable $e) {
+				$_GET['email'] .= ' ou <a href="/token/'.$token_key.'">cliquez ici</a>';
+			}
             
             return $this->view->render('connexion/password_reset.html',['token_sent' => true, 'email' => $_GET['email']]);
         } else {
@@ -574,7 +585,7 @@ $app->get('/token/{token_key}', function ($request, $response, $args) {
         if ($action == 'signup'){
             // query to test
             $reponse = $db->prepare("INSERT INTO user (email) VALUES (:email); UPDATE user SET user_name = CONCAT('user-',(SELECT LAST_INSERT_ID())) WHERE email = :email;");
-            $reponse->execute(['email' => $email]);
+			$reponse->execute(['email' => $email]);
         }
         $reponse = $db->prepare("DELETE FROM token WHERE email = :email");
         $reponse->execute(['email' => $email]);
@@ -620,6 +631,10 @@ $app->post('/settings', function ($request, $response, $args) {
             $action = 'user_name';
             $new_value = $_POST['new_value'];
             $_SESSION['current_user']['pseudo'] = $new_value;
+        } elseif ($_POST['action'] == 'new_description'){
+            $action = 'description';
+            $new_value = base64_encode($_POST['new_value']);
+            $_SESSION['current_user']['description'] = base64_decode($new_value);
         } elseif ($_POST['action'] == 'new_avatar'){
             $action = 'avatar';
             $file_name = $_SESSION['current_user']['user_id'] . '-' . $_FILES["new_value"]["name"];
@@ -628,10 +643,6 @@ $app->post('/settings', function ($request, $response, $args) {
             $new_value = $file_name;
             if ($_SESSION['current_user']['avatar'] != 'default.png' and file_exists(__DIR__ . '/public/img/user/' . $_SESSION['current_user']['avatar'])) unlink(__DIR__ . '/public/img/user/' . $_SESSION['current_user']['avatar']);
             $_SESSION['current_user']['avatar'] = $file_name;
-        } elseif ($_POST['action'] == 'new_description'){
-            $action = 'description';
-            $new_value = $_POST['new_value'];
-            $_SESSION['current_user']['description'] = $new_value;
         }
         try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
         } catch(Exception $e) { throw $e; }
@@ -644,9 +655,27 @@ $app->post('/settings', function ($request, $response, $args) {
         header ('Location: /settings'); exit();
     }
 });
-
-$app->get('/preview_template/{template}', function ($request, $response, $args) {
-    return $this->view->render('user/new_password.html');
+$app->get('/delete-user/{user-id}', function ($request, $response, $args) {
+	if (user_can_do('delete_user','platform') and $args['user-id'] != $_SESSION['current_user']['user_id']){
+		try { $db = new PDO ($this->dbinfos['connect'],$this->dbinfos['user'],$this->dbinfos['password']);
+		} catch(Exception $e) { throw $e; }
+		$reponse = $db->prepare("SELECT avatar, (SELECT COUNT(*) FROM post WHERE author_id = :user_id) AS post_count FROM user WHERE user_id = :user_id");
+		$reponse->execute([ 'user_id' => $args['user-id'] ]);
+		$donnees = $reponse->fetch();
+		if (!empty($donnees)){
+			if ($donnees['post_count'] > 0) throw new Exception ("Vous ne pouvez pas supprimer ce compte car les posts de cet auteur existent encore!");
+			if ($donnees['avatar'] != 'default.png' and file_exists(__DIR__ . '/public/img/user/' . $donnees['avatar'])) unlink(__DIR__ . '/public/img/user/' . $donnees['avatar']);
+			$reponse = $db->prepare("DELETE FROM user WHERE user_id = :user_id; DELETE FROM post_vote WHERE user_id = :user_id; DELETE FROM project_role WHERE user_id = :user_id");
+			$reponse->execute([ 'user_id' => $args['user-id'] ]);
+			$reponse->closeCursor();
+			header ('Location: /u'); exit();
+		} else {
+			$reponse->closeCursor();
+			throw new Exception ("Cet utilisateur n'existe pas");
+		}
+	} else {
+		throw new Exception ("Vous n'avez pas les droits nécessaires pour supprimer ce compte utilisateur");
+	}
 });
 // Run app
 $app->run();

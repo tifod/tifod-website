@@ -46,7 +46,7 @@
                 <input class="mdl-textfield__input" value="{{ current_user.pseudo }}" name="new_value" type="text">
             </div>
             <input type="hidden" name="action" value="new_user_name">
-            <button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Modifier</button>
+            <button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Modifier votre pseudo</button>
         </form>
         
         <h5>Votre description</h5>
@@ -55,7 +55,7 @@
                 <label class="mdl-textfield__label" for="description">Modifier votre description</label>
                 <textarea class="mdl-textfield__input" name="new_value" id="description" type="text" rows= "3" >{{ current_user.description }}</textarea>
             </div>
-            <div><button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Modifier</button></div>
+            <div><button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Modifier votre description</button></div>
             <div class="text-help text-center">Nous supportons <a href="https://seps.flibuste.net/markdown_help">la syntaxe Markdown</a></div>
             <input type="hidden" name="action" value="new_description">
         </form>
