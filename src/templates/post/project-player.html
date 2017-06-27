@@ -44,7 +44,7 @@
             {% include "post/branch.html" with {'post':project[0]} %}
         </div>
 		<div class="post-more-menus">
-            {% include "post/post-more-branch.html" with {'post':project[0]} %}
+            {% include "post/post-more/post-more-branch.html" with {'post':project[0]} %}
 		</div>
     </div>
     <div class="container">
@@ -75,7 +75,7 @@
 {% elseif 'add_post'|is_allowed_for(project_type) %}
     {% set post = project[0] %}
     <div class="container" id="{{ post['id'] }}">
-        {% include "post/add-content.html" %}
+        {% include "post/post-more/add-content.html" %}
     </div>
     <script src="/public/perso/project.js"></script>
     <script>var boards = document.getElementsByClassName('drawing-board'); for (var z = 0; z < boards.length; z++){ resetBoard(boards[z].getAttribute('id')); }</script>
