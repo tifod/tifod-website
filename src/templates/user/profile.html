@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ user.pseudo }}{% endblock %}
+{% block title %}{{ user.pseudo }} | tifod{% endblock %}
 
 {% block body %}
     {% include 'header.html' %}
@@ -33,6 +33,8 @@
 								<div class="post-infos list-inline{% if post.parent_id == 0 %} text-center{% endif %}">
 									{% if post.parent_id == 0 %}
 										<div><span class="fa fa-fw fa-book"></span> Projet créé <span title="{{ post.posted_on }}">{{ post.posted_on|timeago }}</span></div>
+									{% elseif post.is_an_edit %}
+										<div><span class="fa fa-fw fa-pencil"></span> Modification proposé <span title="{{ post.posted_on }}">{{ post.posted_on|timeago }}</span> dans "<strong>{{ post.project_name }}</strong>"</div>
 									{% else %}
 										<div><span title="{{ post.posted_on }}">{{ post.posted_on|timeago }}</span> dans "<strong>{{ post.project_name }}</strong>"</div>
 									{% endif %}

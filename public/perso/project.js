@@ -7,7 +7,7 @@ function goToPostBasedOnHash () {
 animationsTest(goToPostBasedOnHash);
 window.onhashchange = goToPostBasedOnHash;
 
-smoothScroll.init();
+try { smoothScroll.init(); } catch (err){ null; }
 
 new Clipboard (".btn-copy-js");
 var snackbarContainer = document.getElementById("snackbar");

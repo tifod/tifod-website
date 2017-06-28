@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS `post` (
   `score_result` int(11) NOT NULL DEFAULT '0',
   `score_percent` int(11) NOT NULL DEFAULT '0',
   `user_id_pin` int(11) NOT NULL DEFAULT '0',
+  `is_an_edit` tinyint(4) NOT NULL DEFAULT '0',
   `posted_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `author_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
@@ -114,7 +115,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `user_password` varchar(100) DEFAULT NULL,
   `avatar` varchar(100) NOT NULL DEFAULT 'default.png',
   `email` varchar(255) NOT NULL,
-  `platform_role` varchar(100) NOT NULL DEFAULT 'anyone',
+  `platform_role` varchar(100) NOT NULL DEFAULT 'regular_member',
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 COMMIT;
