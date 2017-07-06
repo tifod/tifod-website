@@ -63,7 +63,7 @@ function user_can_do ($action_name, $project_type) {
     if (empty($permissions[$current_project_type][$action_name])){
         throw new Exception("Nom d'action inconnue ($action_name, $current_project_type)");
     }
-    return in_array((empty($_SESSION['current_user']['current_project_role']) ? (empty($_SESSION['current_user']) ? 'not_a_member' : 'regular_member') : $_SESSION['current_user']['current_project_role']), $permissions[$current_project_type][$action_name]) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin');
+    return in_array((empty($_SESSION['current_user']['current_project_role']) ? (empty($_SESSION['current_user']['user_id']) ? 'not_a_member' : 'regular_member') : $_SESSION['current_user']['current_project_role']), $permissions[$current_project_type][$action_name]) or (!empty($_SESSION['current_user']) and $_SESSION['current_user']['platform_role'] == 'admin');
 }
 
 // Register component on container

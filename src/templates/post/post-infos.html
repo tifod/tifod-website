@@ -25,10 +25,17 @@
             {% endif %}
 		</div>
 		
-		<span id="{{ post['id'] }}-more" class="post-more-btn mdl-button mdl-js-button mdl-button--icon">
-			<i class="fa fa-ellipsis-v"></i>
-		</span>
-		<span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-more">Actions supplémentaires</span>
+        <div class="post-more-btn">
+            {% if 'add_post'|is_allowed_for(project_type) %}
+                <label id="{{ post['id'] }}-add-content" for="{{ post['id'] }}-checkbox-more"><span class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"><i class="material-icons">add</i></span></label>
+                <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-add-content">Ajouter une suite</span>
+            {% endif %}
+            
+            <span id="{{ post['id'] }}-more" class="mdl-button mdl-js-button mdl-button--icon">
+                <i class="fa fa-ellipsis-v"></i>
+            </span>
+            <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-more">Actions supplémentaires</span>
+        </div>
     </div>
     
     {% if 'add_post'|is_allowed_for(project_type) %}

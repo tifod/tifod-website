@@ -15,10 +15,6 @@
 	{% if not is_edit %}
 		<a href="/edit/{{ post['id'] }}" class="mdl-menu__item list-inline"><i class="fa fa-pencil fa-fw"></i>Modifier</a>
 		<a href="#{{ post['id'] }}-post-tree" class="mdl-menu__item list-inline tree-link" data-scroll><i class="fa fa-code-fork fa-flip-vertical fa-fw"></i>Voir dans l'arborescence</a>
-		<span id="{{ post['id'] }}-share-btn" data-msg="URL copié" class="mdl-menu__item{% if 'add_post'|is_allowed_for(project_type) %} mdl-menu__item--full-bleed-divider{% endif %} list-inline btn-copy-js" data-clipboard-text="http://{{ server_name }}/p/{{ projectId }}#{{ post['id'] }}"><i class="fa fa-fw fa-link"></i>Copier l'URL</span>
-		
-		{% if 'add_post'|is_allowed_for(project_type) %}
-			<label class="mdl-menu__item list-inline" for="{{ post['id'] }}-checkbox-more"><i class="fa fa-fw fa-plus"></i>Ajouter une suite</label>
-		{% endif %}
+		<span id="{{ post['id'] }}-share-btn" data-msg="URL copié" class="mdl-menu__item list-inline btn-copy-js" data-clipboard-text="http://{{ server_name }}/p/{{ projectId }}#{{ post['id'] }}"><i class="fa fa-fw fa-link"></i>Copier l'URL</span>
 	{% endif %}
 </div>
