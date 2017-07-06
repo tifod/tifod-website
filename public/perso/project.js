@@ -260,8 +260,9 @@ $(function(){
             // resize the ".posts" to the post height
             var posts = document.getElementsByClassName('active-post');
             for(var z = 0; z < posts.length; z++) {
-                console.log(posts[z].parentNode.parentNode.parentNode.getElementsByClassName('post-siblings-nav')[0]);
-                posts[z].parentNode.parentNode.style.height = getAbsoluteHeight(posts[z]) + 'px';
+                var nav = posts[z].parentNode.parentNode.parentNode.getElementsByClassName('post-siblings-nav')[0];
+                var navHeight = (nav !== undefined && nav !== null) ? ((typeof nav === 'object') ? nav.clientHeight : getAbsoluteHeight(nav) ) : 0 ;
+                posts[z].parentNode.parentNode.style.height = (getAbsoluteHeight(posts[z]) + navHeight) + 'px';
             }
             
             animationsTest(function(){

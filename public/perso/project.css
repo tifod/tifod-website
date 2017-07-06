@@ -75,7 +75,7 @@ img { width: 100%; height: auto; }
 .text-help { color: darkgray; font-size: 80%; }
 .post-siblings-nav {
     display: inline-block;
-    bottom: 24px;
+    bottom: 0;
     z-index: 3;
     position: absolute;
     left: 50%;
@@ -155,9 +155,6 @@ img { width: 100%; height: auto; }
 
 .post-more {
     margin: 1em;
-}
-.many-posts .post-more {
-    margin-bottom: 48px;
 }
 .post-more-nav {
     display: flex;
