@@ -7,7 +7,12 @@ function goToPostBasedOnHash () {
 animationsTest(goToPostBasedOnHash);
 window.onhashchange = goToPostBasedOnHash;
 
-smoothScroll.init();
+$('a[data-scroll]').on('click', function() {
+    var page = $(this).attr('href');
+    var speed = 500;
+    $('html, body').animate( { scrollTop: $(page).offset().top }, speed);
+    return false;
+});
 
 new Clipboard (".btn-copy-js");
 var snackbarContainer = document.getElementById("snackbar");
