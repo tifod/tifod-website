@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
 
+{% block title %}Accueil | tifod{% endblock %}
+
 {% block body %}
     {% include 'header.html' %}
     <div class="container">
         <h1>Liste des projets existants</h1>
-        {% for project in projects %}
-        <h3><a href="/p/{{ project['project_id'] }}">{{ project['content'] }}</a></h3>
-        {% endfor %}
+		{% for project in projects %}
+			<p class="list-inline"><a class="text-large text-no-decoration" href="/p/{{ project['project_id'] }}">{{ project['content'] }}</a><span>projet de <a href="/u/{{ project.author_id }}">{{ project.author_name }}</a></span><span>|</span><span>{{ project.post_count - 1 }} posts</span></p>
+		{% endfor %}
         {% if 'create_project'|is_allowed_for('platform') %}
             <form action="/create-project" class="list-inline" method="post">
                 <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">

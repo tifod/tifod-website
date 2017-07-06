@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ project[0]['content'] }}{% endblock %}
+{% block title %}"{{ project[0]['content'] }}" | tifod{% endblock %}
 
 {% block head %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -26,7 +26,7 @@
     <h2>{{ project[0]['content'] }}</h2>
     <p class="list-inline">
         <span>
-            Un projet de <img class="profil_pic" src="/public/img/user/{{ project[0].author_avatar }}"><a href="/u/{{ project[0]['author_id'] }}">{{ project[0]['author_name'] }}</a><span title="utilisateur #{{ project[0]['author_id'] }}" class="text-help">#{{ project[0]['author_id'] }}</span>
+            Un projet de <img class="profil_pic" src="/public/img/user/{{ project[0].author_avatar }}"><a href="/u/{{ project[0]['author_id'] }}">{{ project[0]['author_name'] }}</a>
         </span>
         {% if 'delete_project'|is_allowed_for(project_type) %}
         <span>|</span>
@@ -43,6 +43,9 @@
         <div>
             {% include "post/branch.html" with {'post':project[0]} %}
         </div>
+		<div class="post-more-menus">
+            {% include "post/post-more/post-more-branch.html" with {'post':project[0]} %}
+		</div>
     </div>
     <div class="container">
         <div id="project-tree-section">
@@ -72,7 +75,7 @@
 {% elseif 'add_post'|is_allowed_for(project_type) %}
     {% set post = project[0] %}
     <div class="container" id="{{ post['id'] }}">
-        {% include "post/add-content.html" %}
+        {% include "post/post-more/add-content.html" %}
     </div>
     <script src="/public/perso/project.js"></script>
     <script>var boards = document.getElementsByClassName('drawing-board'); for (var z = 0; z < boards.length; z++){ resetBoard(boards[z].getAttribute('id')); }</script>

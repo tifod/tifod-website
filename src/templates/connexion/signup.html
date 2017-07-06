@@ -1,14 +1,16 @@
 {% extends 'base.html' %}
 
+{% block title %}Inscription | tifod{% endblock %}
+
 {% block body %}
     {% include 'header.html' %}
     <div class="container text-center">
         <div class="form-card">
             {% if token_sent %}
                 <h3>On y est presque!</h3>
-                <p>Veuillez consultez vos emails ({{ email }}) pour confirmer votre inscription.
+                <p>Veuillez consultez vos emails ({{ email|raw }}) pour confirmer votre inscription.
                 <hr>
-                <p>Si <strong>{{ email }}</strong> n'est pas votre adresse email, veuillez <a href="/signup">revenir en arrière</a> et indiquer l'adresse correcte.</p>
+                <p>Si ce n'est pas votre adresse email, veuillez <a href="/signup">revenir en arrière</a> et indiquer l'adresse correcte.</p>
                 <p>Si vous ne recevez aucun email d'ici 15 minutes, veuillez vérifier que l'email ne se trouve pas dans vos spams.</p>
                 <p>Si vous ne l'avez toujours pas reçus, <a href="mailto:contact@tifod.com?subject=Email de confirmation manquant pour {{ email }}">contactez nous</a>.</p>
             {% else %}

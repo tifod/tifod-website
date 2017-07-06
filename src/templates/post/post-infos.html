@@ -4,9 +4,8 @@
             <span class="list-inline">
                 <img class="profil_pic" src="/public/img/user/{{ post.author_avatar }}">
                 <a href="/u/{{ post['author_id'] }}">{{ post['author_name'] }}</a>
-                <span title="utilisateur #{{ post['author_id'] }}" class="text-help">#{{ post['author_id'] }}</span>
             </span>
-            <span>{{ post['posted_on']|timeago }}</span>
+            <span title="{{ post.posted_on }}">{{ post.posted_on|timeago }}</span>
             <button id="{{ post['id'] }}-downvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="{% if 'vote_post'|is_allowed_for(project_type) %}ajaxPingUrl('/vote/minus/{{ post['id'] }}',this,updateScore){% else %}alert('Vous ne pouvez voter qu\'en étant connecté'){% endif %}"><span class="fa fa-caret-down"></span></button>
             <span class="mdl-tooltip mdl-tooltip--top post-score-minus" for="{{ post['id'] }}-downvote">{{ post['vote_minus'] }}</span>
             
@@ -14,62 +13,28 @@
             
             <button id="{{ post['id'] }}-upvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="{% if 'vote_post'|is_allowed_for(project_type) %}ajaxPingUrl('/vote/plus/{{ post['id'] }}',this,updateScore){% else %}alert('Vous ne pouvez voter qu\'en étant connecté'){% endif %}"><span class="fa fa-caret-up"></span></button>
             <span class="mdl-tooltip mdl-tooltip--top post-score-plus" for="{{ post['id'] }}-upvote">{{ post['vote_plus'] }}</span>
-            
-            <a id="{{ post['id'] }}-tree-link" href="#{{ post['id'] }}-post-tree" class="tree-link mdl-button mdl-js-button mdl-button--icon" data-scroll>
-                <i class="fa fa-code-fork fa-flip-vertical fa-lg fa-fw"></i>
-            </a>
-            <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-tree-link">Voir ce post dans l'arborescence du projet</span>
-            
-            <button id="{{ post['id'] }}-share-btn" data-msg="URL copié" class="mdl-button mdl-js-button mdl-button--icon btn-copy-js" data-clipboard-text="{{ server_name }}/p/{{ projectId }}#{{ post['id'] }}">
-                <i class="fa fa-fw fa-link"></i>
-            </button>
-            <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-share-btn">Copier l'URL de ce post</span>
-            
-            {% if post['user_id_pin'] != 0 %}
+			
+			{% if post['user_id_pin'] != 0 %}
                 <span>
-                    {% if 'pin_post'|is_allowed_for(project_type) %}<a href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >{% endif %}
-                        <span id="{{ post['id'] }}-toggle-pin" class="fa-stack fa-fw fa-lg">
-                            <i class="fa fa-circle fa-stack-2x"></i>
-                            <i class="fa fa-thumb-tack fa-inverse fa-stack-1x"></i>
-                        </span>
-                    {% if 'pin_post'|is_allowed_for(project_type) %}</a>{% endif %}
+					<span id="{{ post['id'] }}-toggle-pin" class="fa-stack fa-fw fa-lg">
+						<i class="fa fa-circle fa-stack-2x"></i>
+						<i class="fa fa-thumb-tack fa-inverse fa-stack-1x"></i>
+					</span>
                     <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-toggle-pin">Épinglé par <strong>{% if current_user.user_id == post['user_id_pin'] %}vous-même{% else %}{{ post['user_pseudo_pin'] }}{% endif %}</strong></span>
                 </span>
-            {% else %}
-                {% if 'pin_post'|is_allowed_for(project_type) %}
-                    <a id="{{ post['id'] }}-toggle-pin"class="mdl-button mdl-js-button mdl-button--icon"  href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" >
-                        <i class="fa fa-thumb-tack fa-fw"></i>
-                    </a>
-                    <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-toggle-pin">Épingler ce post</span>
-                {% endif %}
             {% endif %}
-            
-            {% if 'delete_post'|is_allowed_for(project_type) %}
-                <a id="{{ post['id'] }}-delete" class="mdl-button mdl-js-button mdl-button--icon" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ post['id'] }}?redirect=/p/{{ projectId }}"><i class="fa fa-trash text-danger fa-fw"></i></a>
-                <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-delete">Supprimer ce post</span>
-            {% endif %}
-                
-            {% if 'reset_score_post'|is_allowed_for(project_type) %}
-                <a id="{{ post['id'] }}-resetScore" class="mdl-button mdl-js-button mdl-button--icon" href="/resetPostScore/{{ post['id'] }}?redirect=/p/{{ projectId }}">
-                    <i class="fa fa-undo fa-fw"></i>
-                </a>
-                <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-resetScore">Ramener le score à zéro</span>
-            {% endif %}
-        </div>
-        
-        {% if 'add_post'|is_allowed_for(project_type) %}
-            <label class="list-inline post-more-btn" for="{{ post['id'] }}-checkbox-more">
-                <span class="mdl-button mdl-js-button">
-                    Ajouter une suite
-                </span>
-            </label>
-        {% endif %}
+		</div>
+		
+		<span id="{{ post['id'] }}-more" class="post-more-btn mdl-button mdl-js-button mdl-button--icon">
+			<i class="fa fa-ellipsis-v"></i>
+		</span>
+		<span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-more">Actions supplémentaires</span>
     </div>
     
     {% if 'add_post'|is_allowed_for(project_type) %}
         <input type="checkbox" id="{{ post['id'] }}-checkbox-more" class="checkbox-more" data-postid="{{ post['id'] }}">
         <div class="post-more-form">
-            {% include "post/add-content.html" %}
+            {% include "post/post-more/add-content.html" %}
         </div>
     {% endif %}
 </div>

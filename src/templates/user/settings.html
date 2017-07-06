@@ -1,22 +1,42 @@
 {% extends 'base.html' %}
 
-{% block title %}Paramètres{% endblock %}
+{% block title %}Paramètres | tifod{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#settings-preview').attr('style', 'padding: 1em;display: block;width: 100px;height: auto;margin: auto;');
+                    $('#settings-preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        $("#profil-pic-input").change(function(){ readURL(this); });
+        });
+    </script>
+{% endblock %}
 
 {% block body %}
     {% include 'header.html' %}
     <div class="container text-center">
         <h2>Paramètres</h2>
-        <h1><img class="profil_pic" src="/public/img/user/{{ current_user.avatar }}" alt="{{ current_user.pseudo }} avatar"></h1>
+        <div style="font-size: 200px;"><img class="profil_pic" src="/public/img/user/{{ current_user.avatar }}" alt="{{ current_user.pseudo }} avatar"></div>
         
         <h5>Votre photo de profil</h5>
         <form method="post" action="/settings" enctype="multipart/form-data">
             <label>
+                <img id="settings-preview" src="#" style="display: none;" alt="profil picture preview">
                 <span type="submit" class="mdl-button mdl-js-button mdl-button--raised"><i class="fa fa-fw fa-camera"></i></span>
-                <input type="file" name="new_value">
+                <input type="file" id="profil-pic-input" style="display: none;" name="new_value">
             </label>
             <button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Valider</button>
             <input type="hidden" name="action" value="new_avatar">
-            <input type="submit">
         </form>
         
         <h5>Votre pseudo</h5>
@@ -26,7 +46,7 @@
                 <input class="mdl-textfield__input" value="{{ current_user.pseudo }}" name="new_value" type="text">
             </div>
             <input type="hidden" name="action" value="new_user_name">
-            <button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Modifier</button>
+            <button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Modifier votre pseudo</button>
         </form>
         
         <h5>Votre description</h5>
@@ -35,7 +55,7 @@
                 <label class="mdl-textfield__label" for="description">Modifier votre description</label>
                 <textarea class="mdl-textfield__input" name="new_value" id="description" type="text" rows= "3" >{{ current_user.description }}</textarea>
             </div>
-            <div><button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Modifier</button></div>
+            <div><button type="submit" class="mdl-button mdl-js-button mdl-button--raised">Modifier votre description</button></div>
             <div class="text-help text-center">Nous supportons <a href="https://seps.flibuste.net/markdown_help">la syntaxe Markdown</a></div>
             <input type="hidden" name="action" value="new_description">
         </form>
