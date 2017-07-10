@@ -85,7 +85,7 @@ img { width: 100%; height: auto; }
 .prev, .next {
     text-shadow: 0 1px 0 white, 0 -1px 0 white, 1px 0 0 white, -1px 0 0 white;
     opacity: 0.5;
-    top: 50%;
+    height: 100%;
     width: 4em;
     z-index: 3;
     position: absolute;
