@@ -53,7 +53,7 @@ $(function(){
     });
     
     var boards = document.getElementsByClassName('drawing-board');
-    resetBoard(boards[boards.length - 1].getAttribute('id'));
+    if (boards.length > 0) resetBoard(boards[boards.length - 1].getAttribute('id'));
     $('.drawing-board-import').on('change', handleImage);
     function handleImage(e){
         var postId = event.target.getAttribute('data-postid');
