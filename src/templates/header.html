@@ -1,5 +1,5 @@
 <div class="header container{% if no_login_button %} text-center{% endif %}">
-    <a class="header-tifod-logo" href="/">tifod</a>
+    <a class="header-tifod-logo" href="/">tifod{% if dev_mode %}<span style="font-weight: 300"> | beta</span>{% endif %}</a>
     {% if not no_login_button %}
         {% if current_user %}
             <div class="header-right">
