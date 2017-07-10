@@ -13,7 +13,7 @@
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 
 <link rel="stylesheet" href="/min/?f=/public/perso/project.css,/public/treant/Treant.css,/public/drawingboard/drawingboard.min.css"/>
-<script src="/min/?f=/public/unveil.js,/public/drawingboard/drawingboard.min.js,/public/treant/vendor/raphael.js,/public/treant/Treant.js"></script>
+<script src="/min/?f=/public/unveil.js,/public/drawingboard/drawingboard.min.js,/public/treant/vendor/raphael.js,/public/treant/Treant.js,/public/perso/project.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -55,29 +55,12 @@
             </p>
         </div>            
     </div>
-    <div id="project-tree"></div>
-    <script>
-        var simple_chart_config = {
-        chart: { container: "#project-tree" },
-        nodeStructure: {{ project_json[0]['children'][0]|json_encode|raw }}
-        };
-        new Treant(simple_chart_config);
-        var windowWidth = $(window).width();
-        $(window).on('resize',function(){
-            if (windowWidth != $(window).width()){
-                new Treant(simple_chart_config);
-                windowWidth = $(window).width();
-            }
-        });
-    </script>
-    <script src="/public/perso/project.js"></script>
+    <div id="project-tree" data-structure='{{ project_json[0]["children"][0]|json_encode|raw }}'></div>
 {% elseif 'add_post'|is_allowed_for(project_type) %}
     {% set post = project[0] %}
     <div class="container" id="{{ post['id'] }}">
         {% include "post/post-more/add-content.html" %}
     </div>
-    <script src="/public/perso/project.js"></script>
-    <script>var boards = document.getElementsByClassName('drawing-board'); for (var z = 0; z < boards.length; z++){ resetBoard(boards[z].getAttribute('id')); }</script>
 {% else %}
     <div class="container text-center">
         <hr>

@@ -25,9 +25,7 @@ $(function(){
     }
 
     $("img.lazyload").unveil(500, function(){
-        $(this).load(function() {
-            resizePlayer();
-        });
+        $(this).load(resizePlayer);
     });
 
     var radioBtns = document.getElementsByClassName('link-radio-button');
@@ -35,6 +33,27 @@ $(function(){
         if (radioBtns[z].checked == true) showPost(radioBtns[z].parentNode.getAttribute('data-target'));
     }
     
+    if (document.getElementById('project-tree') != null){
+        var simple_chart_config = {
+        chart: { container: "#project-tree" },
+        nodeStructure: JSON.parse(document.getElementById('project-tree').getAttribute('data-structure'))
+        };
+        new Treant(simple_chart_config);
+        var there_is_tree = true;
+    } else {
+        var there_is_tree = false;
+    }
+    var windowWidth = $(window).width();
+    $(window).resize(function(){
+        if (windowWidth != $(window).width()){
+            if (there_is_tree) new Treant(simple_chart_config);
+            windowWidth = $(window).width();
+            resizePlayer();
+        }
+    });
+    
+    var boards = document.getElementsByClassName('drawing-board');
+    resetBoard(boards[boards.length - 1].getAttribute('id'));
     $('.drawing-board-import').on('change', handleImage);
     function handleImage(e){
         var postId = event.target.getAttribute('data-postid');
@@ -160,7 +179,6 @@ $(function(){
 
     // project player height init
     resizePlayer();
-    window.addEventListener('resize', resizePlayer);
 
     // post nav init
     var links = document.getElementsByClassName('link');
