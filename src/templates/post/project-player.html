@@ -55,7 +55,8 @@
             </p>
         </div>            
     </div>
-    <div id="project-tree" data-structure="{{ project_json.0.children.0|replace({''':'&#39;'})|json_encode|raw }}"></div>
+    <div id="project-tree"></div>
+    <script>var tree_structure = {{ project_json.0.children.0|json_encode|raw }}</script>
 {% elseif 'add_post'|is_allowed_for(project_type) %}
     {% set post = project[0] %}
     <div class="container" id="{{ post.id }}">

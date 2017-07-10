@@ -237,7 +237,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
                     'id' => $a['id']
                 ];
             }
-            $project_json = createTree($new, array($posts[$topPostId]));        
+            $project_json = createTree($new, array($posts[$topPostId]));
             
             return $this->view->render('post/project-player.html', ['project' => $project, 'project_type' => $project_type, 'projectId' => $projectId, 'project_json' => $project_json]);
         } else {

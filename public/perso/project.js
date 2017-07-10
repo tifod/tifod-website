@@ -36,7 +36,7 @@ $(function(){
     if (document.getElementById('project-tree') != null){
         var simple_chart_config = {
         chart: { container: "#project-tree" },
-        nodeStructure: JSON.parse(document.getElementById('project-tree').getAttribute('data-structure'))
+        nodeStructure: tree_structure
         };
         new Treant(simple_chart_config);
         var there_is_tree = true;
