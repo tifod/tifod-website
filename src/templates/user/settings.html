@@ -6,18 +6,18 @@
     {{ parent() }}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script>
-        $(document).ready(function(){
+        $(function(){
             function readURL(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    $('#settings-preview').attr('style', 'padding: 1em;display: block;width: 100px;height: auto;margin: auto;');
-                    $('#settings-preview').attr('src', e.target.result);
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#settings-preview').attr('style', 'padding: 1em;display: block;width: 100px;height: auto;margin: auto;');
+                        $('#settings-preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(input.files[0]);
                 }
-                reader.readAsDataURL(input.files[0]);
             }
-        }
-        $("#profil-pic-input").change(function(){ readURL(this); });
+            $("#profil-pic-input").change(function(){ readURL(this); });
         });
     </script>
 {% endblock %}

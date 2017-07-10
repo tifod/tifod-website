@@ -1,10 +1,9 @@
-﻿{# template utilisé quand un projet est vide et pour ajouter du contenu à chaque post #}
 <div>
     <form action="javascript:void(0);">
         <p class="list-inline">
             <label class="list-inline">
-                Importer un fichier
-                <br><input onclick="this.value='';" class="" type="file" onchange="handleImage()" data-postid="{{ post['id'] }}">
+                <span>Importer un fichier à modifier</span>
+                <br><input onclick="this.value='';" class="drawing-board-import" type="file" data-postid="{{ post['id'] }}">
                 <span class="file-dimensions"></span>
             </label>
         </p>
@@ -19,15 +18,27 @@
             </div>
         </p>
     </form>
-    <form class="drawing-form text-center" action="/add-post" method="post">
+    <form class="drawing-form text-center" action="/add-post" method="post" enctype="multipart/form-data">
         <div class="drawing-board-wrapper">
             <div class="drawing-board" id="{{ post['id'] }}-drawing-board"></div>
         </div>
         <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Envoyer votre dessin</button>
         
+        
+        <input type="hidden" name="is_an_edit" value="{% if current_page_is_edit_page %}true{% else %}false{% endif %}">
         <input type="hidden" name="image" value="">
         <input type="hidden" name="parent_id" value="{{ post['id'] }}">
-        <input type="hidden" name="project_id" value="{{ projectId }}">
+    </form>
+    <hr>
+    <div class="text-center">Ou envoyez autre chose</div>
+    <form class="text-center" action="/add-post" method="post" enctype="multipart/form-data">
+        <p class="list-inline">
+            <input type="file" name="image">
+            <button class="mdl-button mdl-js-button mdl-button--raised">Envoyer un fichier</button>
+        </p>
+        
+        <input type="hidden" name="is_an_edit" value="{% if current_page_is_edit_page %}true{% else %}false{% endif %}">
+        <input type="hidden" name="parent_id" value="{{ post['id'] }}">
     </form>
     <form class="list-inline text-center" action="/add-post" method="post">
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
@@ -36,8 +47,8 @@
         </div>
         <button class="mdl-button mdl-js-button mdl-button--raised">Envoyer</button>
         
+        <input type="hidden" name="is_an_edit" value="{% if current_page_is_edit_page %}true{% else %}false{% endif %}">
         <input type="hidden" name="parent_id" value="{{ post['id'] }}">
-        <input type="hidden" name="project_id" value="{{ projectId }}">
     </form>
     <div class="text-help text-center">Nous supportons <a href="https://seps.flibuste.net/markdown_help">la syntaxe Markdown</a></div>
 </div>

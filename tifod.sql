@@ -21,7 +21,7 @@ SET time_zone = "+02:00";
 --
 -- Base de données :  `tifod`
 --
-CREATE DATABASE IF NOT EXISTS `tifod` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE DATABASE IF NOT EXISTS `tifod` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `tifod`;
 
 -- --------------------------------------------------------
@@ -42,11 +42,12 @@ CREATE TABLE IF NOT EXISTS `post` (
   `score_result` int(11) NOT NULL DEFAULT '0',
   `score_percent` int(11) NOT NULL DEFAULT '0',
   `user_id_pin` int(11) NOT NULL DEFAULT '0',
-  `is_an_edit` tinyint(4) NOT NULL DEFAULT '0',
+  `is_an_edit` tinyint(1) NOT NULL DEFAULT '0',
+  `auto_pin_edits` tinyint(1) NOT NULL DEFAULT '0',
   `posted_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `author_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -57,9 +58,9 @@ CREATE TABLE IF NOT EXISTS `post` (
 CREATE TABLE IF NOT EXISTS `post_vote` (
   `post_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `is_upvote` tinyint(4) NOT NULL,
+  `is_upvote` tinyint(1) NOT NULL,
   PRIMARY KEY (`post_id`,`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -72,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `project` (
   `project_type` varchar(100) NOT NULL,
   `project_root_post_id` int(11) NOT NULL,
   PRIMARY KEY (`project_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -85,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `project_role` (
   `project_id` int(11) NOT NULL,
   `project_role` varchar(100) NOT NULL DEFAULT 'none',
   PRIMARY KEY (`user_id`,`project_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -100,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `token` (
   `expiration_date` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `email` varchar(100) NOT NULL,
   PRIMARY KEY (`token_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -117,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `email` varchar(255) NOT NULL,
   `platform_role` varchar(100) NOT NULL DEFAULT 'regular_member',
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

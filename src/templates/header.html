@@ -5,14 +5,13 @@
             <div class="header-right">
                 <label id="header-user-infos" class="header-user-infos list-inline">
                     <img src="/public/img/user/{{ current_user.avatar }}">
-                    {{ current_user.pseudo }}
+                    <span>{{ current_user.pseudo }}</span>
                     <i class="fa fa-caret-down"></i>
                 </label>
             
-                <div class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
-                for="header-user-infos">
-                    <a href="/u/{{ current_user.user_id }}" class="mdl-menu__item"><img class="profil_pic" src="/public/img/user/{{ current_user.avatar }}"> Votre profil</a>
-                    <a href="/settings" class="mdl-menu__item">Paramètres</a>
+                <div class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="header-user-infos">
+                    <a href="/u/{{ current_user.user_id }}" class="mdl-menu__item list-inline"><img class="profil_pic" src="/public/img/user/{{ current_user.avatar }}">Votre profil</a>
+                    <a href="/settings" class="mdl-menu__item list-inline"><i class="fa fa-cog"></i>Paramètres</a>
                     <a href="/logout?redirect={{ current_url }}" class="mdl-menu__item">Déconnexion</a>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 $(function(){
-        function goToPostBasedOnHash () {
+    function goToPostBasedOnHash () {
         var hash = window.location.hash.slice(1);
         if (/^\d+$/.test(hash)){
             goToPost(hash);
@@ -34,7 +34,8 @@ $(function(){
     for (var z = 0; z < radioBtns.length; z++){
         if (radioBtns[z].checked == true) showPost(radioBtns[z].parentNode.getAttribute('data-target'));
     }
-
+    
+    $('.drawing-board-import').on('change', handleImage);
     function handleImage(e){
         var postId = event.target.getAttribute('data-postid');
         
@@ -159,6 +160,7 @@ $(function(){
 
     // project player height init
     resizePlayer();
+    window.addEventListener('resize', resizePlayer);
 
     // post nav init
     var links = document.getElementsByClassName('link');
@@ -256,7 +258,7 @@ $(function(){
     };
 
     function resizePlayer(){
-        if (document.getElementsByClassName('post').length != 0){
+        if (document.getElementsByClassName('active-post').length != 0){
             // resize the ".posts" to the post height
             var posts = document.getElementsByClassName('active-post');
             for(var z = 0; z < posts.length; z++) {
@@ -343,4 +345,9 @@ $(function(){
         xmlhttp.open("GET", url, true);
         xmlhttp.send();
     }
+    $('.vote-btn').on('click', function(){
+        var id = this.getAttribute('id').split('-');
+        var sign = (id[1] == 'upvote') ? 'plus' : 'minus';
+        ajaxPingUrl('/vote/' + sign + '/' + id[0],this,updateScore)
+    });
 });

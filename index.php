@@ -8,6 +8,27 @@ $app = new \Slim\App(['settings' => [ 'addContentLengthHeader' => false, "displa
 $container = $app->getContainer();
 
 // personnal functions
+function update_edit_id ($post_id){
+    $db = MyApp\Utility\Db::getPDO();
+    $reponse = $db->prepare ('SELECT id FROM post WHERE parent_id = :post_id AND is_an_edit = 1 AND user_id_pin != 0 ORDER BY score_percent DESC, posted_on DESC LIMIT 1');
+    $reponse->execute(['post_id' => $post_id]);
+    $winning_edit = $reponse->fetch()['id'];
+    $reponse = $db->prepare('UPDATE post SET edit_id = :edit_id WHERE id = :post_id');
+    $reponse->execute(['post_id' => $post_id, 'edit_id' => (empty($winning_edit) ? 0 : $winning_edit)]);
+    $reponse->closeCursor();
+}
+function confidence_percent ($ups, $downs){
+    // calcul basé sur https://medium.com/hacking-and-gonzo/how-reddit-ranking-algorithms-work-ef111e33d0d9
+    // "Wilson score interval"
+    $n = $ups + $downs;
+    if ($n == 0) return 0;
+    $z = 1.281551565545;
+    $p = $ups / $n;
+    $left = $p + 1/(2*$n)*$z*$z;
+    $right = $z*sqrt($p*(1-$p)/$n + $z*$z/(4*$n*$n));
+    $under = 1+1/$n*$z*$z;
+    return (($left - $right) / $under) * 100;
+}
 function createTree($children_list, $children){
     $tree = array();
     foreach ($children as $child){
@@ -26,7 +47,7 @@ function user_can_do ($action_name, $project_type) {
         ],
         'open_public' => [
             'edit_post' => ['regular_member', 'director', 'moderator'],
-            'pin_edit' => ['post_owner'],
+            'pin_edit_post' => ['post_owner', 'director', 'moderator'],
             'add_post' => ['regular_member', 'director', 'moderator'],
             'view_project' => ['not_a_member', 'regular_member', 'director', 'moderator'],
             'vote_post' => ['regular_member', 'director', 'moderator'],
@@ -37,7 +58,7 @@ function user_can_do ($action_name, $project_type) {
         ],
         'closed_public' => [
             'edit_post' => ['regular_member', 'director', 'moderator'],
-            'pin_edit' => ['post_owner'],
+            'pin_edit_post' => ['post_owner', 'director', 'moderator'],
             'add_post' => ['director', 'moderator'],
             'view_project' => ['not_a_member', 'regular_member', 'director', 'moderator'],
             'vote_post' => ['regular_member', 'director', 'moderator'],
@@ -48,7 +69,7 @@ function user_can_do ($action_name, $project_type) {
         ],
         'closed_private' => [
             'edit_post' => ['director', 'moderator'],
-            'pin_edit' => ['post_owner'],
+            'pin_edit_post' => ['post_owner', 'director', 'moderator'],
             'add_post' => ['director', 'moderator'],
             'view_project' => ['director', 'moderator'],
             'vote_post' => ['director', 'moderator'],
@@ -156,7 +177,7 @@ $app->post('/update-from-github', function ($request, $response, $args) {
 	return "<pre>$output</pre>";
 });
 $app->get('/p/{projectId}', function ($request, $response, $args) {
-    $projectId = $args['projectId'];    
+    $projectId = $args['projectId'];
     
     $db = MyApp\Utility\Db::getPDO();
     $reponse = $db->query ('select project_id from post where parent_id = 0');
@@ -181,7 +202,13 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             $_SESSION['current_user']['current_project_role'] = empty($role) ? 'regular_member' : $role;
         }
         if (user_can_do('view_project',$project_type)){
-            $reponse = $db->query ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar from post p where project_id = ' . $projectId . ' and is_an_edit = 0 order by user_id_pin desc, score_percent desc');
+            $edit_values_needed = ['content', 'content_type', 'posted_on', 'author_id'];
+            $edit_query = ', (select avatar from user where user_id = (IF(p.edit_id = 0,NULL,(SELECT author_id FROM post tp WHERE tp.id = p.edit_id)))) edit_author_avatar, (select user_name from user where user_id = (IF(p.edit_id = 0,NULL,(SELECT author_id FROM post tp WHERE tp.id = p.edit_id)))) edit_author_name';
+            foreach ($edit_values_needed as $edit_field){
+                $edit_query .= ', (IF(p.edit_id = 0,NULL,(SELECT ' . $edit_field . ' FROM post tp WHERE tp.id = p.edit_id))) edit_' . $edit_field;
+            }
+            $reponse = $db->prepare ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar, (SELECT COUNT(*) FROM post tp WHERE tp.parent_id = p.id AND tp.is_an_edit = 1) edit_number' . $edit_query . ' from post p where project_id = :project_id and is_an_edit = 0 order by user_id_pin desc, score_percent desc, score_result desc, posted_on desc');
+            $reponse->execute([ 'project_id' => $projectId ]);
             $donnees = [];
             while ($donnees[] = $reponse->fetch());
             array_pop($donnees);
@@ -193,23 +220,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
 
             // creating a comprehensive list of the projet posts
             foreach ($donnees as $k => $post){
-                $posts [] = [
-                    'id' => $post['id'],
-                    'content' => $post['content'],
-                    'content_type' => $post['content_type'],
-                    'parent_id' => $post['parent_id'],
-                    'path' => $post['path'],
-                    'score_result' => $post['score_result'],
-                    'vote_minus' => $post['vote_minus'],
-                    'vote_plus' => $post['vote_plus'],
-                    'score_percent' => $post['score_percent'],
-                    'user_id_pin' => $post['user_id_pin'],
-                    'user_pseudo_pin' => $post['user_pseudo_pin'],
-                    'posted_on' => date($post['posted_on']),
-                    'author_id' => $post['author_id'],
-                    'author_name' => $post['author_name'],
-                    'author_avatar' => $post['author_avatar']
-                ];
+                $posts [] = $post;
                 if ($post['parent_id'] == 0) $topPostId = $k;
             }
             
@@ -265,49 +276,74 @@ $app->post('/create-project', function ($request, $response) {
     header('Location: /login'); exit();
 });
 $app->post('/add-post', function ($request, $response) {
-    if ((!empty($_POST['content']) or !empty($_POST['image'])) and isset($_POST['parent_id']) and isset($_POST['project_id'])){
+    if ((!empty($_POST['content']) or !empty($_POST['image']) or !empty($_FILES['image']['name'])) and isset($_POST['parent_id']) and isset($_POST['is_an_edit'])){
         $db = MyApp\Utility\Db::getPDO();
-        $reponse = $db->prepare ('select project_type, (SELECT COUNT(*) FROM post WHERE id = :parent_id) AS id_parent_id_valid from project where project_id = :project_id');
+        $reponse = $db->prepare ('select project_type, (SELECT COUNT(*) FROM post WHERE id = :parent_id) id_parent_id_valid, (SELECT project_id FROM post WHERE id = :parent_id) project_id, (SELECT auto_pin_edits FROM post WHERE id = :parent_id) auto_pin_edits, (SELECT author_id FROM post WHERE id = :parent_id) parent_author_id from project where project_id = (SELECT project_id FROM post WHERE id = :parent_id)');
         $reponse->execute([
-			'project_id' => $_POST['project_id'],
 			'parent_id' => $_POST['parent_id']
 		]);
         $donnees = $reponse->fetch();
 		$project_type = $donnees['project_type'];
+		$project_id = $donnees['project_id'];
+		$auto_pin_edits = $donnees['auto_pin_edits'];
+		$parent_author_id = $donnees['parent_author_id'];
 		if ($donnees['id_parent_id_valid'] == 0) throw new Exception ("Vous tentez de répondre à un post qui n'existe plus (il a été supprimé)");
         if (user_can_do('add_post',$project_type)){
-            $reponse = $db->prepare ("INSERT INTO post(content, content_type, is_an_edit, parent_id, project_id, path, author_id) VALUES (:content, :content_type, :is_an_edit, :parent_id, :project_id, (SELECT IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id))), :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/') WHERE id = (SELECT LAST_INSERT_ID())");
+            $reponse = $db->prepare ("INSERT INTO post(content, content_type, is_an_edit, parent_id, project_id, path, author_id) VALUES (:content, :content_type, :is_an_edit, :parent_id, :project_id, (IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id))), :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/')" . (($auto_pin_edits == '0') ? '' : ", user_id_pin = " . $parent_author_id) . " WHERE id = (SELECT LAST_INSERT_ID())");
             $reponse->execute([
                 'content' => (empty($_POST['content']) ? 'file' : $_POST['content']),
                 'content_type' => (empty($_POST['content']) ? 'file' : 'text'),
-                'is_an_edit' => (empty($_POST['is_an_edit']) ? 0 : 1),
+                'is_an_edit' => (($_POST['is_an_edit'] == 'true') ? 1 : 0),
                 'parent_id' => $_POST['parent_id'],
-                'project_id' => $_POST['project_id'],
-                'author_id' => $_SESSION['current_user']['user_id']
+                'project_id' => $project_id,
+                'author_id' => $_SESSION['current_user']['user_id'],
+                'parent_author_id' => $parent_author_id
             ]);
             $reponse->closeCursor();
 			$reponse = $db->query('SELECT LAST_INSERT_ID()');
 			$post_id = $reponse->fetch()[0];
             if (empty($_POST['content'])){
                 // need to get infos about the post
-				$fileName = MyApp\Utility\Math::getARandomString(6) . '-' . $post_id . '.png';
+				if (!empty($_POST['image'])){
+                    $ext = "png";
+                } else {
+                    $allowed = ['gif', 'png' ,'jpg', 'jpeg', 'svg'];
+                    $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                    if(!in_array($ext,$allowed)) { throw new Exception ("Format de fichier non supporté (formats acceptés : " . implode(", ",$allowed) . ")"); }
+                }
+                $fileName = MyApp\Utility\Math::getARandomString(6) . '-' . $post_id . '.' . $ext;
+                
                 $reponse->closeCursor();
                 $reponse = $db->prepare("UPDATE post SET content = :fileName WHERE id = :post_id");
                 $reponse->execute(['fileName' => $fileName, 'post_id' => $post_id]);
                 $reponse->closeCursor();
                 
-                $img = filter_input(INPUT_POST, 'image', FILTER_SANITIZE_URL);
-                $img = str_replace(' ', '+', str_replace('data:image/png;base64,', '', $img));
-                $data = base64_decode($img);
-                file_put_contents(__DIR__ . '/public/img/post/' . $fileName, $data);
-                header('Location: /p/'.$_POST['project_id'].'#'.$post_id); exit();
+                if (!empty($_POST['image'])){
+                    $img = filter_input(INPUT_POST, 'image', FILTER_SANITIZE_URL);
+                    $img = str_replace(' ', '+', str_replace('data:image/png;base64,', '', $img));
+                    $data = base64_decode($img);
+                    file_put_contents(__DIR__ . '/public/img/post/' . $fileName, $data);
+                } else {
+                    if (!move_uploaded_file($_FILES['image']['tmp_name'], __DIR__.'/public/img/post/'.$fileName)) {
+                        echo '<pre>';
+                        print_r($_FILES);
+                        echo '</pre>';
+                        throw new Exception ("Attaque potentielle par téléchargement de fichiers");
+                    }
+                }
             }
-            header('Location: /p/'.$_POST['project_id'].'#'.$post_id); exit();
+            if ($_POST['is_an_edit'] == 'true'){
+                update_edit_id($_POST['parent_id']);
+                header('Location: /edit/'.$_POST['parent_id'].'#'.$post_id);
+            } else {
+                header('Location: /p/'.$project_id.'#'.$post_id);
+            }
+            exit();
         } else {
             throw new Exception ("Vous n'êtes pas autorisés à poster dans ce projet, veuillez contacter le créateur de ce projet, ou bien vous adressez à l'équipe tifod si vous pensez que c'est un bug");
         }
     } else {
-        throw new Exception ('Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "project_id")');
+        throw new Exception ('Vous avez oublié de remplir certains champs ("content" ou "image", "parent_id", "is_an_edit")');
     }
 });
 $app->get('/edit/{post-id}', function ($request, $response, $args) {
@@ -315,7 +351,15 @@ $app->get('/edit/{post-id}', function ($request, $response, $args) {
 	$reponse = $db->prepare ('select project_type from project where project_id = (SELECT project_id FROM post WHERE id = :post_id)');
     $reponse->execute(['post_id' => $args['post-id']]);
     $project_type = $reponse->fetch()['project_type'];
-	return $this->view->render('post/edit.html', ['project_type' => $project_type]);
+    $reponse = $db->prepare ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar from post p where id = :post_id');
+    $reponse->execute(['post_id' => $args['post-id']]);
+    $parent_post = $reponse->fetch();
+    if (isset($_SESSION['current_user']) and $parent_post['author_id'] == $_SESSION['current_user']['user_id']) $_SESSION['current_user']['current_project_role'] = 'post_owner';
+    $reponse = $db->prepare ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar from post p where parent_id = :post_id and is_an_edit = 1 order by user_id_pin desc, score_percent desc, score_result desc, posted_on desc');
+    $reponse->execute(['post_id' => $args['post-id']]);
+    while ($modifications[] = $reponse->fetch());
+    array_pop($modifications);
+    return $this->view->render('post/edit.html', ['parent_post' => $parent_post, 'modifications' => $modifications, 'project_type' => $project_type]);
 });
 $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
     $db = MyApp\Utility\Db::getPDO();
@@ -323,14 +367,15 @@ $app->get('/delete-post/{post-id}', function ($request, $response, $args) {
     $reponse->execute(['post_id' => $args['post-id']]);
     $project_type = $reponse->fetch()['project_type'];
     if (user_can_do('delete_post',$project_type)){
-        $reponse = $db->prepare("SELECT content, content_type FROM post WHERE id = :post_id");
+        $reponse = $db->prepare("SELECT content, content_type, parent_id, is_an_edit FROM post WHERE id = :post_id");
         $reponse->execute([ 'post_id' => $args['post-id'] ]);
-        while ($donnees [] = $reponse->fetch());
-        if ($donnees[0]['content_type'] == 'file' and file_exists(__DIR__ . '/public/img/post/'.$donnees[0]['content'])) unlink(__DIR__ . '/public/img/post/'.$donnees[0]['content']);
+        $donnees = $reponse->fetch();
+        if ($donnees['content_type'] == 'file' and file_exists(__DIR__ . '/public/img/post/'.$donnees['content'])) unlink(__DIR__ . '/public/img/post/'.$donnees['content']);
         
         $reponse = $db->prepare ("DELETE FROM post_vote WHERE post_vote.post_id IN (SELECT id FROM post WHERE path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%')); DELETE FROM post_vote WHERE post_id = :post_id; DELETE FROM post WHERE path LIKE concat('%', (select * from (select path from post where id = :post_id) p), '%'); DELETE FROM project_role WHERE project_id = (SELECT project_id FROM project WHERE project_root_post_id = :post_id); DELETE FROM project WHERE project_root_post_id = :post_id;");
         $reponse->execute([ 'post_id' => $args['post-id'] ]);
         $reponse->closeCursor();
+        if ($donnees['is_an_edit']) update_edit_id($donnees['parent_id']);
     }
     header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
 });
@@ -355,42 +400,73 @@ $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
                     $query = 'update post set ' . $t[0] . ' = ' . $t[0] . ' + 1, score_result = score_result ' . $t[1] . ' 1 where id = :post_id; INSERT INTO post_vote (post_id, user_id, is_upvote) VALUES (:post_id, :user_id, ' . $t[2] . ');';
                 } else if (($donnees[0]['is_upvote'] === '1' and $args['vote-sign'] == 'minus') or ($donnees[0]['is_upvote'] === '0' and $args['vote-sign'] == 'plus')) {
                     $t = ($args['vote-sign'] == 'minus') ? ['vote_plus', '-'] : ['vote_minus', '+'];
-                    $query = 'delete from post_vote where post_id = :post_id and user_id = :user_id; update post set ' . $t[0] . ' = ' . $t[0] . ' - 1, score_result = score_result ' . $t[1] . ' 1 where id = :post_id;';
+                    $query = 'delete FROM post_vote where post_id = :post_id and user_id = :user_id; update post set ' . $t[0] . ' = ' . $t[0] . ' - 1, score_result = score_result ' . $t[1] . ' 1 where id = :post_id;';
                 }
-                $reponse = $db->prepare ($query . ' update post set score_percent = (select * from (select ((vote_plus*100)/(vote_plus + vote_minus)) from post p where id = :post_id) p) where id = :post_id ;');
+                
+                $reponse = $db->prepare ($query);
                 $reponse->execute([
                     'post_id' => $args['post-id'],
                     'user_id' => $_SESSION['current_user']['user_id']
                 ]);
+                
+                $reponse = $db->prepare('SELECT vote_plus, vote_minus FROM post WHERE id = :post_id');
+                $reponse->execute([ 'post_id' => $args['post-id'] ]);
+                $donnees = $reponse->fetch();
+                
+                $confidence = confidence_percent($donnees['vote_plus'], $donnees['vote_minus']);
+                
+                $reponse = $db->prepare('update post set score_percent = :confidence where id = :post_id');
+                $reponse->execute([
+                    'confidence' => $confidence,
+                    'post_id' => $args['post-id']
+                ]);
             }
             
-            $reponse = $db->prepare ('select score_percent, score_result, vote_minus, vote_plus from post where id = :post_id');
+            $reponse = $db->prepare ('select score_percent, score_result, vote_minus, vote_plus FROM post where id = :post_id');
             $reponse->execute(['post_id' => $args['post-id']]);
             $donnees = [];
             while ($donnees[] = $reponse->fetch());
             $reponse->closeCursor();
+            update_edit_id($args['post-id']);
             die(json_encode($donnees));
         } else {
             die('Url invalide');
         }
     }
 });
-$app->get('/togglePin/{post-id}', function ($request, $response, $args) {
+$app->get('/toggleAutoPin/{post-id}', function ($request, $response, $args) {
     $db = MyApp\Utility\Db::getPDO();
-    $reponse = $db->prepare ('select project_type from project where project_id = (SELECT project_id FROM post WHERE id = :post_id)');
+	$reponse = $db->prepare ('select project_type from project where project_id = (SELECT project_id FROM post WHERE id = :post_id)');
     $reponse->execute(['post_id' => $args['post-id']]);
     $project_type = $reponse->fetch()['project_type'];
-    if (user_can_do('pin_post',$project_type)){
+    $reponse = $db->prepare ('select author_id from post where id = :post_id');
+    $reponse->execute(['post_id' => $args['post-id']]);
+    $donnees = $reponse->fetch();
+    if (isset($_SESSION['current_user']) and $donnees['author_id'] == $_SESSION['current_user']['user_id']) $_SESSION['current_user']['current_project_role'] = 'post_owner';
+    if (user_can_do('pin_edit_post',$project_type)){
+        $reponse = $db->prepare ('UPDATE post SET auto_pin_edits = (IF (auto_pin_edits = 0,1,0)) where id = :post_id; UPDATE post SET user_id_pin = (IF (user_id_pin = 0,:author_id,0)) WHERE parent_id = :post_id AND is_an_edit = 1;');
+        $reponse->execute([
+            'post_id' => $args['post-id'],
+            'author_id' => $_SESSION['current_user']['user_id']
+        ]);
+        $reponse->closeCursor();
+        update_edit_id($args['post-id']);
+        header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
+    }
+});
+$app->get('/togglePin/{post-id}', function ($request, $response, $args) {
+    $db = MyApp\Utility\Db::getPDO();
+    $reponse = $db->prepare ('select project_type, (SELECT is_an_edit FROM post WHERE id = :post_id) is_an_edit, (SELECT author_id FROM post WHERE id = :post_id) post_author_id, (SELECT parent_id FROM post WHERE id = :post_id) parent_id from project where project_id = (SELECT project_id FROM post WHERE id = :post_id)');
+    $reponse->execute(['post_id' => $args['post-id']]);
+    $donnees = $reponse->fetch();
+    if ((user_can_do('pin_post',$donnees['project_type']) and $donnees['is_an_edit'] == '0') or (isset($_SESSION['current_user']['user_id']) and user_can_do('pin_edit_post',$donnees['project_type']) and $donnees['is_an_edit'] == '1' and $donnees['post_author_id'] == $_SESSION['current_user']['user_id'])){
         $reponse = $db->prepare ('UPDATE post SET user_id_pin = (IF (user_id_pin = 0,:user_id_pin,0)) where id = :post_id');
         $reponse->execute([
             'user_id_pin' => $_SESSION['current_user']['user_id'],
             'post_id' => $args['post-id']
         ]);
-        // $reponse = $db->prepare ('select user_id_pin from post where id = :post_id');
-        // $reponse->execute(['post_id' => $args['post-id']]);
-        // while ($donnees[] = $reponse->fetch());
-        // die(json_encode($donnees));
         $reponse->closeCursor();
+        update_edit_id($donnees['parent_id']);
         header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'].'#'.$args['post-id'])); exit();
     }
 });
@@ -402,6 +478,7 @@ $app->get('/resetPostScore/{post-id}', function ($request, $response, $args) {
     if (user_can_do('reset_score_post',$project_type)){
 		$reponse = $db->prepare ('update post set score_percent = 0, score_result = 0, vote_minus = 0, vote_plus = 0 where id = :post_id; delete from post_vote where post_id = :post_id;');
         $reponse->execute(['post_id' => $args['post-id']]);
+        update_edit_id($args['post-id']);
         header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect']));
     }
 	$reponse->closeCursor();
@@ -433,7 +510,7 @@ $app->post('/login', function ($request, $response, $args) {
                 'pseudo' => $donnees[0]['user_name'],
                 'email' => $donnees[0]['email'],
                 'avatar' => $donnees[0]['avatar'],
-                'description' => base64_decode($donnees[0]['description']),
+                'description' => $donnees[0]['description'],
                 'platform_role' => $donnees[0]['platform_role']
             ];
         } else {
@@ -470,7 +547,7 @@ $app->get('/u/{user_id}', function ($request, $response, $args) {
             'pseudo' => $donnees[0]['user_name'],
             'avatar' => $donnees[0]['avatar'],
             'platform_role' => $donnees[0]['platform_role'],
-            'description' => base64_decode($donnees[0]['description']),
+            'description' => $donnees[0]['description'],
             'posts' => $posts
         ];
         return $this->view->render('user/profile.html', ['user' => $user]);
@@ -603,11 +680,9 @@ $app->post('/settings', function ($request, $response, $args) {
             if (empty($_POST['new_value'])) throw new Exception ("Vous ne pouvez pas avoir de pseudo vide");
             $action = 'user_name';
             $new_value = $_POST['new_value'];
-            $_SESSION['current_user']['pseudo'] = $new_value;
         } elseif ($_POST['action'] == 'new_description'){
             $action = 'description';
-            $new_value = base64_encode($_POST['new_value']);
-            $_SESSION['current_user']['description'] = base64_decode($new_value);
+            $new_value = $_POST['new_value'];
         } elseif ($_POST['action'] == 'new_avatar'){
             $action = 'avatar';
             $file_name = $_SESSION['current_user']['user_id'] . '-' . $_FILES["new_value"]["name"];
@@ -615,7 +690,6 @@ $app->post('/settings', function ($request, $response, $args) {
             
             $new_value = $file_name;
             if ($_SESSION['current_user']['avatar'] != 'default.png' and file_exists(__DIR__ . '/public/img/user/' . $_SESSION['current_user']['avatar'])) unlink(__DIR__ . '/public/img/user/' . $_SESSION['current_user']['avatar']);
-            $_SESSION['current_user']['avatar'] = $file_name;
         }
         $db = MyApp\Utility\Db::getPDO();
         $reponse = $db->prepare("UPDATE user SET $action = :new_value WHERE user_id = :current_user_id");
@@ -624,6 +698,17 @@ $app->post('/settings', function ($request, $response, $args) {
             'current_user_id' => $_SESSION['current_user']['user_id']
         ]);
         $reponse->closeCursor();
+        switch ($_POST['action']){
+            case 'new_user_name' : 
+                $_SESSION['current_user']['pseudo'] = $new_value;
+                break;
+            case 'new_description' :
+                $_SESSION['current_user']['description'] = $new_value;
+                break;
+            case 'new_avatar':
+                $_SESSION['current_user']['avatar'] = $file_name;
+                break;
+        }
         header ('Location: /settings'); exit();
     }
 });

@@ -1,10 +1,12 @@
+{% set current_page_is_edit_page = true %}
+
 {% extends 'base.html' %}
 
-{% block title %}"{{ project[0]['content'] }}" | tifod{% endblock %}
+{% block title %}Modifications post #{{ parent_post.id }} | tifod{% endblock %}
 
 {% block head %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script type="text/javascript">$(document).bind("mobileinit", function(){$.extend(  $.mobile , {autoInitializePage: false})});</script>
+<script>$(document).bind("mobileinit", function(){$.extend(  $.mobile , {autoInitializePage: false})});</script>
 <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.6.1/clipboard.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium|Material+Icons">
@@ -12,8 +14,8 @@
 <link rel="stylesheet" href="https://opensource.keycdn.com/fontawesome/4.7.0/font-awesome.min.css">
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 
-<link rel="stylesheet" href="/min/?f=/public/perso/project.css,/public/treant/Treant.css,/public/drawingboard/drawingboard.min.css"/>
-<script src="/min/?f=/public/unveil.js,/public/drawingboard/drawingboard.min.js,/public/treant/vendor/raphael.js,/public/treant/Treant.js,/public/smooth-scroll.min.js"></script>
+<link rel="stylesheet" href="/min/?f=/public/perso/project.css,/public/drawingboard/drawingboard.min.css"/>
+<script src="/min/?f=/public/unveil.js,/public/drawingboard/drawingboard.min.js,/public/treant/vendor/raphael.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -22,12 +24,58 @@
     <div class="mdl-snackbar__text"></div>
     <button class="mdl-snackbar__action" type="button"></button>
 </div>
-{% if 'edit_post'|is_allowed_for(project_type) %}
-    {% set post = project[0] %}
-    <div class="container" id="{{ post['id'] }}">
-        {% include "post/post-more/add-content.html" %}
+<div class="posts posts-list">
+    <div>
+        <div class="text-center list-inline">
+            {% if parent_post.auto_pin_edits == '1' %}<span class="fa fa-thumb-tack"></span><span>Toutes les posts ci dessous sont automatiquement épinglés.</span><span>|</span>{% endif %}
+            <a href="/p/{{ parent_post.project_id }}#{{ parent_post.id }}">Revenir au projet</a>
+        </div>
+        <div class="post post-blue-border">
+            <br>
+            <p class="text-center">Post original</p>
+            <hr>
+            {# content #}
+                {% if parent_post.content_type == 'file' %}
+                    <img src="/public/img/post/{{ parent_post.content }}" alt="image sans description">
+                {% else %}
+                    <div class="post-text">{{ parent_post.content|markdown|striptags('<p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
+                {% endif %}
+                {% include 'post/post-infos.html' with {'post': parent_post} %}
+        </div>
     </div>
-    <script src="/public/perso/project.js"></script>
-    <script>var boards = document.getElementsByClassName('drawing-board'); for (var z = 0; z < boards.length; z++){ resetBoard(boards[z].getAttribute('id')); }</script>
+    {% for post in modifications %}
+    <div>
+        <div class="post{% if loop.first and post.user_id_pin != 0 %} post-blue-border{% endif %}" id="{{ post.id }}">
+            {% if loop.first and post.user_id_pin != 0 %}
+                <br>
+                <p class="text-center">Modification acceptée</p>
+                <hr>
+            {% endif %}
+            {# content #}
+                {% if post['content_type'] == 'file' %}
+                    <img src="/public/img/post/{{ post['content'] }}" alt="image sans description">
+                {% else %}
+                    <div class="post-text">{{ post['content']|markdown|striptags('<p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
+                {% endif %}
+            {% include 'post/post-infos.html' %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% if modifications|length == 0 %}
+    <div class="container text-center"><hr><em>Aucun modification n'a été proposé à l'auteur du post ci dessus</em></div>
 {% endif %}
+
+{% if 'edit_post'|is_allowed_for(project_type) %}
+    {% set post = parent_post %}
+    <div class="container" id="{{ post.id }}">{% include "post/post-more/add-content.html" %}</div>
+    <script src="/public/perso/edit.js"></script>
+{% endif %}
+
+<div class="post-more-menus">
+    {% include "post/post-more/post-more-menu.html" with {'post': parent_post} %}
+    {% for post in modifications %}
+        {% include "post/post-more/post-more-menu.html" %}
+    {% endfor %}
+</div>
 {% endblock %}

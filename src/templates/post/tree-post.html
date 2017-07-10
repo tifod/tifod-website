@@ -1,8 +1,19 @@
+{% if post.edit_id != '0' %}
+    {% set content_type = post.edit_content_type %}
+    {% set content = post.edit_content %}
+    {% set author_name = post.edit_author_name ~ ' et ' ~ post.author_name %}
+    {% set posted_on = post.edit_posted_on %}
+{% else %}
+    {% set content_type = post.content_type %}
+    {% set content = post.content %}
+    {% set author_name = post.author_name %}
+    {% set posted_on = post.posted_on %}
+{% endif %}
 <div class="tree-post" id="{{ post['id'] }}-post-tree" data-path="{{ post['path'] }}" data-id="{{ post['id'] }}">
-    {% if post['content_type'] == 'file' %}
-        <img src="/public/img/post/{{ post['content'] }}">
+    {% if content_type == 'file' %}
+        <img src="/public/img/post/{{ content }}">
     {% else %}
-        {{ post['content']|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}
+        {{ content|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}
     {% endif %}
-    <p class="text-help">{{ post['author_name'] ~ ', ' ~ post['posted_on']|timeago }}</p>
+    <p class="text-help">{{ author_name ~ ', ' ~ posted_on|timeago }}</p>
 </div>

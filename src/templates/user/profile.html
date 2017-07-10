@@ -17,7 +17,7 @@
 	{% if not user.posts %}
 		<div class="container"><em>{{ user.pseudo }} n'a pas encore créé de contenu</em></div>
 	{% else %}
-		<div class="posts profile-posts">
+		<div class="posts posts-list">
 			{% for post in user.posts %}
 				<a href="/p/{{ post['project_id'] }}#{{ post['id'] }}">
 					<div class="post">

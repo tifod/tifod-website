@@ -1,20 +1,26 @@
-<div class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="{{ post['id'] }}-more">
-	{% if 'pin_post'|is_allowed_for(project_type) %}
-		{% if post['user_id_pin'] != 0 %}
-			<a href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" class="mdl-menu__item list-inline"><i class="fa fa-thumb-tack fa-fw"></i>Supprimer l'épingle</a>
+<div class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="{{ post.id }}-more">
+	{% if ('pin_post'|is_allowed_for(project_type) and not current_page_is_edit_page) or (current_page_is_edit_page and 'pin_edit_post'|is_allowed_for(project_type) and post.is_an_edit == '1') %}
+		{% if post.user_id_pin != 0 %}
+			<a href="/togglePin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Supprimer l'épingle</a>
 		{% else %}
-			<a href="/togglePin/{{ post['id'] }}?redirect=/p/{{ projectId }}" class="mdl-menu__item list-inline"><i class="fa fa-thumb-tack fa-fw"></i>Epingler</a>
+			<a href="/togglePin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Epingler</a>
+		{% endif %}
+	{% elseif (current_page_is_edit_page and 'pin_edit_post'|is_allowed_for(project_type) and post.is_an_edit == '0') %}
+        {% if post.auto_pin_edits == '1' %}
+			<a href="/toggleAutoPin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Supprimer les épingles de toutes les modifications</a>
+		{% else %}
+			<a href="/toggleAutoPin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Epingler toutes les modifications</a>
 		{% endif %}
 	{% endif %}
 	{% if 'delete_post'|is_allowed_for(project_type) %}
-		<a class="mdl-menu__item list-inline" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ post['id'] }}?redirect=/p/{{ projectId }}"><i class="fa fa-trash text-danger fa-fw"></i>Supprimer</a>
+		<a class="mdl-menu__item list-inline" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ post.id }}?redirect={{ current_url }}"><i class="fa fa-lg fa-trash text-danger fa-fw"></i>Supprimer</a>
 	{% endif %}
 	{% if 'reset_score_post'|is_allowed_for(project_type) %}
-		<a class="mdl-menu__item list-inline" onclick="return confirm('Êtes vous sûrs?')" href="/resetPostScore/{{ post['id'] }}?redirect=/p/{{ projectId }}"><i class="fa fa-undo fa-fw"></i>Ramener le score à zéro</a>
+		<a class="mdl-menu__item list-inline" onclick="return confirm('Êtes vous sûrs?')" href="/resetPostScore/{{ post.id }}?redirect={{ current_url }}"><i class="fa fa-lg fa-undo fa-fw"></i>Ramener le score à zéro</a>
 	{% endif %}
-	{% if not is_edit %}
-		<a href="/edit/{{ post['id'] }}" class="mdl-menu__item list-inline"><i class="fa fa-pencil fa-fw"></i>Modifier</a>
-		<a href="#{{ post['id'] }}-post-tree" class="mdl-menu__item list-inline tree-link" data-scroll><i class="fa fa-code-fork fa-flip-vertical fa-fw"></i>Voir dans l'arborescence</a>
-		<span id="{{ post['id'] }}-share-btn" data-msg="URL copié" class="mdl-menu__item list-inline btn-copy-js" data-clipboard-text="http://{{ server_name }}/p/{{ projectId }}#{{ post['id'] }}"><i class="fa fa-fw fa-link"></i>Copier l'URL</span>
+	{% if not current_page_is_edit_page %}
+		<a href="#{{ post.id }}-post-tree" class="mdl-menu__item list-inline tree-link" data-scroll><i class="fa fa-lg fa-code-fork fa-flip-vertical fa-fw"></i>Voir dans l'arborescence</a>
+		<span id="{{ post.id }}-share-btn" data-msg="URL copié" class="mdl-menu__item list-inline btn-copy-js" data-clipboard-text="http://{{ server_name }}/p/{{ projectId }}#{{ post.id }}"><i class="fa fa-lg fa-fw fa-link"></i>Copier l'URL</span>
+        <a href="/edit/{{ post.id }}" class="mdl-menu__item list-inline"><div class="fa fa-lg fa-pencil"></div>Modifier</a>
 	{% endif %}
 </div>

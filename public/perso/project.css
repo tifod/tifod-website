@@ -124,7 +124,11 @@ img { width: 100%; height: auto; }
 }
 .posts::-webkit-scrollbar { display: none; }
 .posts > * { display: inline-block; white-space: initial; }
-.profile-posts, .profile-posts > * { display: block; margin: auto; }
+.posts-list, .posts-list > * {
+    display: block;
+    margin: auto;
+    overflow: initial;
+}
 .post-siblings {
     display: inline-block;
     position: relative;
@@ -140,6 +144,7 @@ img { width: 100%; height: auto; }
     border-bottom-width: 3px;
     background-color: white;
 }
+.post-blue-border { border-color: #448AFF; }
 .post>img {
     margin-left: 1px;
     width: calc(100% - 1px);
@@ -158,6 +163,7 @@ img { width: 100%; height: auto; }
 }
 .post-more-nav {
     display: flex;
+    align-items: center;
 }
 .post-more-btn {
     margin-left: auto;

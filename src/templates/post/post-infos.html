@@ -1,19 +1,26 @@
 <div class="post-more">
     <div class="post-more-nav">
         <div class="post-infos list-inline">
-            <span class="list-inline">
-                <img class="profil_pic" src="/public/img/user/{{ post.author_avatar }}">
-                <a href="/u/{{ post['author_id'] }}">{{ post['author_name'] }}</a>
-            </span>
-            <span title="{{ post.posted_on }}">{{ post.posted_on|timeago }}</span>
-            <button id="{{ post['id'] }}-downvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="{% if 'vote_post'|is_allowed_for(project_type) %}ajaxPingUrl('/vote/minus/{{ post['id'] }}',this,updateScore){% else %}alert('Vous ne pouvez voter qu\'en étant connecté'){% endif %}"><span class="fa fa-caret-down"></span></button>
-            <span class="mdl-tooltip mdl-tooltip--top post-score-minus" for="{{ post['id'] }}-downvote">{{ post['vote_minus'] }}</span>
+            <img class="profil_pic" src="/public/img/user/{{ post.author_avatar }}">
+            <a href="/u/{{ post.author_id}}">{{ post.author_name }}</a>
+            <span id="{{ post['id'] }}-timeago">{{ post.posted_on|timeago }}</span>
+            <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-timeago">{{ post.posted_on|date('d M Y, H:m') }}</span>
+            {% if post.edit_id != 0 and post.is_an_edit == '0' and not current_page_is_edit_page %}
+                <span>
+                    (<a href="/edit/{{ post.id }}#{{ post.edit_id }}">Modifié</a> par {{ post.edit_author_name }} <span id="{{ post['id'] }}-edit-timeago">{{ post.edit_posted_on|timeago }}</span>)
+                    <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-edit-timeago">{{ post.edit_posted_on|date('d M Y, H:m') }}</span>
+                </span>
+            {% endif %}
+            {% if 'vote_post'|is_allowed_for(project_type) and not current_page_is_edit_page or (current_page_is_edit_page and post.is_an_edit == '1') %}
+                <button id="{{ post['id'] }}-downvote" class="vote-btn mdl-button mdl-js-button mdl-button--icon"><span class="fa fa-caret-down"></span></button>
+                <span class="mdl-tooltip mdl-tooltip--top post-score-minus" for="{{ post['id'] }}-downvote">{{ post['vote_minus'] }}</span>
+                
+                <span class="post-score">{{ post['score_result'] }}</span>
+                
+                <button id="{{ post['id'] }}-upvote" class="vote-btn mdl-button mdl-js-button mdl-button--icon"><span class="fa fa-caret-up"></span></button>
+                <span class="mdl-tooltip mdl-tooltip--top post-score-plus" for="{{ post['id'] }}-upvote">{{ post['vote_plus'] }}</span>
+			{% endif %}
             
-            <span class="post-score">{{ post['score_result'] }}</span>
-            
-            <button id="{{ post['id'] }}-upvote" class="mdl-button mdl-js-button mdl-button--icon" onclick="{% if 'vote_post'|is_allowed_for(project_type) %}ajaxPingUrl('/vote/plus/{{ post['id'] }}',this,updateScore){% else %}alert('Vous ne pouvez voter qu\'en étant connecté'){% endif %}"><span class="fa fa-caret-up"></span></button>
-            <span class="mdl-tooltip mdl-tooltip--top post-score-plus" for="{{ post['id'] }}-upvote">{{ post['vote_plus'] }}</span>
-			
 			{% if post['user_id_pin'] != 0 %}
                 <span>
 					<span id="{{ post['id'] }}-toggle-pin" class="fa-stack fa-fw fa-lg">
@@ -24,21 +31,21 @@
                 </span>
             {% endif %}
 		</div>
-		
+        
         <div class="post-more-btn">
-            {% if 'add_post'|is_allowed_for(project_type) %}
+            {% if 'add_post'|is_allowed_for(project_type) and not current_page_is_edit_page %}
                 <label id="{{ post['id'] }}-add-content" for="{{ post['id'] }}-checkbox-more"><span class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"><i class="material-icons">add</i></span></label>
                 <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-add-content">Ajouter une suite</span>
             {% endif %}
             
-            <span id="{{ post['id'] }}-more" class="mdl-button mdl-js-button mdl-button--icon">
-                <i class="fa fa-ellipsis-v"></i>
-            </span>
-            <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-more">Actions supplémentaires</span>
+            {% if 'pin_edit_post'|is_allowed_for(project_type) or not current_page_is_edit_page %}
+                <span id="{{ post['id'] }}-more" class="mdl-button mdl-js-button mdl-button--icon"><i class="material-icons">more_vert</i></span>
+                <span class="mdl-tooltip mdl-tooltip--top" for="{{ post['id'] }}-more">Actions supplémentaires</span>
+            {% endif %}
         </div>
     </div>
     
-    {% if 'add_post'|is_allowed_for(project_type) %}
+    {% if 'add_post'|is_allowed_for(project_type) and not current_page_is_edit_page %}
         <input type="checkbox" id="{{ post['id'] }}-checkbox-more" class="checkbox-more" data-postid="{{ post['id'] }}">
         <div class="post-more-form">
             {% include "post/post-more/add-content.html" %}
