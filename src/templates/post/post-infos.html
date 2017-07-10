@@ -15,10 +15,13 @@
                 <button id="{{ post.id }}-downvote" class="vote-btn mdl-button mdl-js-button mdl-button--icon"><span class="fa fa-caret-down"></span></button>
                 <span class="mdl-tooltip mdl-tooltip--top post-score-minus" for="{{ post.id }}-downvote">{{ post.vote_minus }}</span>
                 
-                <span class="post-score">{{ post.score_result }}</span>
+                <span class="post-score">{{ post.score_result }}</span>pts
                 
                 <button id="{{ post.id }}-upvote" class="vote-btn mdl-button mdl-js-button mdl-button--icon"><span class="fa fa-caret-up"></span></button>
                 <span class="mdl-tooltip mdl-tooltip--top post-score-plus" for="{{ post.id }}-upvote">{{ post.vote_plus }}</span>
+			{% elseif not current_user %}
+                <span>{{ post.score_result }}</span>pts
+                <span class="text-help"><a href="/login?redirect={{ current_url }}">Connectez vous</a> pour noter ce post</span>
 			{% endif %}
             
 			{% if post.user_id_pin != 0 %}
@@ -36,6 +39,9 @@
             {% if 'add_post'|is_allowed_for(project_type) and not current_page_is_edit_page %}
                 <label id="{{ post.id }}-add-content" for="{{ post.id }}-checkbox-more"><span class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"><i class="material-icons">add</i></span></label>
                 <span class="mdl-tooltip mdl-tooltip--top" for="{{ post.id }}-add-content">Ajouter une suite</span>
+			{% elseif not current_user %}
+                <a id="{{ post.id }}-add-content" href="/login?redirect={{ current_url }}"><span class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent"><i class="material-icons">add</i></span></a>
+                <span class="mdl-tooltip mdl-tooltip--top" for="{{ post.id }}-add-content">Cliquez pour vous connecter</span>
             {% endif %}
             
             {% if 'pin_edit_post'|is_allowed_for(project_type) or not current_page_is_edit_page %}
