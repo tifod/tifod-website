@@ -62,8 +62,9 @@ img { width: 100%; height: auto; }
     cursor: pointer;
 }
 .text-danger { color: red; }
-.text-primary { color: #448AFF; }
-.text-initial { color: initial; }
+.text-primary { color: #448AFF; font-weight: 500; }
+.text-initial { color: initial; font-weight: initial; }
+.text-click { cursor: pointer; }
 .text-center { text-align: center; margin: auto; }
 .text-large {
 	font-weight: 700;

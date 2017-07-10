@@ -1,4 +1,4 @@
-{% set children = post['children'] %}
+{% set children = post.children %}
 
 <div class="post-siblings">
     {# nav bar #}
@@ -8,8 +8,8 @@
         <div class="post-siblings-nav">
             <form>
                 {% for t_child in children %}
-                    <label class="link" data-target="{{ t_child['id'] }}">
-                        <input type="radio" id="{{ t_child['id'] }}-radio-button" class="link-radio-button" name="radio-{{ post['id'] }}" {% if loop.first %}checked{% endif %} />
+                    <label class="link" data-target="{{ t_child.id }}">
+                        <input type="radio" id="{{ t_child.id }}-radio-button" class="link-radio-button" name="radio-{{ post.id }}" {% if loop.first %}checked{% endif %} />
                         <div class="link-btn"></div>
                         {% set loopfirstparent = loop.first %}
                     </label>
@@ -23,7 +23,7 @@
     {% for child in children %}
         {% set lastChild = children[children|length - 1] %}        
         <div>
-            <div class="post{% if loop.first %} active-post{% endif %}" id="{{ child['id'] }}" data-path="{{ child['path'] }}">
+            <div class="post{% if loop.first %} active-post{% endif %}" id="{{ child.id }}" data-path="{{ child.path }}">
                 {% if child.edit_id != '0' %}
                     {% set content_type = child.edit_content_type %}
                     {% set content = child.edit_content %}
@@ -47,8 +47,8 @@
 
 {# post children #}
 {% for child in children%}
-    {% if child['children'] %}
-        <div class="post-level{% if loop.first %} active-level{% endif %}" id="{{ child['id'] }}-children">
+    {% if child.children %}
+        <div class="post-level{% if loop.first %} active-level{% endif %}" id="{{ child.id }}-children">
                 {% include "post/branch.html" with {'post': child} %}
         </div>
     {% endif %}

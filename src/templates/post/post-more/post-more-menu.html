@@ -21,6 +21,5 @@
 	{% if not current_page_is_edit_page %}
 		<a href="#{{ post.id }}-post-tree" class="mdl-menu__item list-inline tree-link" data-scroll><i class="fa fa-lg fa-code-fork fa-flip-vertical fa-fw"></i>Voir dans l'arborescence</a>
 		<span id="{{ post.id }}-share-btn" data-msg="URL copié" class="mdl-menu__item list-inline btn-copy-js" data-clipboard-text="http://{{ server_name }}/p/{{ projectId }}#{{ post.id }}"><i class="fa fa-lg fa-fw fa-link"></i>Copier l'URL</span>
-        <a href="/edit/{{ post.id }}" class="mdl-menu__item list-inline"><div class="fa fa-lg fa-pencil"></div>Modifier</a>
 	{% endif %}
 </div>

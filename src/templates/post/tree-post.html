@@ -9,7 +9,7 @@
     {% set author_name = post.author_name %}
     {% set posted_on = post.posted_on %}
 {% endif %}
-<div class="tree-post" id="{{ post['id'] }}-post-tree" data-path="{{ post['path'] }}" data-id="{{ post['id'] }}">
+<div class="tree-post" id="{{ post.id }}-post-tree" data-path="{{ post.path }}" data-id="{{ post.id }}">
     {% if content_type == 'file' %}
         <img src="/public/img/post/{{ content }}">
     {% else %}

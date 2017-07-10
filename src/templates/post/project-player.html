@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}"{{ project[0]['content'] }}" | tifod{% endblock %}
+{% block title %}"{{ project[0].content }}" | tifod{% endblock %}
 
 {% block head %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -23,14 +23,14 @@
     <button class="mdl-snackbar__action" type="button"></button>
 </div>
 <div class="project-header container text-center">
-    <h2>{{ project[0]['content'] }}</h2>
+    <h2>{{ project[0].content }}</h2>
     <p class="list-inline">
         <span>
-            Un projet de <img class="profil_pic" src="/public/img/user/{{ project[0].author_avatar }}"><a href="/u/{{ project[0]['author_id'] }}">{{ project[0]['author_name'] }}</a>
+            Un projet de <img class="profil_pic" src="/public/img/user/{{ project[0].author_avatar }}"><a href="/u/{{ project[0].author_id }}">{{ project[0].author_name }}</a>
         </span>
         {% if 'delete_project'|is_allowed_for(project_type) %}
         <span>|</span>
-        <a class="text-danger" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ project[0]['id'] }}">Supprimer ce projet</a>
+        <a class="text-danger" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ project[0].id }}">Supprimer ce projet</a>
         {% endif %}
         <br>
         <span>
@@ -38,7 +38,7 @@
         </span>
     </p>
 </div>
-{% if project[0]['children'] %}
+{% if project[0].children %}
     <div id="project-player">
         <div>
             {% include "post/branch.html" with {'post':project[0]} %}
@@ -55,10 +55,10 @@
             </p>
         </div>            
     </div>
-    <div id="project-tree" data-structure='{{ project_json[0]["children"][0]|json_encode|raw }}'></div>
+    <div id="project-tree" data-structure='{{ project_json.0.children.0|json_encode|raw }}'></div>
 {% elseif 'add_post'|is_allowed_for(project_type) %}
     {% set post = project[0] %}
-    <div class="container" id="{{ post['id'] }}">
+    <div class="container" id="{{ post.id }}">
         {% include "post/post-more/add-content.html" %}
     </div>
 {% else %}

@@ -1,54 +1,69 @@
 <div>
+    <hr>
+    <div class="list-inline text-center">
+        <a href="#{{ post.id }}-drawing-form" class="text-no-decoration" data-scroll><i class="fa fa-paint-brush fa-fw"></i> Dessiner</a>
+        <span>|</span>
+        <a href="#{{ post.id }}-file-form" class="text-no-decoration" data-scroll><i class="fa fa-file-image-o fa-fw"></i> Envoyez une image</a>
+        <span>|</span>
+        <label for="{{ post.id }}-text-form" class="text-primary text-click"><i class="fa fa-font fa-fw"></i> Envoyez du texte</label>
+        {% if not current_page_is_edit_page %}
+            <span>|</span>
+            <a href="/edit/{{ post.id }}" class="text-no-decoration{% if post.edit_number > 0 %} mdl-badge{% endif %}" {% if post.edit_number > 0 %}data-badge="{{ post.edit_number }}"{% endif %}><i class="fa fa-pencil fa-fw"></i> Modification</a>
+        {% endif %}
+    </div>
+    <hr>
+    <h6 id="{{ post.id }}-drawing-form">Dessiner</h6>
     <form action="javascript:void(0);">
         <p class="list-inline">
             <label class="list-inline">
                 <span>Importer un fichier à modifier</span>
-                <br><input onclick="this.value='';" class="drawing-board-import" type="file" data-postid="{{ post['id'] }}">
+                <br><input onclick="this.value='';" class="drawing-board-import" type="file" data-postid="{{ post.id }}">
                 <span class="file-dimensions"></span>
             </label>
         </p>
         <p class="list-inline">
             <div class="mdl-cell mdl-cell--3-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                 <label class="mdl-textfield__label" >Largeur du dessin</label>
-                <input class="mdl-textfield__input drawingboard-width-input" type="text" data-postid="{{ post['id'] }}">
+                <input class="mdl-textfield__input drawingboard-width-input" type="text" data-postid="{{ post.id }}">
             </div>
             <div class="mdl-cell mdl-cell--3-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                 <label class="mdl-textfield__label">Hauteur du dessin</label>
-                <input class="mdl-textfield__input drawingboard-height-input" type="text" data-postid="{{ post['id'] }}">
+                <input class="mdl-textfield__input drawingboard-height-input" type="text" data-postid="{{ post.id }}">
             </div>
         </p>
     </form>
     <form class="drawing-form text-center" action="/add-post" method="post" enctype="multipart/form-data">
         <div class="drawing-board-wrapper">
-            <div class="drawing-board" id="{{ post['id'] }}-drawing-board"></div>
+            <div class="drawing-board" id="{{ post.id }}-drawing-board"></div>
         </div>
-        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Envoyer votre dessin</button>
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Envoyez votre dessin</button>
         
         
         <input type="hidden" name="is_an_edit" value="{% if current_page_is_edit_page %}true{% else %}false{% endif %}">
         <input type="hidden" name="image" value="">
-        <input type="hidden" name="parent_id" value="{{ post['id'] }}">
+        <input type="hidden" name="parent_id" value="{{ post.id }}">
     </form>
-    <hr>
-    <div class="text-center">Ou envoyez autre chose</div>
+    <h6 id="{{ post.id }}-file-form">Envoyez une image</h6>
     <form class="text-center" action="/add-post" method="post" enctype="multipart/form-data">
         <p class="list-inline">
             <input type="file" name="image">
-            <button class="mdl-button mdl-js-button mdl-button--raised">Envoyer un fichier</button>
+            <button class="mdl-button mdl-js-button mdl-button--raised">Envoyez une image</button>
         </p>
         
         <input type="hidden" name="is_an_edit" value="{% if current_page_is_edit_page %}true{% else %}false{% endif %}">
-        <input type="hidden" name="parent_id" value="{{ post['id'] }}">
+        <input type="hidden" name="parent_id" value="{{ post.id }}">
     </form>
+    <div class="text-help text-center">Formats acceptés : <code>.jpg .jpeg .png .svg .gif</code></div>
+    <h6>Envoyez du texte</h6>
     <form class="list-inline text-center" action="/add-post" method="post">
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <label class="mdl-textfield__label">Ou bien, envoyer du texte</label>
-            <input class="mdl-textfield__input drawingboard-height-input" type="text" name="content" data-postid="{{ post['id'] }}">
+            <label class="mdl-textfield__label">Envoyez du texte</label>
+            <input id="{{ post.id }}-text-form" class="mdl-textfield__input drawingboard-height-input" type="text" name="content" data-postid="{{ post.id }}">
         </div>
         <button class="mdl-button mdl-js-button mdl-button--raised">Envoyer</button>
         
         <input type="hidden" name="is_an_edit" value="{% if current_page_is_edit_page %}true{% else %}false{% endif %}">
-        <input type="hidden" name="parent_id" value="{{ post['id'] }}">
+        <input type="hidden" name="parent_id" value="{{ post.id }}">
     </form>
     <div class="text-help text-center">Nous supportons <a href="http://tifod.com/blog/markdown">la syntaxe Markdown</a></div>
 </div>
