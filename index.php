@@ -4,7 +4,7 @@ session_start();
 date_default_timezone_set('Europe/Paris');
 
 // Create and configure Slim app
-$app = new \Slim\App(['settings' => [ 'addContentLengthHeader' => false, "displayErrorDetails" => true]]);
+$app = new \Slim\App(['settings' => [ 'addContentLengthHeader' => false, "displayErrorDetails" => ($_SERVER["SERVER_NAME"] != 'tifod.com')]]);
 $container = $app->getContainer();
 
 // personnal functions

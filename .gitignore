@@ -2,6 +2,7 @@ vendor
 src/templates/twig_cache
 public/img/post
 public/img/user
+blog
 
 !public/img/user/default.png
 !*.gitkeep
