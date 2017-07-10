@@ -19,7 +19,7 @@
 	{% else %}
 		<div class="posts posts-list">
 			{% for post in user.posts %}
-				<a href="/p/{{ post['project_id'] }}#{{ post['id'] }}">
+				<a href="{% if post.is_an_edit %}/edit/{{ post.parent_id ~ '#' ~ post.id }}{% else %}/p/{{ post.project_id ~ '#' ~ post.id }}{% endif %}">
 					<div class="post">
 						{# content #}
 							{% if post['content_type'] == 'file' %}
