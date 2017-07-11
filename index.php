@@ -533,7 +533,7 @@ $app->get('/u/{user_id}', function ($request, $response, $args) {
     $reponse = $db->prepare("SELECT * FROM user WHERE user_id = :user_id");
     $reponse->execute(['user_id' => $args['user_id']]);
     while ($donnees[] = $reponse->fetch());
-    $reponse = $db->prepare("SELECT *, (SELECT content FROM post WHERE id = (SELECT project_root_post_id FROM project WHERE project.project_id = p.project_id)) AS project_name FROM post AS p WHERE author_id = :user_id ORDER BY p.project_id DESC, posted_on DESC");
+    $reponse = $db->prepare("SELECT *, (SELECT content FROM post WHERE id = (SELECT project_root_post_id FROM project WHERE project.project_id = p.project_id)) AS project_name FROM post AS p WHERE author_id = :user_id ORDER BY posted_on DESC");
     $reponse->execute(['user_id' => $args['user_id']]);
     while ($posts[] = $reponse->fetch());
     array_pop($posts);
