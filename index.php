@@ -248,14 +248,20 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
     }
 });
 $app->get('/', function ($request, $response) {
+    if (isset($_SESSION['current_user'])){ header('Location: /p'); exit(); }
+    else { return $this->view->render('homepage.html'); }
+});
+$app->get('/project', function ($request, $response) { header('Location: /p'); exit(); });
+$app->get('/projects', function ($request, $response) { header('Location: /p'); exit(); });
+$app->get('/p', function ($request, $response) {
     $db = MyApp\Utility\Db::getPDO();
-    $reponse = $db->query ('select *, (SELECT COUNT(*) FROM post tp WHERE tp.project_id = p.project_id) post_count, (select user_name from user u where u.user_id = p.author_id) author_name from post p where parent_id = 0');
+    $reponse = $db->query ('select *, (SELECT COUNT(*) FROM post tp WHERE tp.project_id = p.project_id) post_count, (SELECT COUNT(DISTINCT author_id) FROM post tp WHERE tp.project_id = p.project_id) author_count, (select user_name from user u where u.user_id = p.author_id) author_name from post p where parent_id = 0');
     while ($donnees[] = $reponse->fetch());
     array_pop($donnees);
     $lastProjectId = count($donnees) > 0 ? $donnees[count($donnees) - 1]['project_id'] + 1 : 1;
     $reponse->closeCursor();
-    return $this->view->render('homepage.html', ['projects' => $donnees, 'child' => ['id' => 0], 'projectId' => $lastProjectId]);
-})->setName('homepage');
+    return $this->view->render('post/all-project.html', ['projects' => $donnees, 'child' => ['id' => 0], 'projectId' => $lastProjectId]);
+});
 $app->post('/create-project', function ($request, $response) {
     if (user_can_do('create_project','platform')){
         if (!(empty($_POST['content']) or empty($_POST['project_id']))){
@@ -520,6 +526,8 @@ $app->post('/login', function ($request, $response, $args) {
     
     header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'])); exit();
 });
+$app->get('/user', function ($request, $response, $args) { header('Location: /u'); exit(); });
+$app->get('/users', function ($request, $response, $args) { header('Location: /u'); exit(); });
 $app->get('/u', function ($request, $response, $args) {
     $db = MyApp\Utility\Db::getPDO();
     $reponse = $db->query("SELECT user_name, avatar, platform_role, user_id, (SELECT COUNT(id) FROM post AS p WHERE p.author_id = u.user_id) post_amount FROM user AS u ORDER BY user_id");

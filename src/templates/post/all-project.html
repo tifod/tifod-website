@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Tous les projets | tifod{% endblock %}
+
+{% block body %}
+    {% include 'header.html' %}
+    <div class="container">
+        <h1>Liste des projets existants</h1>
+		{% for project in projects %}
+			<div class="list-inline"><h4><a class="text-no-decoration" href="/p/{{ project.project_id }}">{{ project.content }}</a></h4><span>projet de <a href="/u/{{ project.author_id }}">{{ project.author_name }}</a>{% if project.author_count == 2 %} avec {{ project.author_count - 1 }} autre auteur{% elseif project.author_count > 2 %} avec {{ project.author_count - 1 }} autres auteurs{% endif %}</span><span>|</span><span>{{ project.post_count - 1 }} posts</span></div>
+		{% endfor %}
+        {% if projects|length == 0 %}<p><i>Il n'y a pas de projets pour le moment</i></p>{% endif %}
+        {% if 'create_project'|is_allowed_for('platform') %}
+            <form action="/create-project" class="list-inline" method="post">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                    <label class="mdl-textfield__label" for="new_project" >Créer un nouveau projet</label>
+                    <input class="mdl-textfield__input" id="new_project" name="content" type="text">
+                </div>
+                <input name="project_id" type="hidden" value="{{ projectId }}">
+                <button type="submit" class="mdl-button mdl-js-button">Envoyer</button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

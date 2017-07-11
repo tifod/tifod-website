@@ -1,5 +1,5 @@
 body {
-    color: #333;
+    color: #47525d;
     font-family: "Roboto","Helvetica","Arial",sans-serif;
 }
 .list-inline>* { display: inline-block; margin-right: 5px; }
@@ -12,7 +12,7 @@ body {
 }
 .header-tifod-logo {
     text-decoration: none;
-    color: #333;
+    color: #47525d;
     font-weight: 900;
     font-size: 28px;
 }
@@ -53,7 +53,7 @@ body {
 
 #project-player { margin: auto; }
 .container { max-width: 80vw; margin: auto; }
-body { color: #333; background-color: #eee; }
+body { color: #47525d; background-color: #f6f9fc; }
 img { width: 100%; height: auto; }
 .url-like {
     color: rgb(68,138,255);
@@ -66,11 +66,8 @@ img { width: 100%; height: auto; }
 .text-initial { color: initial; font-weight: initial; }
 .text-click { cursor: pointer; }
 .text-center { text-align: center; margin: auto; }
-.text-large {
-	font-weight: 700;
-	font-size: 32px;
-	line-height: 1;
-}
+.text-heavy { font-weight: 700; }
+.text-really-heavy { font-weight: 900; }
 .text-no-decoration { text-decoration: none; }
 
 .text-help { color: darkgray; font-size: 80%; }

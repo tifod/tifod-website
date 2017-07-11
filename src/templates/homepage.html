@@ -1,24 +1,20 @@
 {% extends 'base.html' %}
 
-{% block title %}Accueil | tifod{% endblock %}
+{% block title %}Tifod{% endblock %}
 
 {% block body %}
-    {% include 'header.html' %}
-    <div class="container">
-        <h1>Liste des projets existants</h1>
-		{% for project in projects %}
-			<p class="list-inline"><a class="text-large text-no-decoration" href="/p/{{ project.project_id }}">{{ project.content }}</a><span>projet de <a href="/u/{{ project.author_id }}">{{ project.author_name }}</a></span><span>|</span><span>{{ project.post_count - 1 }} posts</span></p>
-		{% endfor %}
-        {% if projects|length == 0 %}<p><i>Il n'y a pas de projets pour le moment</i></p>{% endif %}
-        {% if 'create_project'|is_allowed_for('platform') %}
-            <form action="/create-project" class="list-inline" method="post">
-                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                    <label class="mdl-textfield__label" for="new_project" >Créer un nouveau projet</label>
-                    <input class="mdl-textfield__input" id="new_project" name="content" type="text">
-                </div>
-                <input name="project_id" type="hidden" value="{{ projectId }}">
-                <button type="submit" class="mdl-button mdl-js-button">Envoyer</button>
-            </form>
-        {% endif %}
+    {% include 'header.html' with {'no_login_button':true} %}
+    <div class="container mdl-grid">
+        <div class="mdl-cell mdl-cell--6-col mdl-cell--12-col-tablet">
+            <h1 class="text-heavy">Prenez part à l'histoire</h1>
+            <h3>Sur tifod on imagine des histoires collaboratives</h3>
+            <h3>Et on a hâte que vous y ajoutiez <strong>votre grain de sel</strong>!</h3>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-col-tablet text-center"><img src="/public/img/illustration/salt_bae.png" alt="grain de sel"></div>
+        <div class="mdl-cell mdl-cell--12-col text-center">
+            <p class="list-inline">
+                <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="/signup">Inscrivez vous</a> &nbsp; <a class="mdl-button mdl-js-button mdl-button--raised" href="/p">Voir les projets en cours</a>
+            </p>
+        </div>
     </div>
 {% endblock %}
