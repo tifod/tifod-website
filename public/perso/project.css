@@ -2,6 +2,7 @@ body {
     color: #47525d;
     font-family: "Roboto","Helvetica","Arial",sans-serif;
 }
+.mdl-snackbar--active { z-index: 100; }
 .list-inline>* { display: inline-block; margin-right: 5px; }
 .header { height: 56px; display: flex; }
 .header>* {

@@ -1,0 +1,11 @@
+{% if children|length > 1 %}
+    <div class="prev"><i class="fa fa-chevron-left fa-2x"></i></div>
+    <div class="next"><i class="fa fa-chevron-right fa-2x"></i></div>
+    <div class="post-siblings-nav">
+        <form>
+            {% for post in children %}
+                {% include 'post/link-radio-button.html' %}
+            {% endfor %}
+        </form>
+    </div>
+{% endif %}

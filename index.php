@@ -176,6 +176,44 @@ $app->post('/update-from-github', function ($request, $response, $args) {
     foreach ($result as $line) $output .= $line."\n";
 	return "<pre>$output</pre>";
 });
+$app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $response, $args) {
+    $db = MyApp\Utility\Db::getPDO();
+    $edit_values_needed = ['content', 'content_type', 'posted_on', 'author_id'];
+    $edit_query = ', (select avatar from user where user_id = (IF(p.edit_id = 0,NULL,(SELECT author_id FROM post tp WHERE tp.id = p.edit_id)))) edit_author_avatar, (select user_name from user where user_id = (IF(p.edit_id = 0,NULL,(SELECT author_id FROM post tp WHERE tp.id = p.edit_id)))) edit_author_name';
+    foreach ($edit_values_needed as $edit_field){
+        $edit_query .= ', (IF(p.edit_id = 0,NULL,(SELECT ' . $edit_field . ' FROM post tp WHERE tp.id = p.edit_id))) edit_' . $edit_field;
+    }
+    $reponse = $db->prepare ('select *, (SELECT COUNT(id) FROM post tp WHERE tp.parent_id = p.parent_id) siblings_amount, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar, (SELECT COUNT(*) FROM post tp WHERE tp.parent_id = p.id AND tp.is_an_edit = 1) edit_number, (select project_type from project where project_id = :project_id) project_type' . $edit_query . ' from post p where project_id = :project_id AND posted_on > :last_time ORDER BY posted_on LIMIT 1');
+    $reponse->execute([
+        'project_id' => $args['project_id'],
+        'last_time' => $args['last_time']
+    ]);
+    $donnees = $reponse->fetch();
+    if ($donnees == false) die (json_encode($donnees));
+    if ($donnees['siblings_amount'] >= 3){
+        $output = [
+            'post_data' => $donnees,
+            'html' => $this->view->render('/post/post-content.html', ['post' => $donnees, 'project_type' => $donnees['project_type']]),
+            'html_link' => $this->view->render('/post/link-radio-button.html', ['post' => $donnees]),
+            'html_menu' => $this->view->render('/post/post-more/post-more-menu.html', ['post' => $donnees, 'project_type' => $donnees['project_type']])
+        ];
+    } elseif ($donnees['siblings_amount'] == 1) {
+        $output = [
+            'post_data' => $donnees,
+            'html' => '<div class="post-level active-level" id="' . $donnees['parent_id'] . '-children">' . $this->view->render('/post/branch.html', ['post' => ['children' => [$donnees]], 'project_type' => $donnees['project_type']]) . '</div>',
+            'html_menu' => $this->view->render('/post/post-more/post-more-menu.html', ['post' => $donnees, 'project_type' => $donnees['project_type']])
+        ];
+    } else if ($donnees['siblings_amount'] == 2){
+        $output = [
+            'post_data' => $donnees,
+            'html' => $this->view->render('/post/post-content.html', ['post' => $donnees, 'project_type' => $donnees['project_type']]),
+            'html_link' => $this->view->render('/post/post_navbar.html', ['children' => [$donnees, $donnees]]),
+            'html_menu' => $this->view->render('/post/post-more/post-more-menu.html', ['post' => $donnees, 'project_type' => $donnees['project_type']])
+        ];
+    }
+    $reponse->closeCursor();
+    die(json_encode($output));
+});
 $app->get('/p/{projectId}', function ($request, $response, $args) {
     $projectId = $args['projectId'];
     
@@ -219,9 +257,11 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             }
 
             // creating a comprehensive list of the projet posts
+            $lastPostedOn = $donnees[0]['posted_on'];
             foreach ($donnees as $k => $post){
                 $posts [] = $post;
                 if ($post['parent_id'] == 0) $topPostId = $k;
+                if ($post['posted_on'] > $lastPostedOn) $lastPostedOn = $post['posted_on'];
             }
             
             $new = [];
@@ -239,7 +279,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             }
             $project_json = createTree($new, array($posts[$topPostId]));
             
-            return $this->view->render('post/project-player.html', ['project' => $project, 'project_type' => $project_type, 'projectId' => $projectId, 'project_json' => $project_json]);
+            return $this->view->render('post/project-player.html', ['project' => $project, 'project_type' => $project_type, 'projectId' => $projectId, 'project_json' => $project_json, 'last_posted_on' => $lastPostedOn]);
         } else {
             throw new Exception("Vous n'êtes pas autorisé à consulter ce projet");
         }
@@ -473,8 +513,8 @@ $app->get('/togglePin/{post-id}', function ($request, $response, $args) {
         ]);
         $reponse->closeCursor();
         update_edit_id($donnees['parent_id']);
-        header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'].'#'.$args['post-id'])); exit();
     }
+    header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'].'#'.$args['post-id'])); exit();
 });
 $app->get('/resetPostScore/{post-id}', function ($request, $response, $args) {
 	$db = MyApp\Utility\Db::getPDO();

@@ -8,7 +8,7 @@ $(function(){
     animationsTest(goToPostBasedOnHash);
     window.onhashchange = goToPostBasedOnHash;
 
-    $('a[data-scroll]').on('click', function() {
+    $(document).on('click', 'a[data-scroll]', function() {
         scrollTo($($(this).attr('href')));
         return false;
     });
@@ -16,22 +16,13 @@ $(function(){
     function scrollTo (el){ $('html, body').animate( { scrollTop: $(el).offset().top }, 500); }
 
     new Clipboard (".btn-copy-js");
-    var snackbarContainer = document.getElementById("snackbar");
-    var snackbarBtns = document.getElementsByClassName('btn-copy-js');
-    for (var z = 0; z < snackbarBtns.length; z++){
-        snackbarBtns[z].onclick = function() {
-            snackbarContainer.MaterialSnackbar.showSnackbar({message: this.getAttribute("data-msg")});
-        };
-    }
+    $(document).on('click', '.btn-copy-js', function(){
+        document.getElementById("snackbar").MaterialSnackbar.showSnackbar({message: this.getAttribute("data-msg")});
+    });
 
     $("img.lazyload").unveil(500, function(){
         $(this).load(resizePlayer);
     });
-
-    var radioBtns = document.getElementsByClassName('link-radio-button');
-    for (var z = 0; z < radioBtns.length; z++){
-        if (radioBtns[z].checked == true) showPost(radioBtns[z].parentNode.getAttribute('data-target'));
-    }
     
     if (document.getElementById('project-tree') != null){
         var simple_chart_config = {
@@ -54,7 +45,7 @@ $(function(){
     
     var boards = document.getElementsByClassName('drawing-board');
     if (boards.length > 0) resetBoard(boards[boards.length - 1].getAttribute('id'));
-    $('.drawing-board-import').on('change', handleImage);
+    $(document).on('change', '.drawing-board-import', handleImage);
     function handleImage(e){
         var postId = event.target.getAttribute('data-postid');
         
@@ -81,8 +72,8 @@ $(function(){
     }
 
     // drawing board
-    $('.drawingboard-width-input').on('change',function(){ resizeDrawingBoardSize('width',this.getAttribute('data-postid')); });
-    $('.drawingboard-height-input').on('change',function(){ resizeDrawingBoardSize('height',this.getAttribute('data-postid')); });
+    $(document).on('change', '.drawingboard-width-input', function(){ resizeDrawingBoardSize('width',this.getAttribute('data-postid')); });
+    $(document).on('change', '.drawingboard-height-input', function(){ resizeDrawingBoardSize('height',this.getAttribute('data-postid')); });
     function resizeDrawingBoardSize (dimension, postId){
         if (dimension == 'height'){
             document.getElementById(postId + '-drawing-board').style.height = event.target.value < 310 ? (event.target.value*1 + 89) +'px' : (event.target.value*1 + 33) +'px';
@@ -135,81 +126,67 @@ $(function(){
         }
     }
     // checkbox-more init
-    var checkboxMore = document.getElementsByClassName('checkbox-more');
-    for (var z = 0; z < checkboxMore.length; z++){
-        (checkboxMore[z]).onchange = function(){
-            var cssRule = '.prev, .next { display: none; }';
-            var cssId = 'style-for-prev-next';
-            var css = document.getElementById(cssId);
-            if (css == null){
-                css = document.createElement("style");
-                css.type = "text/css";
-                css.id = cssId;
-                css.innerHTML = cssRule;
-                document.body.appendChild(css);
-            } else {
-                var oneChecked = false;
-                var allCheckboxMore = document.getElementsByClassName('checkbox-more');
-                for (var y = 0; y < allCheckboxMore.length; y++){
-                    if (allCheckboxMore[y].checked) oneChecked = true;
-                }
-                css.innerHTML = oneChecked ? cssRule : '';
+    $(document).on('change', '.checkbox-more', function(){
+        var cssRule = '.prev, .next { display: none; }';
+        var cssId = 'style-for-prev-next';
+        var css = document.getElementById(cssId);
+        if (css == null){
+            css = document.createElement("style");
+            css.type = "text/css";
+            css.id = cssId;
+            css.innerHTML = cssRule;
+            document.body.appendChild(css);
+        } else {
+            var oneChecked = false;
+            var allCheckboxMore = document.getElementsByClassName('checkbox-more');
+            for (var y = 0; y < allCheckboxMore.length; y++){
+                if (allCheckboxMore[y].checked) oneChecked = true;
             }
-            
-            resetBoard(this.getAttribute('data-postid') + '-drawing-board');
-            resizePlayer();
-        };
-    }
+            css.innerHTML = oneChecked ? cssRule : '';
+        }
+        
+        resetBoard(this.getAttribute('data-postid') + '-drawing-board');
+        resizePlayer();
+    });
 
     // tree-link init
-    var treeLinks = document.getElementsByClassName('tree-link');
-    for(var z = 0; z < treeLinks.length; z++) {
-        treeLinks[z].onclick = function (){
-            var postTreeId = this.getAttribute('href');
-            $(postTreeId).addClass('tree-post-active');
-            var scrollQuantity = $(postTreeId).offset().left - $(postTreeId).parent().offset().left + $(postTreeId).parent().scrollLeft();
-            $(postTreeId).parent().stop().animate({ scrollLeft: scrollQuantity }, 500);
-            animationsTest(function(){
-                setTimeout(function(){
-                    $(postTreeId).removeClass('tree-post-active');
-                },1000);
-            });
-        };
-    }
+    $(document).on('click', '.tree-link', function(){
+        var postTreeId = this.getAttribute('href');
+        $(postTreeId).addClass('tree-post-active');
+        var scrollQuantity = $(postTreeId).offset().left - $(postTreeId).parent().offset().left + $(postTreeId).parent().scrollLeft();
+        $(postTreeId).parent().stop().animate({ scrollLeft: scrollQuantity }, 500);
+        animationsTest(function(){
+            setTimeout(function(){
+                $(postTreeId).removeClass('tree-post-active');
+            },1000);
+        });
+    });
 
     // project player height init
     resizePlayer();
 
     // post nav init
-    var links = document.getElementsByClassName('link');
-    for(var z = 0; z < links.length; z++) {
-        var elem = links[z];
-        elem.onclick = function (){ showPost(this.getAttribute('data-target')); };
-    }
+    
+    $(document).on('click', '.link', function(){
+        showPost(this.getAttribute('data-target'));
+    });
 
     // tree nav init
     $('#project-tree').on('click','.tree-post',function(){
         goToPost(this.getAttribute('data-id'));
     });
 
-    // scroll post siblings init
-    var postSiblings = document.getElementsByClassName('many-posts');
-    for(var z = 0; z < postSiblings.length; z++) {
-        $(postSiblings[z]).on("swiperight",function(){ prevSlide(this); });
-        $(postSiblings[z]).on("swipeleft",function(){ nextSlide(this); });
-    }
-
     // nextSlide & prevSlide
-    function nextSlide (element){
-        var thisPost = element.parentNode.getElementsByClassName('active-post')[0].parentNode;
+    function nextSlide (){
+        var thisPost = this.parentNode.getElementsByClassName('active-post')[0].parentNode;
         if (thisPost.nextElementSibling == null){
             showPost(thisPost.parentNode.childNodes[0].getElementsByClassName('post')[0].getAttribute('id'));
         } else {
             showPost(thisPost.nextElementSibling.getElementsByClassName('post')[0].getAttribute('id'));
         }
     }
-    function prevSlide (element){
-        var thisPost = element.parentNode.getElementsByClassName('active-post')[0].parentNode;
+    function prevSlide (){
+        var thisPost = this.parentNode.getElementsByClassName('active-post')[0].parentNode;
             if (thisPost.previousElementSibling == null){
                 var t = thisPost.parentNode.getElementsByClassName('post');
                 showPost(t[t.length - 1].getAttribute('id'));
@@ -218,13 +195,12 @@ $(function(){
             }
     }
 
-    // next buttons init
-    var next = document.getElementsByClassName('next');
-    for(var z = 0; z < next.length; z++) { $(next[z]).on("click",function(){ nextSlide(this); }); }
-
-    // prev buttons init
-    var prev = document.getElementsByClassName('prev');
-    for(var z = 0; z < prev.length; z++) { $(prev[z]).on("click",function(){ prevSlide(this); }); }
+    // scroll post siblings init
+    $(document).on('swiperight', '.many-posts', prevSlide);
+    $(document).on('swipeleft', '.many-posts', nextSlide);
+    // next/prev buttons init
+    $(document).on('click', '.next', nextSlide);
+    $(document).on('click', '.prev', prevSlide);
 
     function hasClass(element, cls) { return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1; }
 
@@ -238,7 +214,7 @@ $(function(){
         scrollTo(document.getElementById(postId));
     }
 
-    function showPost (postId) {
+    function showPost (postId, timing = 500) {
         // Select '.post-level' among direct children
         var allSiblingsLvl = document.getElementById(postId).parentNode.parentNode.parentNode.parentNode.childNodes;
         var levels = [];
@@ -258,21 +234,17 @@ $(function(){
         }
         
         // same process but for .post
-        var posts = document.getElementById(postId).parentNode.parentNode.childNodes;
-        for(var y = 0; y < posts.length; y++) {
-            $(posts[y].getElementsByClassName('post')[0]).removeClass('active-post');
-        }
+        $(document.getElementById(postId).parentNode.parentNode).find('.post').removeClass('active-post');
         $(document.getElementById(postId)).addClass('active-post');
         
         resizePlayer();
         
         // check the radio button matching with the post
-        // if it exists
-        if (document.getElementById(postId + '-radio-button') != null) document.getElementById(postId + '-radio-button').checked = true;
+        $(".link[data-target='" + postId + "'").find('.link-radio-button').prop('checked',true);
         
         // scroll to the post
         var scrollQuantity = $(document.getElementById(postId).parentNode).offset().left - $(document.getElementById(postId).parentNode.parentNode).offset().left + $(document.getElementById(postId).parentNode.parentNode).scrollLeft();
-        $(document.getElementById(postId).parentNode.parentNode).stop().animate({ scrollLeft: scrollQuantity }, 500);
+        $(document.getElementById(postId).parentNode.parentNode).stop().animate({ scrollLeft: scrollQuantity }, timing);
     };
 
     function resizePlayer(){
@@ -341,6 +313,49 @@ $(function(){
     function updatePin (el,response){
         el.innerHTML = response['0'].has_pin == true ? el.getAttribute('data-unpin') : el.getAttribute('data-repin');
     }
+    
+    if (window.hasOwnProperty("project_data")){
+        setInterval(function(){
+            ajaxPingUrl('/get_last_posted_on/' + project_data.project_id + '/' + project_data.last_posted_on, document.getElementById('project-player'),function(el,response){
+                if (response != false && response.post_data.posted_on != project_data.last_posted_on){
+                    var lastLvl = document.getElementsByClassName('active-level');
+                    var bottomPost = lastLvl[lastLvl.length - 1].getElementsByClassName('active-post')[0];
+                    if (response.post_data.siblings_amount >= 3){
+                        var parentPost = document.getElementById(response.post_data.parent_id + '-children');
+                        parentPost.getElementsByClassName('posts')[0].insertAdjacentHTML('afterbegin',response.html);
+                        parentPost.getElementsByClassName('post-siblings-nav')[0].childNodes[0].insertAdjacentHTML('afterbegin',response.html_link);
+                    } else if (response.post_data.siblings_amount == 1) {
+                        document.getElementById(response.post_data.parent_id).parentNode.parentNode.parentNode.parentNode.insertAdjacentHTML('beforeend',response.html);
+                    } else if (response.post_data.siblings_amount == 2) {
+                        document.getElementById(response.post_data.parent_id + '-children').getElementsByClassName('posts')[0].insertAdjacentHTML('afterbegin',response.html);
+                        document.getElementById(response.post_data.parent_id + '-children').getElementsByClassName('post-siblings')[0].insertAdjacentHTML('afterbegin',response.html_link);
+                        document.getElementById(response.post_data.parent_id + '-children').getElementsByClassName('link')[0].setAttribute('data-target',document.getElementById(response.post_data.parent_id + '-children').getElementsByClassName('post')[0].id);
+                    }
+                    showPost(bottomPost.id,0);
+                    document.getElementsByClassName('post-more-menus')[0].insertAdjacentHTML('beforeend',response.html_menu);
+                    componentHandler.upgradeDom();
+                    
+                    document.getElementById("snackbar").MaterialSnackbar.showSnackbar({
+                        message: "Un nouveau post vient d'être créé",
+                        actionHandler: function (){
+                            goToPost(response.post_data.id);
+                        },
+                        timeout: (10 * 1000),
+                        actionText: "Voir"
+                    });
+                    if ($('#new_post_amount').length){
+                        var current_amount = parseInt($('#new_post_amount').html());
+                        $('#new_post_amount').html(current_amount + 1);
+                    } else {
+                        document.getElementsByClassName('project-header')[0].getElementsByClassName('list-inline')[0].insertAdjacentHTML('beforeend','<br><span>Il y a <span id="new_post_amount">1</span> nouveau post, <a href>cliquez ici</a> pour rafraichir la page</span>')
+                    }
+                    
+                    // last_posted_on updated
+                    project_data.last_posted_on = response.post_data.posted_on;
+                }
+            });
+        },3000);
+    }
 
     function ajaxPingUrl(url,el,callback) {
         var xmlhttp = new XMLHttpRequest(),
@@ -363,7 +378,7 @@ $(function(){
         xmlhttp.open("GET", url, true);
         xmlhttp.send();
     }
-    $('.vote-btn').on('click', function(){
+    $(document).on('click', '.vote-btn', function(){
         var id = this.getAttribute('id').split('-');
         var sign = (id[1] == 'upvote') ? 'plus' : 'minus';
         ajaxPingUrl('/vote/' + sign + '/' + id[0],this,updateScore)

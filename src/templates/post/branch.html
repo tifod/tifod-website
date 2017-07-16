@@ -2,54 +2,22 @@
 
 <div class="post-siblings">
     {# nav bar #}
-    {% if children|length > 1 %}
-        <div class="prev"><i class="fa fa-chevron-left fa-2x"></i></div>
-        <div class="next"><i class="fa fa-chevron-right fa-2x"></i></div>
-        <div class="post-siblings-nav">
-            <form>
-                {% for t_child in children %}
-                    <label class="link" data-target="{{ t_child.id }}">
-                        <input type="radio" id="{{ t_child.id }}-radio-button" class="link-radio-button" name="radio-{{ post.id }}" {% if loop.first %}checked{% endif %} />
-                        <div class="link-btn"></div>
-                        {% set loopfirstparent = loop.first %}
-                    </label>
-                {% endfor %}
-            </form>
-        </div>
-    {% endif %}
+    {% include 'post/post_navbar.html' %}
     
     {# posts #}
     <div class="posts{% if children|length > 1 %} many-posts{% endif %}">
-    {% for child in children %}
-        {% set lastChild = children[children|length - 1] %}        
-        <div>
-            <div class="post{% if loop.first %} active-post{% endif %}" id="{{ child.id }}" data-path="{{ child.path }}">
-                {% if child.edit_id != '0' %}
-                    {% set content_type = child.edit_content_type %}
-                    {% set content = child.edit_content %}
-                {% else %}
-                    {% set content_type = child.content_type %}
-                    {% set content = child.content %}
-                {% endif %}
-                {% if content_type == 'file' %}
-                    <img class="lazyload" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ content }}" alt="image sans description">
-                {% else %}
-                    <div class="post-text">{{ content|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
-                {% endif %}
-                
-                {# post infos #}
-                {% include "/post/post-infos.html" with {'post':child} %}
-            </div>
-        </div>
+    {% set lastChild = children[children|length - 1] %}        
+    {% for post in children %}
+        {% include 'post/post-content.html' %}
     {% endfor %}
     </div>
 </div>
 
 {# post children #}
-{% for child in children%}
-    {% if child.children %}
-        <div class="post-level{% if loop.first %} active-level{% endif %}" id="{{ child.id }}-children">
-                {% include "post/branch.html" with {'post': child} %}
+{% for post in children %}
+    {% if post.children %}
+        <div class="post-level{% if loop.first %} active-level{% endif %}" id="{{ post.id }}-children">
+            {% include "post/branch.html" %}
         </div>
     {% endif %}
 {% endfor %}
