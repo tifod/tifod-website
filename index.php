@@ -190,6 +190,37 @@ $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $r
     ]);
     $donnees = $reponse->fetch();
     if ($donnees == false) die (json_encode($donnees));
+    
+    $edit_values_needed = ['content', 'content_type', 'posted_on', 'author_id'];
+    $edit_query = ', (select avatar from user where user_id = (IF(p.edit_id = 0,NULL,(SELECT author_id FROM post tp WHERE tp.id = p.edit_id)))) edit_author_avatar, (select user_name from user where user_id = (IF(p.edit_id = 0,NULL,(SELECT author_id FROM post tp WHERE tp.id = p.edit_id)))) edit_author_name';
+    foreach ($edit_values_needed as $edit_field){
+        $edit_query .= ', (IF(p.edit_id = 0,NULL,(SELECT ' . $edit_field . ' FROM post tp WHERE tp.id = p.edit_id))) edit_' . $edit_field;
+    }
+    $reponse = $db->prepare ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar, (SELECT COUNT(*) FROM post tp WHERE tp.parent_id = p.id AND tp.is_an_edit = 1) edit_number' . $edit_query . ' from post p where project_id = :project_id and is_an_edit = 0 order by user_id_pin desc, score_percent desc, score_result desc, posted_on desc');
+    $reponse->execute([ 'project_id' => $args['project_id'] ]);
+    $data = [];
+    while ($data[] = $reponse->fetch());
+    array_pop($data);
+
+    // creating a comprehensive list of the projet posts
+    $lastPostedOn = $data[0]['posted_on'];
+    foreach ($data as $k => $post){
+        $posts [] = $post;
+        if ($post['parent_id'] == 0) $topPostId = $k;
+        if ($post['posted_on'] > $lastPostedOn) $lastPostedOn = $post['posted_on'];
+    }
+
+    $new = [];
+    foreach ($posts as $a){
+        $new[$a['parent_id']][] = [
+            'innerHTML' => $this->view->render('post/tree-post.html', ['post' => $a]),
+            'id' => $a['id']
+        ];
+    }
+    $project_json = createTree($new, array($posts[$topPostId]));
+    
+    $reponse->closeCursor();
+    
     if ($donnees['siblings_amount'] >= 3){
         $output = [
             'post_data' => $donnees,
@@ -211,7 +242,9 @@ $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $r
             'html_menu' => $this->view->render('/post/post-more/post-more-menu.html', ['post' => $donnees, 'project_type' => $donnees['project_type']])
         ];
     }
-    $reponse->closeCursor();
+    
+    // $project_json
+    $output['tree_structure'] = $this->view->createTemplate('{{ project_json.0.children.0|json_encode|raw }}')->render(['project_json'=> $project_json]);
     die(json_encode($output));
 });
 $app->get('/p/{projectId}', function ($request, $response, $args) {

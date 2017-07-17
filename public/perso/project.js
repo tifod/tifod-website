@@ -26,8 +26,8 @@ $(function(){
     
     if (document.getElementById('project-tree') != null){
         var simple_chart_config = {
-        chart: { container: "#project-tree" },
-        nodeStructure: tree_structure
+            chart: { container: "#project-tree" },
+            nodeStructure: tree_structure
         };
         new Treant(simple_chart_config);
         var there_is_tree = true;
@@ -45,31 +45,29 @@ $(function(){
     
     var boards = document.getElementsByClassName('drawing-board');
     if (boards.length > 0) resetBoard(boards[boards.length - 1].getAttribute('id'));
-    $(document).on('change', '.drawing-board-import', handleImage);
-    function handleImage(e){
+    $(document).on('change', '.drawing-board-import', function(){
         var postId = event.target.getAttribute('data-postid');
-        
         var reader = new FileReader();
         reader.onload = function(event){
             var img = new Image();
             img.onload = function(){
-                document.getElementById(postId).parentNode.getElementsByClassName('file-dimensions')[0].innerHTML = img.width + ' × ' + img.height;
-                document.getElementById(postId + '-drawing-board').style.height = img.height + 'px';
-                document.getElementById(postId + '-drawing-board').style.width = img.width + 'px';
-                resetBoard(postId + '-drawing-board');
+                $('#' + postId + ' .file-dimensions').html(img.width + ' × ' + img.height);
+                $('#' + postId + '-drawing-board').css('height',img.height + 'px');
+                $('#' + postId + '-drawing-board').css('width',img.width + 'px');
+                var currentBoard = resetBoard(postId + '-drawing-board',true);
                 resizePlayer();
                 animationsTest(function(){
-                    var canvas = document.getElementById(postId + '-drawing-board').getElementsByTagName('canvas')[0];
-                    var ctx = canvas.getContext('2d');
+                    var canvas = $('#' + postId + '-drawing-board canvas')[0];
                     canvas.width = img.width;
                     canvas.height = img.height;
-                    ctx.drawImage(img,0,0);
+                    canvas.getContext('2d').drawImage(img,0,0);
+                    currentBoard.saveHistory();
                 });
             }
             img.src = event.target.result;
         }
-        reader.readAsDataURL(event.target.files[0]);     
-    }
+        reader.readAsDataURL(event.target.files[0]);
+    });
 
     // drawing board
     $(document).on('change', '.drawingboard-width-input', function(){ resizeDrawingBoardSize('width',this.getAttribute('data-postid')); });
@@ -87,7 +85,7 @@ $(function(){
         resizePlayer();
     }
     var mainBoard;
-    function resetBoard (elId){
+    function resetBoard (elId, returnBoard){
         if (document.getElementById(elId) != null){
             document.getElementById(elId).innerHTML = '';
             mainBoard = new DrawingBoard.Board(elId, {
@@ -123,6 +121,8 @@ $(function(){
                     mainBoard.clearWebStorage();
                 }
             }
+            
+            if (returnBoard) return mainBoard;
         }
     }
     // checkbox-more init
@@ -319,20 +319,24 @@ $(function(){
             ajaxPingUrl('/get_last_posted_on/' + project_data.project_id + '/' + project_data.last_posted_on, document.getElementById('project-player'),function(el,response){
                 if (response != false && response.post_data.posted_on != project_data.last_posted_on){
                     var lastLvl = document.getElementsByClassName('active-level');
-                    var bottomPost = lastLvl[lastLvl.length - 1].getElementsByClassName('active-post')[0];
                     if (response.post_data.siblings_amount >= 3){
-                        var parentPost = document.getElementById(response.post_data.parent_id + '-children');
-                        parentPost.getElementsByClassName('posts')[0].insertAdjacentHTML('afterbegin',response.html);
-                        parentPost.getElementsByClassName('post-siblings-nav')[0].childNodes[0].insertAdjacentHTML('afterbegin',response.html_link);
+                        var postChildren = document.getElementById(response.post_data.parent_id + '-children');
+                        postChildren.getElementsByClassName('posts')[0].insertAdjacentHTML('afterbegin',response.html);
+                        postChildren.getElementsByClassName('post-siblings-nav')[0].childNodes[0].insertAdjacentHTML('afterbegin',response.html_link);
+                        showPost(postChildren.getElementsByClassName('active-post')[0].id,0);
                     } else if (response.post_data.siblings_amount == 1) {
                         document.getElementById(response.post_data.parent_id).parentNode.parentNode.parentNode.parentNode.insertAdjacentHTML('beforeend',response.html);
                     } else if (response.post_data.siblings_amount == 2) {
-                        document.getElementById(response.post_data.parent_id + '-children').getElementsByClassName('posts')[0].insertAdjacentHTML('afterbegin',response.html);
-                        document.getElementById(response.post_data.parent_id + '-children').getElementsByClassName('post-siblings')[0].insertAdjacentHTML('afterbegin',response.html_link);
-                        document.getElementById(response.post_data.parent_id + '-children').getElementsByClassName('link')[0].setAttribute('data-target',document.getElementById(response.post_data.parent_id + '-children').getElementsByClassName('post')[0].id);
+                        var postChildren = document.getElementById(response.post_data.parent_id + '-children');
+                        postChildren.getElementsByClassName('posts')[0].insertAdjacentHTML('afterbegin',response.html);
+                        postChildren.getElementsByClassName('post-siblings')[0].insertAdjacentHTML('afterbegin',response.html_link);
+                        postChildren.getElementsByClassName('link')[1].setAttribute('data-target',postChildren.getElementsByClassName('post')[1].id);
+                        showPost(postChildren.getElementsByClassName('post')[1].id,0);
                     }
-                    showPost(bottomPost.id,0);
                     document.getElementsByClassName('post-more-menus')[0].insertAdjacentHTML('beforeend',response.html_menu);
+                    new Treant({ chart: { container: "#project-tree" }, nodeStructure: JSON.parse(response.tree_structure) });
+                    resizePlayer();
+                    
                     componentHandler.upgradeDom();
                     
                     document.getElementById("snackbar").MaterialSnackbar.showSnackbar({
@@ -340,7 +344,7 @@ $(function(){
                         actionHandler: function (){
                             goToPost(response.post_data.id);
                         },
-                        timeout: (10 * 1000),
+                        timeout: (5 * 1000),
                         actionText: "Voir"
                     });
                     if ($('#new_post_amount').length){
