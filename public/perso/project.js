@@ -318,34 +318,44 @@ $(function(){
         setInterval(function(){
             ajaxPingUrl('/get_last_posted_on/' + project_data.project_id + '/' + project_data.last_posted_on, document.getElementById('project-player'),function(el,response){
                 if (response != false && response.post_data.posted_on != project_data.last_posted_on){
-                    var lastLvl = document.getElementsByClassName('active-level');
-                    if (response.post_data.siblings_amount >= 3){
-                        var postChildren = document.getElementById(response.post_data.parent_id + '-children');
-                        postChildren.getElementsByClassName('posts')[0].insertAdjacentHTML('afterbegin',response.html);
-                        postChildren.getElementsByClassName('post-siblings-nav')[0].childNodes[0].insertAdjacentHTML('afterbegin',response.html_link);
-                        showPost(postChildren.getElementsByClassName('active-post')[0].id,0);
-                    } else if (response.post_data.siblings_amount == 1) {
-                        document.getElementById(response.post_data.parent_id).parentNode.parentNode.parentNode.parentNode.insertAdjacentHTML('beforeend',response.html);
-                    } else if (response.post_data.siblings_amount == 2) {
-                        var postChildren = document.getElementById(response.post_data.parent_id + '-children');
-                        postChildren.getElementsByClassName('posts')[0].insertAdjacentHTML('afterbegin',response.html);
-                        postChildren.getElementsByClassName('post-siblings')[0].insertAdjacentHTML('afterbegin',response.html_link);
-                        postChildren.getElementsByClassName('link')[1].setAttribute('data-target',postChildren.getElementsByClassName('post')[1].id);
-                        showPost(postChildren.getElementsByClassName('post')[1].id,0);
+                    if (response.post_data.is_an_edit == 0){
+                        if (response.post_data.siblings_amount >= 3){
+                            console.log(response.post_data.siblings_amount);
+                            var postChildren = document.getElementById(response.post_data.parent_id + '-children');
+                            postChildren.getElementsByClassName('posts')[0].insertAdjacentHTML('afterbegin',response.html);
+                            postChildren.getElementsByClassName('post-siblings-nav')[0].childNodes[0].insertAdjacentHTML('afterbegin',response.html_link);
+                            showPost(postChildren.getElementsByClassName('active-post')[0].id,0);
+                        } else if (response.post_data.siblings_amount == 1) {
+                            document.getElementById(response.post_data.parent_id).parentNode.parentNode.parentNode.parentNode.insertAdjacentHTML('beforeend',response.html);
+                        } else if (response.post_data.siblings_amount == 2) {
+                            var postChildren = document.getElementById(response.post_data.parent_id + '-children');
+                            postChildren.getElementsByClassName('posts')[0].insertAdjacentHTML('afterbegin',response.html);
+                            postChildren.getElementsByClassName('post-siblings')[0].insertAdjacentHTML('afterbegin',response.html_link);
+                            postChildren.getElementsByClassName('link')[1].setAttribute('data-target',postChildren.getElementsByClassName('post')[1].id);
+                            showPost(postChildren.getElementsByClassName('post')[1].id,0);
+                        }
+                        document.getElementsByClassName('post-more-menus')[0].insertAdjacentHTML('beforeend',response.html_menu);
+                        new Treant({ chart: { container: "#project-tree" }, nodeStructure: JSON.parse(response.tree_structure) });
+                        resizePlayer();
+                        
+                        componentHandler.upgradeDom();
+                        var snackbar = {
+                            msg : "Un nouveau post vient d'être créé",
+                            actionText: "Voir",
+                            actionHandler : function (){ goToPost(response.post_data.id); }
+                        };
+                    } else {
+                        var snackbar = {
+                            msg : "Un post vient d'être modifier",
+                            actionText: "Rafraîchir la page",
+                            actionHandler : function (){ location = location; }
+                        };
                     }
-                    document.getElementsByClassName('post-more-menus')[0].insertAdjacentHTML('beforeend',response.html_menu);
-                    new Treant({ chart: { container: "#project-tree" }, nodeStructure: JSON.parse(response.tree_structure) });
-                    resizePlayer();
-                    
-                    componentHandler.upgradeDom();
-                    
                     document.getElementById("snackbar").MaterialSnackbar.showSnackbar({
                         message: "Un nouveau post vient d'être créé",
-                        actionHandler: function (){
-                            goToPost(response.post_data.id);
-                        },
-                        timeout: (5 * 1000),
-                        actionText: "Voir"
+                        actionHandler: snackbar.actionHandler,
+                        timeout: (8 * 1000),
+                        actionText: snackbar.actionText
                     });
                     if ($('#new_post_amount').length){
                         var current_amount = parseInt($('#new_post_amount').html());

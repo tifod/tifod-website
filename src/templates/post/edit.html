@@ -27,7 +27,7 @@
 <div class="posts posts-list">
     <div>
         <div class="text-center list-inline">
-            {% if parent_post.auto_pin_edits == '1' %}<span class="fa fa-thumb-tack"></span><span>Toutes les posts ci dessous sont automatiquement épinglés</span><span>|</span>{% endif %}
+            {% if parent_post.auto_pin_edits == '1' %}<span class="fa fa-thumb-tack"></span><span>Toutes les posts ci dessous sont automatiquement épinglés</span>{% endif %}
             <a href="/p/{{ parent_post.project_id }}#{{ parent_post.id }}"><i class="fa fa-fw fa-arrow-left"></i> Voir ce post dans son contexte d'origine</a>
         </div>
         <div class="post post-blue-border">
@@ -51,13 +51,14 @@
                 <p class="text-center">Modification acceptée</p>
                 <hr>
             {% endif %}
+            {% include 'post/post-infos.html' %}
             {# content #}
                 {% if post.content_type == 'file' %}
                     <img src="/public/img/post/{{ post.content }}" alt="image sans description">
                 {% else %}
                     <div class="post-text">{{ post.content|markdown|striptags('<p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
                 {% endif %}
-            {% include 'post/post-infos.html' %}
+            {% include 'post/post-actions.html' %}
         </div>
     </div>
     {% endfor %}

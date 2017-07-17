@@ -1,0 +1,39 @@
+<div class="post-more">
+    <div class="post-more-nav">
+        <div class="post-infos list-inline">
+            {% if 'vote_post'|is_allowed_for(project_type) and not current_page_is_edit_page or (current_page_is_edit_page and post.is_an_edit == '1') %}
+                <button id="{{ post.id }}-upvote" class="vote-btn mdl-button mdl-js-button mdl-button--icon"><span class="material-icons">thumb_up</span></button>
+                <span class="mdl-tooltip mdl-tooltip--top post-score-plus" for="{{ post.id }}-upvote">{{ post.vote_plus }}</span>
+                
+                <strong class="post-score">{{ post.score_result }}</strong>
+                
+                <button id="{{ post.id }}-downvote" class="vote-btn mdl-button mdl-js-button mdl-button--icon"><span class="material-icons">thumb_down</span></button>
+                <span class="mdl-tooltip mdl-tooltip--top post-score-minus" for="{{ post.id }}-downvote">{{ post.vote_minus }}</span>
+			{% elseif not current_user %}
+                <a class="mdl-button mdl-js-button mdl-button--icon" id="login_for_voting_btn-{{ post.id }}" href="/login?redirect={{ current_url }}"><span class="material-icons">thumbs_up_down</span></a>
+                <strong>{{ post.score_result }}</strong>
+                <span class="mdl-tooltip mdl-tooltip--top" for="login_for_voting_btn-{{ post.id }}">Cliquez pour vous connecter</span>
+			{% endif %}
+        </div>
+        <div class="post-more-btn list-inline">
+            {% if 'add_post'|is_allowed_for(project_type) and not current_page_is_edit_page %}
+                <label class="mdl-button mdl-js-button mdl-button--raised" id="{{ post.id }}-add-content" for="{{ post.id }}-checkbox-more"><i class="material-icons">add</i> Répondre</label>
+            {% elseif not current_user %}
+                <a id="{{ post.id }}-add-content" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="/login?redirect={{ current_url }}"><i class="material-icons">add</i> Répondre</a>
+                <span class="mdl-tooltip mdl-tooltip--top" for="{{ post.id }}-add-content">Cliquez pour vous connecter</span>
+            {% endif %}
+            {% if not current_page_is_edit_page %}
+                {% if post.edit_number > 0 %}<span data-badge="{{ post.edit_number }}" class="mdl-badge mdl-badge--overlap">{% endif %}
+                    <a href="/edit/{{ post.id }}"{% if post.edit_number > 0 %} data-badge="{{ post.edit_number }}"{% endif %} class="mdl-button{% if post.edit_number > 0 %} mdl-badge{% endif %}"><i class="material-icons">mode_edit</i> Modifier</a>
+                {% if post.edit_number > 0 %}</span>{% endif %}
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if 'add_post'|is_allowed_for(project_type) and not current_page_is_edit_page %}
+        <input type="checkbox" id="{{ post.id }}-checkbox-more" class="checkbox-more" data-postid="{{ post.id }}">
+        <div class="post-more-form">
+            {% include "post/post-more/add-content.html" %}
+        </div>
+    {% endif %}
+</div>

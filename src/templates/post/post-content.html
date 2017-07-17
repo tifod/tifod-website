@@ -1,5 +1,7 @@
 <div>
     <div class="post{% if loop.first %} active-post{% endif %}" id="{{ post.id }}" data-path="{{ post.path }}">
+        {# post infos #}
+        {% include "/post/post-infos.html" %}
         {% if post.edit_id != '0' %}
             {% set content_type = post.edit_content_type %}
             {% set content = post.edit_content %}
@@ -12,8 +14,6 @@
         {% else %}
             <div class="post-text">{{ content|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
         {% endif %}
-        
-        {# post infos #}
-        {% include "/post/post-infos.html" %}
+        {% include 'post/post-actions.html' %}
     </div>
 </div>
