@@ -179,13 +179,14 @@ $app->post('/update-from-github', function ($request, $response, $args) {
 });
 $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $response, $args) {
     $db = MyApp\Utility\Db::getPDO();
-    $reponse = $db->prepare ('select id from post where project_id = :project_id AND posted_on > :last_time ORDER BY posted_on LIMIT 1');
+    $reponse = $db->prepare ('select * from post where project_id = :project_id AND posted_on > :last_time ORDER BY posted_on LIMIT 1');
     $reponse->execute([
         'project_id' => $args['project_id'],
         'last_time' => $args['last_time']
     ]);
     $donnees = $reponse->fetch();
     if ($donnees == false) die (json_encode($donnees));
+    if ($donnees['is_an_edit'] == 1) die (json_encode(['post_data' => $donnees]));
     $post_id_searched = $donnees['id'];
     
     $edit_values_needed = ['content', 'content_type', 'posted_on', 'author_id'];
@@ -193,7 +194,7 @@ $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $r
     foreach ($edit_values_needed as $edit_field){
         $edit_query .= ', (IF(p.edit_id = 0,NULL,(SELECT ' . $edit_field . ' FROM post tp WHERE tp.id = p.edit_id))) edit_' . $edit_field;
     }
-    $reponse = $db->prepare ('select *, (SELECT project_type FROM project WHERE project_id = :project_id) project_type, (SELECT COUNT(id) FROM post tp WHERE tp.parent_id = p.parent_id) siblings_amount, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar, (SELECT COUNT(*) FROM post tp WHERE tp.parent_id = p.id AND tp.is_an_edit = 1) edit_number' . $edit_query . ' from post p where project_id = :project_id order by user_id_pin desc, score_percent desc, score_result desc, posted_on desc');
+    $reponse = $db->prepare ('select *, (SELECT project_type FROM project WHERE project_id = :project_id) project_type, (SELECT COUNT(id) FROM post tp WHERE tp.parent_id = p.parent_id AND tp.is_an_edit = 0) siblings_amount, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar, (SELECT COUNT(*) FROM post tp WHERE tp.parent_id = p.id AND tp.is_an_edit = 1) edit_number' . $edit_query . ' from post p where project_id = :project_id order by user_id_pin desc, score_percent desc, score_result desc, posted_on desc');
     $reponse->execute([ 'project_id' => $args['project_id'] ]);
     $donnees = [];
     while ($donnees[] = $reponse->fetch());
@@ -201,6 +202,7 @@ $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $r
 
     // creating a comprehensive list of the projet posts
     $i = 0;
+    $all_posts = [];
     foreach ($donnees as $k => $post){
         if ($post['is_an_edit'] == 0){
             $posts [$i] = $post;
@@ -208,7 +210,9 @@ $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $r
             $i++;
         }
         if ($post['id'] == $post_id_searched) $last_post = $post;
+        $all_posts[$post['id']] = $post;
     }
+    $last_post['is_changing_parent'] = ($last_post['is_an_edit'] == 1 and $all_posts[$last_post['parent_id']]['posted_on'] == $last_post['posted_on']);
 
     $new = [];
     foreach ($posts as $a){

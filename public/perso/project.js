@@ -339,24 +339,20 @@ $(function(){
                         resizePlayer();
                         
                         componentHandler.upgradeDom();
-                        var snackbar = {
-                            msg : "Un nouveau post vient d'être créé",
+                        document.getElementById("snackbar").MaterialSnackbar.showSnackbar({
+                            message : "Un nouveau post vient d'être créé",
                             actionText: "Voir",
-                            actionHandler : function (){ goToPost(response.post_data.id); }
-                        };
+                            actionHandler: function (){ goToPost(response.post_data.id); },
+                            timeout: (8 * 1000),
+                        });
                     } else {
-                        var snackbar = {
-                            msg : "Un post vient d'être modifier",
-                            actionText: "Rafraîchir la page",
-                            actionHandler : function (){ location = location; }
-                        };
+                        document.getElementById("snackbar").MaterialSnackbar.showSnackbar({
+                            message : "Une modification vient d'être posté",
+                            actionText: "Voir",
+                            actionHandler: function (){ location = '/edit/' + response.post_data.parent_id + '#' + response.post_data.id; },
+                            timeout: (8 * 1000),
+                        });
                     }
-                    document.getElementById("snackbar").MaterialSnackbar.showSnackbar({
-                        message: "Un nouveau post vient d'être créé",
-                        actionHandler: snackbar.actionHandler,
-                        timeout: (8 * 1000),
-                        actionText: snackbar.actionText
-                    });
                     if ($('#new_post_amount').length){
                         var current_amount = parseInt($('#new_post_amount').html());
                         $('#new_post_amount').html(current_amount + 1);

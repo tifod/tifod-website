@@ -164,7 +164,9 @@ img { width: 100%; height: auto; }
     display: flex;
     align-items: center;
 }
+.post-infos { white-space: nowrap; }
 .post-more-btn {
+    text-align: right;
     margin-left: auto;
 }
 .post-more-menus {

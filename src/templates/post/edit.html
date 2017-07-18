@@ -25,22 +25,26 @@
     <button class="mdl-snackbar__action" type="button"></button>
 </div>
 <div class="posts posts-list">
+    <div class="container">
+        <p>
+            <a class="mdl-button mdl-js-button mdl-button--raised" href="/p/{{ parent_post.project_id }}#{{ parent_post.id }}"><i class="fa fa-fw fa-arrow-left"></i> Retour</a>
+        </p>
+        <p>
+            {% if parent_post.auto_pin_edits == '1' %}<span class="fa fa-thumb-tack"></span> Tous les posts ci dessous sont automatiquement épinglés{% endif %}
+        </p>
+    </div>
     <div>
-        <div class="text-center list-inline">
-            {% if parent_post.auto_pin_edits == '1' %}<span class="fa fa-thumb-tack"></span><span>Toutes les posts ci dessous sont automatiquement épinglés</span>{% endif %}
-            <a href="/p/{{ parent_post.project_id }}#{{ parent_post.id }}"><i class="fa fa-fw fa-arrow-left"></i> Voir ce post dans son contexte d'origine</a>
-        </div>
         <div class="post post-blue-border">
             <br>
             <p class="text-center">Post original</p>
             <hr>
+            {% include 'post/post-infos.html' with {'post': parent_post} %}
             {# content #}
                 {% if parent_post.content_type == 'file' %}
                     <img src="/public/img/post/{{ parent_post.content }}" alt="image sans description">
                 {% else %}
                     <div class="post-text">{{ parent_post.content|markdown|striptags('<p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
                 {% endif %}
-                {% include 'post/post-infos.html' with {'post': parent_post} %}
         </div>
     </div>
     {% for post in modifications %}

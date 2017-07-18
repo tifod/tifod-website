@@ -10,15 +10,19 @@
                 <button id="{{ post.id }}-downvote" class="vote-btn mdl-button mdl-js-button mdl-button--icon"><span class="material-icons">thumb_down</span></button>
                 <span class="mdl-tooltip mdl-tooltip--top post-score-minus" for="{{ post.id }}-downvote">{{ post.vote_minus }}</span>
 			{% elseif not current_user %}
-                <a class="mdl-button mdl-js-button mdl-button--icon" id="login_for_voting_btn-{{ post.id }}" href="/login?redirect={{ current_url }}"><span class="material-icons">thumbs_up_down</span></a>
-                <strong>{{ post.score_result }}</strong>
-                <span class="mdl-tooltip mdl-tooltip--top" for="login_for_voting_btn-{{ post.id }}">Cliquez pour vous connecter</span>
+                <button id="{{ post.id }}-upvote" class="mdl-button mdl-js-button mdl-button--icon"><span class="material-icons">thumb_up</span></button>
+                <span class="mdl-tooltip mdl-tooltip--top post-score-plus" for="{{ post.id }}-upvote">{{ post.vote_plus }} (connectez vous pour voter)</span>
+                
+                <strong class="post-score">{{ post.score_result }}</strong>
+                
+                <button id="{{ post.id }}-downvote" class="mdl-button mdl-js-button mdl-button--icon"><span class="material-icons">thumb_down</span></button>
+                <span class="mdl-tooltip mdl-tooltip--top post-score-minus" for="{{ post.id }}-downvote">{{ post.vote_minus }} (connectez vous pour voter)</span>
 			{% endif %}
         </div>
         <div class="post-more-btn list-inline">
             {% if 'add_post'|is_allowed_for(project_type) and not current_page_is_edit_page %}
                 <label class="mdl-button mdl-js-button mdl-button--raised" id="{{ post.id }}-add-content" for="{{ post.id }}-checkbox-more"><i class="material-icons">add</i> Répondre</label>
-            {% elseif not current_user %}
+            {% elseif not current_user and not current_page_is_edit_page %}
                 <a id="{{ post.id }}-add-content" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="/login?redirect={{ current_url }}"><i class="material-icons">add</i> Répondre</a>
                 <span class="mdl-tooltip mdl-tooltip--top" for="{{ post.id }}-add-content">Cliquez pour vous connecter</span>
             {% endif %}
