@@ -194,7 +194,7 @@ $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $r
     foreach ($edit_values_needed as $edit_field){
         $edit_query .= ', (IF(p.edit_id = 0,NULL,(SELECT ' . $edit_field . ' FROM post tp WHERE tp.id = p.edit_id))) edit_' . $edit_field;
     }
-    $reponse = $db->prepare ('select *, (SELECT project_type FROM project WHERE project_id = :project_id) project_type, (SELECT COUNT(id) FROM post tp WHERE tp.parent_id = p.parent_id AND tp.is_an_edit = 0) siblings_amount, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar, (SELECT COUNT(*) FROM post tp WHERE tp.parent_id = p.id AND tp.is_an_edit = 1) edit_number' . $edit_query . ' from post p where project_id = :project_id order by user_id_pin desc, score_percent desc, score_result desc, posted_on desc');
+    $reponse = $db->prepare ('select *, (SELECT IF (p.user_id_pin = 0,0,1)) has_pin, (SELECT project_type FROM project WHERE project_id = :project_id) project_type, (SELECT COUNT(id) FROM post tp WHERE tp.parent_id = p.parent_id AND tp.is_an_edit = 0) siblings_amount, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar, (SELECT COUNT(*) FROM post tp WHERE tp.parent_id = p.id AND tp.is_an_edit = 1) edit_number' . $edit_query . ' from post p where project_id = :project_id order by has_pin desc, score_percent desc, score_result desc, posted_on desc');
     $reponse->execute([ 'project_id' => $args['project_id'] ]);
     $donnees = [];
     while ($donnees[] = $reponse->fetch());
@@ -282,7 +282,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             foreach ($edit_values_needed as $edit_field){
                 $edit_query .= ', (IF(p.edit_id = 0,NULL,(SELECT ' . $edit_field . ' FROM post tp WHERE tp.id = p.edit_id))) edit_' . $edit_field;
             }
-            $reponse = $db->prepare ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar, (SELECT COUNT(*) FROM post tp WHERE tp.parent_id = p.id AND tp.is_an_edit = 1) edit_number' . $edit_query . ' from post p where project_id = :project_id order by user_id_pin desc, score_percent desc, score_result desc, posted_on desc');
+            $reponse = $db->prepare ('select *, (SELECT IF (p.user_id_pin = 0,0,1)) has_pin, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar, (SELECT COUNT(*) FROM post tp WHERE tp.parent_id = p.id AND tp.is_an_edit = 1) edit_number' . $edit_query . ' from post p where project_id = :project_id order by has_pin desc, score_percent desc, score_result desc, posted_on desc');
             $reponse->execute([ 'project_id' => $projectId ]);
             $donnees = [];
             while ($donnees[] = $reponse->fetch());
@@ -309,7 +309,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             foreach ($posts as $a){
                 $new[$a['parent_id']][] = $a;
             }
-            $project = createTree($new, array($posts[$topPostId]));
+            $project = ['children' => createTree($new, [$posts[$topPostId]])];
 
             $new = [];
             foreach ($posts as $a){
@@ -317,10 +317,14 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
                     'innerHTML' => $this->view->render('post/tree-post.html', ['post' => $a]),
                     'id' => $a['id']
                 ];
+                if ($a['parent_id'] == 0) $top_post_json = [
+                    'innerHTML' => $this->view->render('post/tree-post.html', ['post' => $a]),
+                    'id' => $a['id']
+                ];
             }
-            $project_json = createTree($new, array($posts[$topPostId]));
+            $project_json = createTree($new, [$top_post_json]);
             
-            return $this->view->render('post/project-player.html', ['project' => $project, 'project_type' => $project_type, 'projectId' => $projectId, 'project_json' => $project_json, 'last_posted_on' => $lastPostedOn]);
+            return $this->view->render('post/project-player.html', ['top_post' => $project['children'][0],'project' => $project, 'project_type' => $project_type, 'projectId' => $projectId, 'project_json' => $project_json, 'last_posted_on' => $lastPostedOn]);
         } else {
             throw new Exception("Vous n'êtes pas autorisé à consulter ce projet");
         }
@@ -336,7 +340,13 @@ $app->get('/project', function ($request, $response) { header('Location: /p'); e
 $app->get('/projects', function ($request, $response) { header('Location: /p'); exit(); });
 $app->get('/p', function ($request, $response) {
     $db = MyApp\Utility\Db::getPDO();
-    $reponse = $db->query ('select *, (SELECT COUNT(*) FROM post tp WHERE tp.project_id = p.project_id) post_count, (SELECT COUNT(DISTINCT author_id) FROM post tp WHERE tp.project_id = p.project_id) author_count, (select user_name from user u where u.user_id = p.author_id) author_name from post p where parent_id = 0');
+    $edit_values_needed = ['content', 'content_type'];
+    $edit_query = ', (select avatar from user where user_id = (IF(p.edit_id = 0,NULL,(SELECT author_id FROM post tp WHERE tp.id = p.edit_id)))) edit_author_avatar, (select user_name from user where user_id = (IF(p.edit_id = 0,NULL,(SELECT author_id FROM post tp WHERE tp.id = p.edit_id)))) edit_author_name';
+    foreach ($edit_values_needed as $edit_field){
+        $edit_query .= ', (IF(p.edit_id = 0,NULL,(SELECT ' . $edit_field . ' FROM post tp WHERE tp.id = p.edit_id))) edit_' . $edit_field;
+    }
+    
+    $reponse = $db->query ('select *, (SELECT COUNT(*) FROM post tp WHERE tp.project_id = p.project_id) post_count, (SELECT COUNT(DISTINCT author_id) FROM post tp WHERE tp.project_id = p.project_id) author_count, (select user_name from user u where u.user_id = p.author_id) author_name' . $edit_query . ' from post p where parent_id = 0');
     while ($donnees[] = $reponse->fetch());
     array_pop($donnees);
     $lastProjectId = count($donnees) > 0 ? $donnees[count($donnees) - 1]['project_id'] + 1 : 1;
@@ -365,19 +375,20 @@ $app->post('/create-project', function ($request, $response) {
 $app->post('/add-post', function ($request, $response) {
     if ((!empty($_POST['content']) or !empty($_POST['image']) or !empty($_FILES['image']['name'])) and isset($_POST['parent_id']) and isset($_POST['is_an_edit'])){
         $db = MyApp\Utility\Db::getPDO();
-        $reponse = $db->prepare ('select project_type, (SELECT is_an_edit FROM post WHERE id = :parent_id) is_an_edit, (SELECT COUNT(*) FROM post WHERE id = :parent_id) id_parent_id_valid, (SELECT project_id FROM post WHERE id = :parent_id) project_id, (SELECT auto_pin_edits FROM post WHERE id = :parent_id) auto_pin_edits, (SELECT author_id FROM post WHERE id = :parent_id) parent_author_id from project where project_id = (SELECT project_id FROM post WHERE id = :parent_id)');
+        $reponse = $db->prepare ('select project_type, (select parent_id from post where id = :parent_id) grand_parent_id, (SELECT is_an_edit FROM post WHERE id = :parent_id) is_an_edit, (SELECT COUNT(*) FROM post WHERE id = :parent_id) id_parent_id_valid, (SELECT project_id FROM post WHERE id = :parent_id) project_id, (SELECT auto_pin_edits FROM post WHERE id = :parent_id) auto_pin_edits, (SELECT author_id FROM post WHERE id = :parent_id) parent_author_id from project where project_id = (SELECT project_id FROM post WHERE id = :parent_id)');
         $reponse->execute([
 			'parent_id' => $_POST['parent_id']
 		]);
         $donnees = $reponse->fetch();
         if ($donnees['is_an_edit'] == 1) throw new Exception ('Impossible de modifier une modification');
+        if ($donnees['grand_parent_id'] == 0 and empty($_POST['content']) and $_POST['is_an_edit'] == 'true') throw new Exception ("Seul du texte peut être proposé comme modification du titre du projet");
 		$project_type = $donnees['project_type'];
 		$project_id = $donnees['project_id'];
 		$auto_pin_edits = $donnees['auto_pin_edits'];
 		$parent_author_id = $donnees['parent_author_id'];
 		if ($donnees['id_parent_id_valid'] == 0) throw new Exception ("Vous tentez de répondre à un post qui n'existe plus (il a été supprimé)");
         if (user_can_do('add_post',$project_type)){
-            $reponse = $db->prepare ("INSERT INTO post(content, content_type, is_an_edit, parent_id, project_id, path, author_id) VALUES (:content, :content_type, :is_an_edit, :parent_id, :project_id, (IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id))), :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/')" . (($auto_pin_edits == '0') ? '' : ", user_id_pin = " . $parent_author_id) . " WHERE id = (SELECT LAST_INSERT_ID())");
+            $reponse = $db->prepare ("INSERT INTO post(content, content_type, is_an_edit, parent_id, project_id, path, author_id) VALUES (:content, :content_type, :is_an_edit, :parent_id, :project_id, (IF (:parent_id = 0,'/',(SELECT path FROM post AS p WHERE id = :parent_id))), :author_id); UPDATE post SET path = CONCAT(path,(SELECT LAST_INSERT_ID()),'/')" . (($auto_pin_edits == '1' && $_POST['is_an_edit'] == 'true') ? ", user_id_pin = " . $parent_author_id : '') . " WHERE id = (SELECT LAST_INSERT_ID())");
             $reponse->execute([
                 'content' => (empty($_POST['content']) ? 'file' : $_POST['content']),
                 'content_type' => (empty($_POST['content']) ? 'file' : 'text'),
@@ -444,7 +455,7 @@ $app->get('/edit/{post-id}', function ($request, $response, $args) {
     $reponse->execute(['post_id' => $args['post-id']]);
     $parent_post = $reponse->fetch();
     if (isset($_SESSION['current_user']) and $parent_post['author_id'] == $_SESSION['current_user']['user_id']) $_SESSION['current_user']['current_project_role'] = 'post_owner';
-    $reponse = $db->prepare ('select *, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar from post p where parent_id = :post_id and is_an_edit = 1 order by user_id_pin desc, score_percent desc, score_result desc, posted_on desc');
+    $reponse = $db->prepare ('select *, (SELECT IF (p.user_id_pin = 0,0,1)) has_pin, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar from post p where parent_id = :post_id and is_an_edit = 1 order by has_pin desc, score_percent desc, posted_on desc');
     $reponse->execute(['post_id' => $args['post-id']]);
     while ($modifications[] = $reponse->fetch());
     array_pop($modifications);
@@ -555,14 +566,15 @@ $app->get('/togglePin/{post-id}', function ($request, $response, $args) {
     $reponse = $db->prepare ('select project_type, (SELECT is_an_edit FROM post WHERE id = :post_id) is_an_edit, (SELECT author_id FROM post WHERE id = :post_id) post_author_id, (SELECT parent_id FROM post WHERE id = :post_id) parent_id from project where project_id = (SELECT project_id FROM post WHERE id = :post_id)');
     $reponse->execute(['post_id' => $args['post-id']]);
     $donnees = $reponse->fetch();
-    if ((user_can_do('pin_post',$donnees['project_type']) and $donnees['is_an_edit'] == '0') or (isset($_SESSION['current_user']['user_id']) and user_can_do('pin_edit_post',$donnees['project_type']) and $donnees['is_an_edit'] == '1' and $donnees['post_author_id'] == $_SESSION['current_user']['user_id'])){
+    if (isset($_SESSION['current_user']) and $donnees['post_author_id'] == $_SESSION['current_user']['user_id']) $_SESSION['current_user']['project_role'] = 'post_owner';
+    if ((user_can_do('pin_post',$donnees['project_type']) and $donnees['is_an_edit'] == '0') or (user_can_do('pin_edit_post',$donnees['project_type']) and $donnees['is_an_edit'] == '1')){
         $reponse = $db->prepare ('UPDATE post SET user_id_pin = (IF (user_id_pin = 0,:user_id_pin,0)) where id = :post_id');
         $reponse->execute([
             'user_id_pin' => $_SESSION['current_user']['user_id'],
             'post_id' => $args['post-id']
         ]);
         $reponse->closeCursor();
-        update_edit_id($donnees['parent_id']);
+        if ($donnees['is_an_edit'] == '1') update_edit_id($donnees['parent_id']);
     }
     header('Location: ' . (empty($_GET['redirect']) ? '/' : $_GET['redirect'].'#'.$args['post-id'])); exit();
 });

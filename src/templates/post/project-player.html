@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}"{{ project[0].content }}" | tifod{% endblock %}
+{% if top_post.edit_id != '0' %}
+    {% set project_title = top_post.edit_content %}
+{% else %}
+    {% set project_title = top_post.content %}
+{% endif %}
+
+{% block title %}"{{ project_title }}" | tifod{% endblock %}
 
 {% block head %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -22,29 +28,32 @@
     <div class="mdl-snackbar__text"></div>
     <button class="mdl-snackbar__action" type="button"></button>
 </div>
-<div class="project-header container text-center">
-    <h2>{{ project[0].content }}</h2>
+<div id="{{ top_post.id }}" data-path="{{ top_post.path }}" class="project-header container text-center">
+    <h2>{{ project_title }}</h2>
     <p class="list-inline">
         <span>
-            Un projet de <img class="profil_pic" src="/public/img/user/{{ project[0].author_avatar }}"><a href="/u/{{ project[0].author_id }}">{{ project[0].author_name }}</a>
+            Un projet de <img class="profil_pic" src="/public/img/user/{{ top_post.author_avatar }}"><a href="/u/{{ top_post.author_id }}">{{ top_post.author_name }}</a>
         </span>
         {% if 'delete_project'|is_allowed_for(project_type) %}
-        <span>|</span>
-        <a class="text-danger" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ project[0].id }}">Supprimer ce projet</a>
+            <span>|</span>
+            <a class="text-danger" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ top_post.id }}">Supprimer ce projet</a>
         {% endif %}
         <br>
         <span>
             Ce projet est {% if project_type == 'open_public' %}visible de <strong>tous</strong>, et <strong>tous</strong> peuvent participer{% elseif project_type == 'closed_public' %}visible de <strong>tous</strong>, mais <strong>seuls les inscrits</strong> peuvent participer{% elseif project_type == 'closed_private' %}visible par <strong>les inscrits seulement</strong> et <strong>seuls les inscrits</strong> peuvent participer{% endif %}.
         </span>
     </p>
+    <hr>
+    {% include 'post/post-actions.html' with {'post' : top_post} %}
+    <hr>
 </div>
-{% if project[0].children %}
+{% if project.children %}
     <div id="project-player">
         <div>
-            {% include "post/branch.html" with {'post':project[0]} %}
+            {% include "post/branch.html" with {'post':project.children.0} %}
         </div>
 		<div class="post-more-menus">
-            {% include "post/post-more/post-more-branch.html" with {'post':project[0]} %}
+            {% include "post/post-more/post-more-branch.html" with {'post':project} %}
 		</div>
     </div>
     <div class="container">
@@ -56,9 +65,9 @@
         </div>            
     </div>
     <div id="project-tree"></div>
-    <script>var tree_structure = {{ project_json.0.children.0|json_encode|raw }}, project_data = { 'last_posted_on' : "{{ last_posted_on }}", 'project_id' : {{ project[0].project_id }} };</script>
+    <script>var tree_structure = {{ project_json.0|json_encode|raw }}, project_data = { 'last_posted_on' : "{{ last_posted_on }}", 'project_id' : {{ top_post.project_id }} };</script>
 {% elseif 'add_post'|is_allowed_for(project_type) %}
-    {% set post = project[0] %}
+    {% set post = top_post %}
     <div class="container" id="{{ post.id }}">
         {% include "post/post-more/add-content.html" %}
     </div>

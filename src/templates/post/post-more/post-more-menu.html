@@ -12,8 +12,8 @@
 			<a href="/toggleAutoPin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Epingler toutes les modifications</a>
 		{% endif %}
 	{% endif %}
-	{% if 'delete_post'|is_allowed_for(project_type) %}
-		<a class="mdl-menu__item list-inline" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ post.id }}?redirect={{ current_url }}"><i class="fa fa-lg fa-trash text-danger fa-fw"></i>Supprimer</a>
+	{% if 'delete_post'|is_allowed_for(project_type) or ('delete_project'|is_allowed_for(project_type) and post.parent_id == 0) %}
+		<a class="mdl-menu__item list-inline" onclick="return confirm('Êtes vous sûrs de vouloir supprimer? Cette action sera définitive!')" href="/delete-post/{{ post.id }}?redirect={{ current_url }}"><i class="fa fa-lg fa-trash text-danger fa-fw"></i>Supprimer {% if post.parent_id == 0 %}le projet{% else %}ce post{% endif %}</a>
 	{% endif %}
 	{% if 'reset_score_post'|is_allowed_for(project_type) %}
 		<a class="mdl-menu__item list-inline" onclick="return confirm('Êtes vous sûrs?')" href="/resetPostScore/{{ post.id }}?redirect={{ current_url }}"><i class="fa fa-lg fa-undo fa-fw"></i>Ramener le score à zéro</a>
