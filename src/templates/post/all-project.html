@@ -12,7 +12,7 @@
             {% else %}
                 {% set project_title = project.content %}
             {% endif %}
-			<div class="list-inline"><h4><a class="text-no-decoration" href="/p/{{ project.project_id }}">{{ project_title }}</a></h4><span>projet de <a href="/u/{{ project.author_id }}">{{ project.author_name }}</a>{% if project.author_count == 2 %} avec {{ project.author_count - 1 }} autre auteur{% elseif project.author_count > 2 %} avec {{ project.author_count - 1 }} autres auteurs{% endif %}</span><span>|</span><span>{{ project.post_count - 1 }} posts</span></div>
+			<div class="list-inline"><h4><a class="text-no-decoration" href="/p/{{ project.project_id }}">{{ project_title|markdown|striptags("<strong><em><del><span><div>")|raw }}</a></h4><span>projet de <a href="/u/{{ project.author_id }}">{{ project.author_name }}</a>{% if project.author_count == 2 %} avec {{ project.author_count - 1 }} autre auteur{% elseif project.author_count > 2 %} avec {{ project.author_count - 1 }} autres auteurs{% endif %}</span><span>|</span><span>{{ project.post_count - 1 }} posts</span></div>
 		{% endfor %}
         {% if projects|length == 0 %}<p><i>Il n'y a pas de projets pour le moment</i></p>{% endif %}
         {% if 'create_project'|is_allowed_for('platform') %}

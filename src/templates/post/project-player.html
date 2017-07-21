@@ -6,7 +6,7 @@
     {% set project_title = top_post.content %}
 {% endif %}
 
-{% block title %}"{{ project_title }}" | tifod{% endblock %}
+{% block title %}"{{ project_title|markdown|striptags }}" | tifod{% endblock %}
 
 {% block head %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -28,24 +28,28 @@
     <div class="mdl-snackbar__text"></div>
     <button class="mdl-snackbar__action" type="button"></button>
 </div>
-<div id="{{ top_post.id }}" data-path="{{ top_post.path }}" class="project-header container text-center">
-    <h2>{{ project_title }}</h2>
-    <p class="list-inline">
-        <span>
-            Un projet de <img class="profil_pic" src="/public/img/user/{{ top_post.author_avatar }}"><a href="/u/{{ top_post.author_id }}">{{ top_post.author_name }}</a>
-        </span>
-        {% if 'delete_project'|is_allowed_for(project_type) %}
-            <span>|</span>
-            <a class="text-danger" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ top_post.id }}">Supprimer ce projet</a>
-        {% endif %}
-        <br>
-        <span>
-            Ce projet est {% if project_type == 'open_public' %}visible de <strong>tous</strong>, et <strong>tous</strong> peuvent participer{% elseif project_type == 'closed_public' %}visible de <strong>tous</strong>, mais <strong>seuls les inscrits</strong> peuvent participer{% elseif project_type == 'closed_private' %}visible par <strong>les inscrits seulement</strong> et <strong>seuls les inscrits</strong> peuvent participer{% endif %}.
-        </span>
-    </p>
-    <hr>
-    {% include 'post/post-actions.html' with {'post' : top_post} %}
-    <hr>
+<div class="text-center">
+    <div id="{{ top_post.id }}" data-path="{{ top_post.path }}" class="project-header text-center">
+        <div class="post post-active">
+            <div>
+                <h2>{{ project_title|markdown|striptags('<a><strong><em><del><span><div>')|raw }}</h2>
+                <p class="list-inline">
+                    <span>
+                        Un projet de <img class="profil_pic" src="/public/img/user/{{ top_post.author_avatar }}"><a href="/u/{{ top_post.author_id }}">{{ top_post.author_name }}</a>
+                    </span>
+                    {% if 'delete_project'|is_allowed_for(project_type) %}
+                        <span>|</span>
+                        <a class="text-danger" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ top_post.id }}">Supprimer ce projet</a>
+                    {% endif %}
+                    <br>
+                    <span>
+                        Ce projet est {% if project_type == 'open_public' %}visible de <strong>tous</strong>, et <strong>tous</strong> peuvent participer{% elseif project_type == 'closed_public' %}visible de <strong>tous</strong>, mais <strong>seuls les inscrits</strong> peuvent participer{% elseif project_type == 'closed_private' %}visible par <strong>les inscrits seulement</strong> et <strong>seuls les inscrits</strong> peuvent participer{% endif %}.
+                    </span>
+                </p>
+                {% include 'post/post-actions.html' with {'post' : top_post} %}
+            </div>
+        </div>
+    </div>
 </div>
 {% if project.children %}
     <div id="project-player">

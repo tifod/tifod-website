@@ -1,0 +1,11 @@
+<form class="list-inline text-center" action="/add-post" method="post">
+    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        <label class="mdl-textfield__label">Envoyez du texte</label>
+        <input id="{{ post.id }}-text-form" class="mdl-textfield__input drawingboard-height-input" type="text" name="content" data-postid="{{ post.id }}">
+    </div>
+    <button class="mdl-button mdl-js-button mdl-button--raised">Envoyer</button>
+    
+    <input type="hidden" name="is_an_edit" value="{% if current_page_is_edit_page %}true{% else %}false{% endif %}">
+    <input type="hidden" name="parent_id" value="{{ post.id }}">
+</form>
+<div class="text-help text-center">Nous supportons <a href="http://tifod.com/blog/markdown">la syntaxe Markdown</a></div>

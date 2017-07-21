@@ -73,7 +73,18 @@
 
 {% if 'edit_post'|is_allowed_for(project_type) %}
     {% set post = parent_post %}
-    <div class="container" id="{{ post.id }}">{% include "post/post-more/add-content.html" %}</div>
+    <div class="container" id="{{ post.id }}">
+        {% if current_page_is_edit_page %}
+            <h3>Proposer une modification</h3>
+            <div class="mdl-grid">
+                <div class="text-center">
+                {% include "post/post-more/add-text.html" %}
+                </div>
+            </div>
+        {% else %}
+            {% include "post/post-more/add-content.html" %}
+        {% endif %}
+    </div>
     <script src="/public/perso/edit.js"></script>
 {% endif %}
 

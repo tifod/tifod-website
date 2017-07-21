@@ -2,9 +2,19 @@ body {
     color: #47525d;
     font-family: "Roboto","Helvetica","Arial",sans-serif;
 }
+img.pixelated { 
+    image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+    image-rendering: -moz-crisp-edges;          /* Firefox                        */
+    image-rendering: -o-crisp-edges;            /* Opera                          */
+    image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+    image-rendering: pixelated; /* Chrome */
+    image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+
+}
 .mdl-snackbar--active { z-index: 100; }
 .list-inline>* { display: inline-block; margin-right: 5px; }
-.header { height: 56px; display: flex; }
+.header { min-height: 56px; display: flex; }
 .header>* {
     display: inline-block;
     vertical-align: middle;
@@ -52,7 +62,6 @@ body {
     max-width: 60vw;
 }
 
-#project-player { margin: auto; }
 .container { max-width: 80vw; margin: auto; }
 body { color: #47525d; background-color: #f6f9fc; }
 img { width: 100%; height: auto; }
@@ -112,14 +121,22 @@ img { width: 100%; height: auto; }
 	transform: scale(1.5,1.5);
 }
 
-#project-player { transition: height .5s; }
+#project-player {
+    width: var(--width);
+    transition: height .5s;
+    margin: auto;
+}
 .post-level:not(.active-level) { display: none; }
-.posts {
-    width: 81vw;
+.posts, .project-header {
+    width: var(--width);
     display: inline-block;
     position: relative;
     overflow: hidden;
     white-space: nowrap;
+}
+.project-header * { max-width: var(--width); }
+.project-header {
+    white-space: initial;
 }
 .posts::-webkit-scrollbar { display: none; }
 .posts > * { display: inline-block; white-space: initial; }
@@ -133,6 +150,7 @@ img { width: 100%; height: auto; }
     position: relative;
 }
 .post {
+    width: calc(var(--width) - 2px);
     margin: 0.5em 1em 0.5em 0;
     vertical-align: top;
     display: inline-block;
@@ -236,5 +254,3 @@ img { width: 100%; height: auto; }
     .prev { left: -100px; }
     .next { right: -100px; }
 }
-#project-player, .posts { width: var(--width); }
-.post { width: calc(var(--width) - 2px); }

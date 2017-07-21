@@ -21,15 +21,22 @@
         </div>
         <div class="post-more-btn list-inline">
             {% if 'add_post'|is_allowed_for(project_type) and not current_page_is_edit_page %}
-                <label class="mdl-button mdl-js-button mdl-button--raised" id="{{ post.id }}-add-content" for="{{ post.id }}-checkbox-more"><i class="material-icons">add</i> Répondre</label>
+                <label class="mdl-button mdl-js-button mdl-button--raised" id="{{ post.id }}-add-content" for="{{ post.id }}-checkbox-more"><i class="material-icons">add</i> Réponse</label>
             {% elseif not current_user and not current_page_is_edit_page %}
                 <a id="{{ post.id }}-add-content" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" href="/login?redirect={{ current_url }}"><i class="material-icons">add</i> Répondre</a>
                 <span class="mdl-tooltip mdl-tooltip--top" for="{{ post.id }}-add-content">Cliquez pour vous connecter</span>
             {% endif %}
             {% if not current_page_is_edit_page %}
                 {% if post.edit_number > 0 %}<span data-badge="{{ post.edit_number }}" class="mdl-badge mdl-badge--overlap">{% endif %}
-                    <a href="/edit/{{ post.id }}"{% if post.edit_number > 0 %} data-badge="{{ post.edit_number }}"{% endif %} class="mdl-button{% if post.edit_number > 0 %} mdl-badge{% endif %}"><i class="material-icons">mode_edit</i> Modifier</a>
+                    <a href="/edit/{{ post.id }}"{% if post.edit_number > 0 %} data-badge="{{ post.edit_number }}"{% endif %} class="mdl-button{% if post.edit_number > 0 %} mdl-badge{% endif %}"><i class="material-icons">mode_edit</i> {% if post.edit_number > 0 %}Modifications{% else %}Modifier{% endif %}</a>
                 {% if post.edit_number > 0 %}</span>{% endif %}
+            {% endif %}
+            {% if current_page_is_edit_page and 'pin_edit_post'|is_allowed_for(project_type) and post.is_an_edit == '1' %}
+                {% if post.user_id_pin != 0 %}
+                    <a href="/togglePin/{{ post.id }}?redirect={{ current_url }}" class="mdl-button"><i class="fa fa-lg fa-thumb-tack fa-fw"></i> Supprimer l'épingle</a>
+                {% else %}
+                    <a href="/togglePin/{{ post.id }}?redirect={{ current_url }}" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent"><i class="fa fa-lg fa-thumb-tack fa-fw"></i> Accepter la modification</a>
+                {% endif %}
             {% endif %}
         </div>
     </div>
