@@ -10,7 +10,7 @@ $container = $app->getContainer();
 // personnal functions
 function update_edit_id ($post_id){
     $db = MyApp\Utility\Db::getPDO();
-    $reponse = $db->prepare ('SELECT id FROM post WHERE parent_id = :post_id AND is_an_edit = 1 AND user_id_pin != 0 ORDER BY score_percent DESC, posted_on DESC LIMIT 1');
+    $reponse = $db->prepare ('SELECT id FROM post WHERE parent_id = :post_id AND is_an_edit = 1 AND user_id_pin != 0 ORDER BY score_percent DESC, score_result DESC, posted_on DESC LIMIT 1');
     $reponse->execute(['post_id' => $post_id]);
     $winning_edit = $reponse->fetch()['id'];
     $reponse = $db->prepare('UPDATE post SET edit_id = :edit_id WHERE id = :post_id');
@@ -455,7 +455,7 @@ $app->get('/edit/{post-id}', function ($request, $response, $args) {
     $reponse->execute(['post_id' => $args['post-id']]);
     $parent_post = $reponse->fetch();
     if (isset($_SESSION['current_user']) and $parent_post['author_id'] == $_SESSION['current_user']['user_id']) $_SESSION['current_user']['current_project_role'] = 'post_owner';
-    $reponse = $db->prepare ('select *, (SELECT IF (p.user_id_pin = 0,0,1)) has_pin, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar from post p where parent_id = :post_id and is_an_edit = 1 order by has_pin desc, score_percent desc, posted_on desc');
+    $reponse = $db->prepare ('select *, (SELECT IF (p.user_id_pin = 0,0,1)) has_pin, (select user_name from user u where u.user_id = p.author_id) author_name, (select user_name from user u where u.user_id = p.user_id_pin) user_pseudo_pin, (select avatar from user u where u.user_id = p.author_id) author_avatar from post p where parent_id = :post_id and is_an_edit = 1 order by has_pin desc, score_percent desc, score_result desc, posted_on desc');
     $reponse->execute(['post_id' => $args['post-id']]);
     while ($modifications[] = $reponse->fetch());
     array_pop($modifications);
