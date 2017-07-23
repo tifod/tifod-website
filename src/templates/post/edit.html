@@ -74,7 +74,7 @@
 {% if 'edit_post'|is_allowed_for(project_type) %}
     {% set post = parent_post %}
     <div class="container" id="{{ post.id }}">
-        {% if current_page_is_edit_page %}
+        {% if parent_post.parent_id == 0 %}
             <h3>Proposer une modification</h3>
             <div class="mdl-grid">
                 <div class="text-center">

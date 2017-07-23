@@ -9,7 +9,6 @@ $(function(){
     window.onhashchange = goToPostBasedOnHash;
     function scrollTo (el){ $('html, body').animate( { scrollTop: $(el).offset().top }, 500); }
     
-    /*
     $('.drawing-board-import').on('change', handleImage);
     function handleImage(e){
         var postId = event.target.getAttribute('data-postid');
@@ -90,7 +89,6 @@ $(function(){
     }
     
     resetBoard(document.getElementsByClassName('drawing-board')[0].getAttribute('id'));
-    */
     
     // Test if ANY/ALL page animations are currently active
     function animationsTest (callback) {
