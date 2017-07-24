@@ -171,11 +171,14 @@ set_error_handler(function ($severity, $message, $file, $line) {
 
 // Define app routes
 $app->post('/update-from-github', function ($request, $response, $args) {
+    echo '<pre/>';
+    var_dump($_POST);
+    echo '</pre><pre>';
     $result = [];
 	$output = '';
     exec("git pull", $result);
     foreach ($result as $line) $output .= $line."\n";
-	return "<pre>$output</pre>";
+	return $output . "</pre>";
 });
 $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $response, $args) {
     $db = MyApp\Utility\Db::getPDO();
