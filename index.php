@@ -92,8 +92,7 @@ function user_can_do ($action_name, $project_type) {
 $container['view'] = function ($container) {
     $loader = new Twig_Loader_Filesystem(__DIR__ . '/src/templates');
     $twig = new Twig_Environment($loader, [
-        // 'cache' => __DIR__ . '/templates/twig_cache'
-        'cache' => false
+        'cache' => (($container['settings']['displayErrorDetails']) ? false : __DIR__ . '/src/templates/twig_cache')
     ]);
     
     $twig->addGlobal('current_user', (empty($_SESSION['current_user']) ? null : $_SESSION['current_user']));
@@ -168,11 +167,11 @@ set_error_handler(function ($severity, $message, $file, $line) {
     }
     throw new \ErrorException($message, 0, $severity, $file, $line);
 });
-
 // Define app routes
-$app->post('/update-from-github', function ($request, $response, $args) {
+$app->get('/update-from-github', function ($request, $response, $args) {
     $result = [];
 	$output = '';
+    exec("rm -rf " . __DIR__ . "/src/templates/twig_cache/*");
     exec("git pull", $result);
     foreach ($result as $line) $output .= $line."\n";
 	return "<pre>" . $output . "</pre>";

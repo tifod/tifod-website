@@ -175,6 +175,7 @@ img { width: 100%; height: auto; }
     margin: 1em;
 }
 
+.mdl-textfield { vertical-align: middle; }
 .post-more {
     margin: 1em;
 }
