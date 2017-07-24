@@ -320,7 +320,6 @@ $(function(){
                 if (response != false && response.post_data.posted_on != project_data.last_posted_on){
                     if (response.post_data.is_an_edit == 0){
                         if (response.post_data.siblings_amount >= 3){
-                            console.log(response.post_data.siblings_amount);
                             var postChildren = document.getElementById(response.post_data.parent_id + '-children');
                             postChildren.getElementsByClassName('posts')[0].insertAdjacentHTML('afterbegin',response.html);
                             postChildren.getElementsByClassName('post-siblings-nav')[0].childNodes[0].insertAdjacentHTML('afterbegin',response.html_link);

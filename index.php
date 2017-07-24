@@ -220,8 +220,12 @@ $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $r
             'innerHTML' => $this->view->render('post/tree-post.html', ['post' => $a]),
             'id' => $a['id']
         ];
+        if ($a['parent_id'] == 0) $top_post_json = [
+            'innerHTML' => $this->view->render('post/tree-post.html', ['post' => $a]),
+            'id' => $a['id']
+        ];
     }
-    $project_json = createTree($new, array($posts[$topPostId]));
+    $project_json = createTree($new, [$top_post_json]);
     
     $reponse->closeCursor();
     
@@ -248,7 +252,7 @@ $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $r
     }
     
     // $project_json
-    $output['tree_structure'] = $this->view->createTemplate('{{ project_json.0.children.0|json_encode|raw }}')->render(['project_json'=> $project_json]);
+    $output['tree_structure'] = $this->view->createTemplate('{{ project_json.0|json_encode|raw }}')->render(['project_json'=> $project_json]);
     die(json_encode($output));
 });
 $app->get('/p/{projectId}', function ($request, $response, $args) {
