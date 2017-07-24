@@ -173,6 +173,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
 $app->post('/update-from-github', function ($request, $response, $args) {
     echo '<pre/>';
     var_dump($_POST);
+    
     echo '</pre><pre>';
     $result = [];
 	$output = '';
