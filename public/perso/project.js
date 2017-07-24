@@ -24,22 +24,11 @@ $(function(){
         $(this).load(resizePlayer);
     });
     
-    if (document.getElementById('project-tree') != null){
-        var simple_chart_config = {
-            chart: { container: "#project-tree" },
-            nodeStructure: tree_structure
-        };
-        new Treant(simple_chart_config);
-        var there_is_tree = true;
-    } else {
-        var there_is_tree = false;
-    }
     var windowWidth = $(window).width();
     $(window).resize(function(){
         if (windowWidth != $(window).width()){
-            if (there_is_tree) new Treant(simple_chart_config);
-            windowWidth = $(window).width();
             resizePlayer();
+            windowWidth = $(window).width();
         }
     });
     
@@ -256,6 +245,13 @@ $(function(){
                 var navHeight = (nav !== undefined && nav !== null) ? ((typeof nav === 'object') ? nav.clientHeight : getAbsoluteHeight(nav) ) : 0 ;
                 posts[z].parentNode.parentNode.style.height = (getAbsoluteHeight(posts[z]) + navHeight) + 'px';
             }
+            // refresh project tree
+            if (document.getElementById('project-tree') != null){
+                new Treant({
+                    chart: { container: "#project-tree" },
+                    nodeStructure: tree_structure
+                });
+            }
             
             animationsTest(function(){
                 // resize the whole '#project-player'
@@ -334,7 +330,7 @@ $(function(){
                             showPost(postChildren.getElementsByClassName('post')[1].id,0);
                         }
                         document.getElementsByClassName('post-more-menus')[0].insertAdjacentHTML('beforeend',response.html_menu);
-                        new Treant({ chart: { container: "#project-tree" }, nodeStructure: JSON.parse(response.tree_structure) });
+                        tree_structure = JSON.parse(response.tree_structure);
                         resizePlayer();
                         
                         componentHandler.upgradeDom();
