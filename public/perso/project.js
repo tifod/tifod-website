@@ -246,7 +246,7 @@ $(function(){
                 posts[z].parentNode.parentNode.style.height = (getAbsoluteHeight(posts[z]) + navHeight) + 'px';
             }
             // refresh project tree
-            if (document.getElementById('project-tree') != null){
+            if (document.getElementById('project-tree')){
                 new Treant({
                     chart: { container: "#project-tree" },
                     nodeStructure: tree_structure

@@ -12,7 +12,7 @@
         {% if content_type == 'file' %}
             <img class="lazyload pixelated" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="/public/img/post/{{ content }}" alt="image sans description">
         {% else %}
-            <div class="post-text">{{ content|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
+            <div class="post-text">{{ content|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|break_attr|raw }}</div>
         {% endif %}
         {% include 'post/post-actions.html' %}
     </div>

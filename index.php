@@ -103,6 +103,17 @@ $container['view'] = function ($container) {
     
     $twig->addGlobal("dev_mode", $container['settings']['displayErrorDetails']);
     
+    $filter = new Twig_SimpleFilter('break_attr', function ($input) {
+        $rdm = MyApp\Utility\Math::getARandomString(3);
+        $output = str_replace('=', $rdm, $input);
+        $except = ['style', 'href', 'target'];
+        foreach ($except as $e){
+            $output = str_replace($e.$rdm, $e.'=', $output);
+        }
+        return $output;
+    });
+    $twig->addFilter($filter);
+    
     $filter = new Twig_SimpleFilter('is_allowed_for', function ($action_name, $project_type) { return user_can_do($action_name, $project_type); });
     $twig->addFilter($filter);
     
@@ -172,6 +183,7 @@ $app->get('/update-from-github', function ($request, $response, $args) {
     $result = [];
 	$output = '';
     exec("rm -rf " . __DIR__ . "/src/templates/twig_cache/*");
+    exec("touch " . __DIR__ . "/src/templates/twig_cache/.gitkeep");
     exec("git pull", $result);
     foreach ($result as $line) $output .= $line."\n";
 	return "<pre>" . $output . "</pre>";
@@ -512,7 +524,7 @@ $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
                     'user_id' => $_SESSION['current_user']['user_id']
                 ]);
                 
-                $reponse = $db->prepare('SELECT vote_plus, vote_minus FROM post WHERE id = :post_id');
+                $reponse = $db->prepare('SELECT vote_plus, vote_minus, parent_id FROM post WHERE id = :post_id');
                 $reponse->execute([ 'post_id' => $args['post-id'] ]);
                 $donnees = $reponse->fetch();
                 
@@ -527,10 +539,10 @@ $app->get('/vote/{vote-sign}/{post-id}', function ($request, $response, $args) {
             
             $reponse = $db->prepare ('select score_percent, score_result, vote_minus, vote_plus FROM post where id = :post_id');
             $reponse->execute(['post_id' => $args['post-id']]);
+            update_edit_id($donnees['parent_id']);
             $donnees = [];
             while ($donnees[] = $reponse->fetch());
             $reponse->closeCursor();
-            update_edit_id($args['post-id']);
             die(json_encode($donnees));
         } else {
             die('Url invalide');

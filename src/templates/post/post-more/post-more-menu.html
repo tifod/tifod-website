@@ -1,15 +1,15 @@
 <div class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="{{ post.id }}-more">
 	{% if ('pin_post'|is_allowed_for(project_type) and not current_page_is_edit_page) or (current_page_is_edit_page and 'pin_edit_post'|is_allowed_for(project_type) and post.is_an_edit == '1') %}
 		{% if post.user_id_pin != 0 %}
-			<a href="/togglePin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Supprimer l'épingle</a>
+			<a href="/togglePin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Désépingler</a>
 		{% else %}
-			<a href="/togglePin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Epingler</a>
+			<a href="/togglePin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Épingler</a>
 		{% endif %}
 	{% elseif (current_page_is_edit_page and 'pin_edit_post'|is_allowed_for(project_type) and post.is_an_edit == '0') %}
         {% if post.auto_pin_edits == '1' %}
-			<a href="/toggleAutoPin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Supprimer les épingles de toutes les modifications</a>
+			<a href="/toggleAutoPin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Refuser toutes les modifications</a>
 		{% else %}
-			<a href="/toggleAutoPin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Epingler toutes les modifications</a>
+			<a href="/toggleAutoPin/{{ post.id }}?redirect={{ current_url }}" class="mdl-menu__item list-inline"><i class="fa fa-lg fa-thumb-tack fa-fw"></i>Accepter toutes les modifications</a>
 		{% endif %}
 	{% endif %}
 	{% if 'delete_post'|is_allowed_for(project_type) or ('delete_project'|is_allowed_for(project_type) and post.parent_id == 0) %}

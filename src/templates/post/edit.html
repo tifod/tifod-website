@@ -16,6 +16,7 @@
 
 <link rel="stylesheet" href="/min/?f=/public/perso/project.css,/public/drawingboard/drawingboard.min.css"/>
 <script src="/min/?f=/public/unveil.js,/public/drawingboard/drawingboard.min.js,/public/treant/vendor/raphael.js"></script>
+<style>.post { margin-right: 0; }</style>
 {% endblock %}
 
 {% block body %}
@@ -43,7 +44,7 @@
                 {% if parent_post.content_type == 'file' %}
                     <img src="/public/img/post/{{ parent_post.content }}" alt="image sans description">
                 {% else %}
-                    <div class="post-text">{{ parent_post.content|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
+                    <div class="post-text">{{ parent_post.content|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|break_attr|raw }}</div>
                 {% endif %}
         </div>
     </div>
@@ -60,7 +61,11 @@
                 {% if post.content_type == 'file' %}
                     <img src="/public/img/post/{{ post.content }}" alt="image sans description">
                 {% else %}
-                    <div class="post-text">{{ post.content|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
+                    {% if parent_post.parent_id == 0 %}
+                        <div class="post-text"><h1>{{ post.content|markdown|striptags('<strong><em><del><span><div>')|raw }}</h1></div>
+                    {% else %}
+                        <div class="post-text">{{ post.content|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
+                    {% endif %}
                 {% endif %}
             {% include 'post/post-actions.html' %}
         </div>
@@ -68,7 +73,7 @@
     {% endfor %}
 </div>
 {% if modifications|length == 0 %}
-    <div class="container text-center"><hr><em>Aucun modification n'a été proposé à l'auteur du post ci dessus</em></div>
+    <div class="container text-center"><hr><em>Aucune modification n'a été proposé à l'auteur du post ci dessus</em></div>
 {% endif %}
 
 {% if 'edit_post'|is_allowed_for(project_type) %}
