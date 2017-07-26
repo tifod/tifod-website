@@ -179,7 +179,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
     throw new \ErrorException($message, 0, $severity, $file, $line);
 });
 // Define app routes
-$app->get('/update-from-github', function ($request, $response, $args) {
+$app->post('/update-from-github', function ($request, $response, $args) {
     $result = [];
 	$output = '';
     exec("rm -rf " . __DIR__ . "/src/templates/twig_cache/*");
