@@ -50,8 +50,8 @@
         <input type="hidden" name="parent_id" value="{{ post.id }}">
     </form>
     <div class="text-help text-center">Formats acceptés : <code>.jpg .jpeg .png .svg .gif</code></div>
-    <h6>Envoyez du texte</h6>
-    <form id="{{ post.id }}-text-form" action="/add-post" method="post">
+    <h6 id="{{ post.id }}-text-form">Envoyez du texte</h6>
+    <form action="/add-post" method="post">
         <textarea class="textarea-js" type="text" name="content" data-postid="{{ post.id }}" rows= "2"></textarea>
         <div>
             <button class="mdl-button mdl-js-button mdl-button--raised">Envoyer</button>

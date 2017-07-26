@@ -133,11 +133,14 @@ img { width: 100%; height: auto; }
     position: relative;
     overflow: hidden;
     white-space: nowrap;
+    margin: auto;
 }
 .project-header * { max-width: var(--width); }
 .project-header {
+    display: block;
     white-space: initial;
 }
+.project-header .text-center { margin-left: 1em; margin-right: 1em; }
 .posts::-webkit-scrollbar { display: none; }
 .posts > * { display: inline-block; white-space: initial; }
 .posts-list, .posts-list > * {
