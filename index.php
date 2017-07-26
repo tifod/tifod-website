@@ -117,7 +117,7 @@ $container['view'] = function ($container) {
     $filter = new Twig_SimpleFilter('is_allowed_for', function ($action_name, $project_type) { return user_can_do($action_name, $project_type); });
     $twig->addFilter($filter);
     
-    $filter = new Twig_SimpleFilter('markdown', function ($text) { return Michelf\Markdown::defaultTransform($text); });
+    $filter = new Twig_SimpleFilter('markdown', function ($text) { return Parsedown::instance()->text($text); });
     $twig->addFilter($filter);
         
     $filter = new Twig_SimpleFilter('timeago', function ($datetime) {
@@ -186,6 +186,7 @@ $app->get('/update-from-github', function ($request, $response, $args) {
     exec("touch " . __DIR__ . "/src/templates/twig_cache/.gitkeep");
     exec("git pull", $result);
     foreach ($result as $line) $output .= $line."\n";
+    exec("php composer.phar update -o");
 	return "<pre>" . $output . "</pre>";
 });
 $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $response, $args) {

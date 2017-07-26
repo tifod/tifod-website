@@ -3,7 +3,7 @@
         "slim/slim": "^3.0",
         "slim/twig-view": "^2.2",
         "mrclay/minify": "~3.0.0",
-        "michelf/php-markdown": "^1.7"
+        "erusev/parsedown": "^1.6"
     },
     "autoload": {
         "psr-4": {

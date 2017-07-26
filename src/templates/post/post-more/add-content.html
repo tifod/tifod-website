@@ -5,7 +5,7 @@
         <span>|</span>
         <a href="#{{ post.id }}-file-form" class="text-no-decoration" data-scroll><i class="fa fa-file-image-o fa-fw"></i> Envoyez une image</a>
         <span>|</span>
-        <label for="{{ post.id }}-text-form" class="text-primary text-click"><i class="fa fa-font fa-fw"></i> Envoyez du texte</label>
+        <a href="#{{ post.id }}-text-form" class="text-no-decoration" data-scroll><i class="fa fa-font fa-fw"></i> Envoyez du texte</a>
     </div>
     <hr>
     <h6 id="{{ post.id }}-drawing-form">Dessiner</h6>
@@ -51,5 +51,14 @@
     </form>
     <div class="text-help text-center">Formats acceptés : <code>.jpg .jpeg .png .svg .gif</code></div>
     <h6>Envoyez du texte</h6>
-    {% include 'post/post-more/add-text.html' %}
+    <form id="{{ post.id }}-text-form" action="/add-post" method="post">
+        <textarea class="textarea-js" type="text" name="content" data-postid="{{ post.id }}" rows= "2"></textarea>
+        <div>
+            <button class="mdl-button mdl-js-button mdl-button--raised">Envoyer</button>
+        </div>
+        
+        <input type="hidden" name="is_an_edit" value="{% if current_page_is_edit_page %}true{% else %}false{% endif %}">
+        <input type="hidden" name="parent_id" value="{{ post.id }}">
+    </form>
+    <div class="text-help text-center">Nous supportons <a target="_blank" href="http://tifod.com/blog/markdown">la syntaxe Markdown</a></div>
 </div>

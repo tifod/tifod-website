@@ -13,6 +13,8 @@
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css">
 <link rel="stylesheet" href="https://opensource.keycdn.com/fontawesome/4.7.0/font-awesome.min.css">
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 
 <link rel="stylesheet" href="/min/?f=/public/perso/project.css,/public/drawingboard/drawingboard.min.css"/>
 <script src="/min/?f=/public/unveil.js,/public/drawingboard/drawingboard.min.js,/public/treant/vendor/raphael.js"></script>
@@ -83,7 +85,19 @@
             <h3>Proposer une modification</h3>
             <div class="mdl-grid">
                 <div class="text-center">
-                {% include "post/post-more/add-text.html" %}
+                <form class="list-inline text-center" action="/add-post" method="post">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <label class="mdl-textfield__label">Envoyez du texte</label>
+                        <input id="{{ post.id }}-text-form" class="mdl-textfield__input" type="text" name="content" data-postid="{{ post.id }}">
+                    </div>
+                    <div>
+                        <button class="mdl-button mdl-js-button mdl-button--raised">Envoyer</button>
+                    </div>
+                    
+                    <input type="hidden" name="is_an_edit" value="{% if current_page_is_edit_page %}true{% else %}false{% endif %}">
+                    <input type="hidden" name="parent_id" value="{{ post.id }}">
+                </form>
+                <div class="text-help text-center">Attention seul les balises suivantes sont acceptés :<br><code><strong>&lt;strong&gt;</strong><em>&lt;em&gt;</em><del>&lt;del&gt;</del>&lt;span&gt;&lt;div&gt;</code>
                 </div>
             </div>
         {% else %}

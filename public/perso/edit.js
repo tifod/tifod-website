@@ -10,6 +10,8 @@ $(function(){
     function scrollTo (el){ $('html, body').animate( { scrollTop: $(el).offset().top }, 500); }
     
     if (document.getElementsByClassName('.drawing-board-import')[0]){
+        var simplemde = new SimpleMDE({ element: document.getElementsByClassName('textarea-js')[0] });
+        
         $('.drawing-board-import').on('change', handleImage);
         function handleImage(e){
             var postId = event.target.getAttribute('data-postid');
