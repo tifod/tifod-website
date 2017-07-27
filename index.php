@@ -104,7 +104,7 @@ $container['view'] = function ($container) {
     $twig->addGlobal("dev_mode", $container['settings']['displayErrorDetails']);
     
     try {
-        $twig->addGlobal("site_version_tag", file_get_contents(__DIR__ . 'version.txt'));
+        $twig->addGlobal("site_version_tag", file_get_contents(__DIR__ . '/version.txt'));
     } catch (Throwable $e){
         $twig->addGlobal("site_version_tag", MyApp\Utility\Math::getARandomString(5));
     }
