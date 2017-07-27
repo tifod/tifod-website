@@ -103,6 +103,12 @@ $container['view'] = function ($container) {
     
     $twig->addGlobal("dev_mode", $container['settings']['displayErrorDetails']);
     
+    try {
+        $twig->addGlobal("site_version_tag", file_get_contents(__DIR__ . 'version.txt'));
+    } catch (Throwable $e){
+        $twig->addGlobal("site_version_tag", MyApp\Utility\Math::getARandomString(5));
+    }
+    
     $filter = new Twig_SimpleFilter('break_attr', function ($input) {
         $rdm = MyApp\Utility\Math::getARandomString(3);
         $output = str_replace('=', $rdm, $input);
@@ -182,12 +188,13 @@ set_error_handler(function ($severity, $message, $file, $line) {
 $app->post('/update-from-github', function ($request, $response, $args) {
     $result = [];
 	$output = '';
-    exec("rm -rf " . __DIR__ . "/src/templates/twig_cache/*");
-    exec("touch " . __DIR__ . "/src/templates/twig_cache/.gitkeep");
     exec("git pull", $result);
     foreach ($result as $line) $output .= $line."\n";
+    exec("rm -rf " . __DIR__ . "/src/templates/twig_cache/*");
+    exec("touch " . __DIR__ . "/src/templates/twig_cache/.gitkeep");
     exec("php composer.phar update -o");
-	return "<pre>" . $output . "</pre>";
+    if (! $this->settings['displayErrorDetails']) exec(json_decode()->release->tag_name . " > " . __DIR__ . "/version.txt");
+    return "<pre>" . $output . "</pre>";
 });
 $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $response, $args) {
     $db = MyApp\Utility\Db::getPDO();
