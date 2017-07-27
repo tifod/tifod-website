@@ -193,8 +193,7 @@ $app->post('/update-from-github', function ($request, $response, $args) {
     exec("rm -rf " . __DIR__ . "/src/templates/twig_cache/*");
     exec("touch " . __DIR__ . "/src/templates/twig_cache/.gitkeep");
     exec("php composer.phar update -o");
-    var_dump(json_decode($_POST['payload']));
-    // if (! $this->settings['displayErrorDetails']) file_put_contents(__DIR__ . "/version.txt",json_decode($_POST['payload'])->release->tag_name);
+    if (! $this->settings['displayErrorDetails']) file_put_contents(__DIR__ . "/version.txt",json_decode($_POST['payload'])->release->tag_name);
     return "<pre>" . $output . "</pre>";
 });
 $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $response, $args) {
