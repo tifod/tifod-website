@@ -2,3 +2,37 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]
+
+<IfModule mod_expires.c>
+ ExpiresActive On
+ ExpiresByType image/jpg "access plus 2592000 seconds"
+ ExpiresByType image/jpeg "access plus 2592000 seconds"
+ ExpiresByType image/png "access plus 2592000 seconds"
+ ExpiresByType image/gif "access plus 2592000 seconds"
+ ExpiresByType image/svg "access plus 2592000 seconds"
+ AddType image/x-icon .ico
+ ExpiresByType image/ico "access plus 2592000 seconds"
+ ExpiresByType image/icon "access plus 2592000 seconds"
+ ExpiresByType image/x-icon "access plus 2592000 seconds"
+ ExpiresByType text/css "access plus 2592000 seconds"
+ ExpiresByType text/javascript "access plus 2592000 seconds"
+ ExpiresByType application/javascript A2592000
+ ExpiresByType application/x-javascript "access plus 2592000 seconds"
+ ExpiresByType application/x-shockwave-flash "access plus 2592000 seconds"
+</IfModule>
+
+<IfModule mod_headers.c>
+ <FilesMatch "\\.(ico|jpe?g|png|gif|svg|swf|gz|ttf)$">
+ Header set Cache-Control "max-age=2592000, public"
+ </FilesMatch>
+ <FilesMatch "\\.(css)$">
+ Header set Cache-Control "max-age=2592000, public"
+ </FilesMatch>
+ <FilesMatch "\\.(js)$">
+ Header set Cache-Control "max-age=2592000, private"
+ </FilesMatch>
+# Disable caching for scripts and other dynamic files
+<FilesMatch "\.(pl|php|html|htm|cgi|spl|scgi|fcgi)$">
+Header unset Cache-Control
+</FilesMatch>
+</IfModule>
