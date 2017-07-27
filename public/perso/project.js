@@ -77,7 +77,7 @@ $(function(){
     function resetBoard (elId, returnBoard){
         if (document.getElementById(elId) != null){
             var post = document.getElementById(elId).parentNode.parentNode.parentNode;
-            if (!post.getElementsByClassName('editor-toolbar')[0]) var simplemde = new SimpleMDE({ element: post.getElementsByClassName('textarea-js')[0] });
+            if (!post.getElementsByClassName('editor-toolbar')[0]) new SimpleMDE({ element: post.getElementsByClassName('textarea-js')[0] });
             document.getElementById(elId).innerHTML = '';
             mainBoard = new DrawingBoard.Board(elId, {
                 controls: [
