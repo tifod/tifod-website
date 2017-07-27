@@ -306,7 +306,7 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
             $reponse->closeCursor();
 
             if (count($donnees) == 1){
-                return $this->view->render('post/project-player.html', ['project' => $donnees, 'project_type' => $project_type, 'projectId' => $projectId]);
+                return $this->view->render('post/project-player.html', ['top_post' => $donnees[0], 'project' => $donnees, 'project_type' => $project_type, 'projectId' => $projectId]);
             }
 
             // creating a comprehensive list of the projet posts

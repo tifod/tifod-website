@@ -70,11 +70,6 @@
     </div>
     <div id="project-tree"></div>
     <script>var tree_structure = {{ project_json.0|json_encode|raw }}, project_data = { 'last_posted_on' : "{{ last_posted_on }}", 'project_id' : {{ top_post.project_id }} };</script>
-{% elseif 'add_post'|is_allowed_for(project_type) %}
-    {% set post = top_post %}
-    <div class="container" id="{{ post.id }}">
-        {% include "post/post-more/add-content.html" %}
-    </div>
 {% else %}
     <div class="container text-center">
         <hr>
