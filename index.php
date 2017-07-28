@@ -103,11 +103,14 @@ $container['view'] = function ($container) {
     
     $twig->addGlobal("dev_mode", $container['settings']['displayErrorDetails']);
     
-    try {
-        $twig->addGlobal("site_version_tag", file_get_contents(__DIR__ . '/version.txt'));
-    } catch (Throwable $e){
+    $db = MyApp\Utility\Db::getPDO();
+    $reponse = $db->query ('SELECT data_value FROM platform_data WHERE data_name = "version"');
+    if ($site_version_tag = $reponse->fetch()['data_value']){
+        $twig->addGlobal("site_version_tag", $site_version_tag);
+    } else {
         $twig->addGlobal("site_version_tag", MyApp\Utility\Math::getARandomString(5));
     }
+    $reponse->closeCursor();
     
     $filter = new Twig_SimpleFilter('break_attr', function ($input) {
         $rdm = MyApp\Utility\Math::getARandomString(3);
@@ -193,11 +196,11 @@ $app->post('/update-from-github', function ($request, $response, $args) {
     exec("rm -rf " . __DIR__ . "/src/templates/twig_cache/*");
     exec("touch " . __DIR__ . "/src/templates/twig_cache/.gitkeep");
     exec("php composer.phar update -o");
-    if ($this->settings['displayErrorDetails']){
-        file_put_contents(__DIR__ . "/version.txt",json_decode($_POST['payload'])->after);
-    } else {
-        file_put_contents(__DIR__ . "/version.txt",json_decode($_POST['payload'])->release->tag_name);
-    }
+    $version = ($this->settings['displayErrorDetails']) ? json_decode($_POST['payload'])->after : json_decode($_POST['payload'])->release->tag_name;
+    $db = MyApp\Utility\Db::getPDO();
+    $reponse = $db->prepare ('INSERT INTO platform_data (data_name, data_value) VALUES("version", :version) ON DUPLICATE KEY UPDATE data_name="version", data_value=:version');
+    $reponse->execute([ 'version' => $version ]);
+    $reponse->closeCursor();
     return "<pre>" . $output . "</pre>";
 });
 $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $response, $args) {
