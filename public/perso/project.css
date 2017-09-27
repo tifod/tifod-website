@@ -2,6 +2,7 @@ body {
     color: #47525d;
     font-family: "Roboto","Helvetica","Arial",sans-serif;
 }
+body>.container:not(.header) { min-height: 40vh; margin-bottom: 5em; }
 img.pixelated { 
     image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
     image-rendering: -moz-crisp-edges;          /* Firefox                        */
@@ -76,6 +77,7 @@ img { width: 100%; height: auto; }
 .text-initial { color: initial; font-weight: initial; }
 .text-click { cursor: pointer; }
 .text-center { text-align: center; margin: auto; }
+.text-regular-weight { font-weight: 400; }
 .text-heavy { font-weight: 700; }
 .text-really-heavy { font-weight: 900; }
 .text-no-decoration { text-decoration: none; }

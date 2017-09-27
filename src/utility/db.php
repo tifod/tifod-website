@@ -3,7 +3,7 @@
 namespace MyApp\Utility;
 
 class Db {
-    public static function getPDO ($length = 18, $keyspace = ''){
+    public static function getPDO (){
 		$db_name = ($_SERVER["SERVER_NAME"] == 'tifod.com') ? 'tifod' : 'beta_tifod';
         $infos = [
 			'connect' => 'mysql:host=localhost;dbname=' . $db_name . ';charset=utf8mb4',
