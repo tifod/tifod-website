@@ -14,7 +14,7 @@ if (isset($_POST['payload']) or true){
     }
     
     $hash = sha1($github_key);
-    echo __LINE__ . ' ';
+    echo __LINE__ . ' ' . $_SERVER['HTTP_X_HUB_SIGNATURE'] . ' ';
     if (isset($_SERVER['HTTP_X_HUB_SIGNATURE']) && $_SERVER['HTTP_X_HUB_SIGNATURE'] === ('sha1=' . $hash)) {
         echo __LINE__ . ' ';
         
@@ -35,7 +35,6 @@ if (isset($_POST['payload']) or true){
         }
         echo "<pre>" . $output . "</pre>";
     } else {
-        echo __LINE__ . ' ';
         echo "Signature not matching";
     }
 } else {
