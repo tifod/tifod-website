@@ -16,7 +16,7 @@ if (isset($_POST['payload'])){
     $reponse = $db->prepare ('INSERT INTO platform_data (data_name, data_value) VALUES("version", :version) ON DUPLICATE KEY UPDATE data_name="version", data_value=:version');
     $reponse->execute([ 'version' => $version ]);
     $reponse->closeCursor();
-    return "<pre>" . $output . "</pre>";
+    echo "<pre>" . $output . "</pre>";
 } else {
-    return "Method to update not allowed";
+    echo "Method to update not allowed";
 }
