@@ -3,9 +3,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 session_start();
 date_default_timezone_set('Europe/Paris');
 
-echo __LINE__ . ' ';
 if (isset($_POST['payload']) or true){
-    echo __LINE__ . ' ';
     $db = MyApp\Utility\Db::getPDO();
     try {
         $reponse = $db->query ('SELECT data_value FROM platform_data WHERE data_name = "github_key"');
@@ -15,11 +13,9 @@ if (isset($_POST['payload']) or true){
         die ("platform_data.github_key is missing from the database, platform can't be updated");
     }
     
-    echo __LINE__ . ' ';
-    $header = getallheaders();
     $hash = sha1($github_key);
     echo __LINE__ . ' ';
-    if (isset($header['X-Hub-Signature']) && $header['X-Hub-Signature'] === ('sha1=' . $hash)) {
+    if (isset($_SERVER['HTTP_X_HUB_SIGNATURE']) && $_SERVER['HTTP_X_HUB_SIGNATURE'] === ('sha1=' . $hash)) {
         echo __LINE__ . ' ';
         
         $result = [];
