@@ -1,5 +1,6 @@
 <?php
 if (isset($_POST['payload'])){
+    
     require_once __DIR__ . '/vendor/autoload.php';
     session_start();
     date_default_timezone_set('Europe/Paris');
