@@ -38,6 +38,7 @@ if (isset($_POST['payload']) or true){
         }
         echo "<pre>" . $output . "</pre>";
     } else {
+        echo __LINE__ . ' ';
         echo "Signature not matching";
     }
 } else {
