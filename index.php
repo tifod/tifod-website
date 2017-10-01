@@ -206,10 +206,11 @@ $app->post('/update-from-github', function ($request, $response, $args) {
 $app->get('/version', function ($request, $response, $args) {
     $db = MyApp\Utility\Db::getPDO();
     $reponse = $db->query ('SELECT data_value FROM platform_data WHERE data_name = "version"');
-    $reponse->closeCursor();
     if ($site_version_tag = $reponse->fetch()['data_value']){
+        $reponse->closeCursor();
         return $site_version_tag;
     } else {
+        $reponse->closeCursor();
         return "beta version";
     }
 });
