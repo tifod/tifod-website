@@ -203,6 +203,12 @@ $app->post('/update-from-github', function ($request, $response, $args) {
     $reponse->closeCursor();
     return "<pre>" . $output . "</pre>";
 });
+$app->get('/version', function ($request, $response, $args) {
+    $db = MyApp\Utility\Db::getPDO();
+    $reponse = $db->query ('SELECT data_value FROM platform_data WHERE data_name = "version"');
+    $reponse->closeCursor();
+    return ($site_version_tag = $reponse->fetch()['data_value']) ? $site_version_tag : "Beta version";
+});
 $app->get('/get_last_posted_on/{project_id}/{last_time}', function ($request, $response, $args) {
     $db = MyApp\Utility\Db::getPDO();
     $reponse = $db->prepare ('select * from post where project_id = :project_id AND posted_on > :last_time ORDER BY posted_on LIMIT 1');
