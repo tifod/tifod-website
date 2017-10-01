@@ -18,6 +18,7 @@ if (isset($_POST['payload']) or true){
     echo __LINE__ . ' ';
     $header = getallheaders();
     $hash = sha1($github_key);
+    echo __LINE__ . ' ';
     if (isset($header['X-Hub-Signature']) && $header['X-Hub-Signature'] === ('sha1=' . $hash)) {
         echo __LINE__ . ' ';
         
