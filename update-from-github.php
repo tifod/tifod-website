@@ -6,7 +6,7 @@ date_default_timezone_set('Europe/Paris');
 if (isset($_POST['payload'])){
     $db = MyApp\Utility\Db::getPDO();
     try {
-        $reponse = $db->query ('SELECT data_value FROM platform_data WHERE data_name = github_key');
+        $reponse = $db->query ('SELECT data_value FROM platform_data WHERE data_name = "github_key"');
         $github_key = $reponse->fetch()['data_value'];
         $reponse->closeCursor();
     } catch (Throwable $e){
@@ -24,7 +24,7 @@ if (isset($_POST['payload'])){
         exec("touch " . __DIR__ . "/src/templates/twig_cache/.gitkeep");
         exec("php composer.phar update -o");
         $version = ($_SERVER["SERVER_NAME"] != 'tifod.com') ? json_decode($_POST['payload'])->after : json_decode($_POST['payload'])->release->tag_name;
-        $reponse = $db->prepare ('UPDATE platform_data SET data_value = :version WHERE data_name =  version');
+        $reponse = $db->prepare ('UPDATE platform_data SET data_value = :version WHERE data_name =  "version"');
         try {
             $reponse->execute([ 'version' => $version ]);
             $reponse->closeCursor();
