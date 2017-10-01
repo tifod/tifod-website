@@ -13,8 +13,8 @@ if (isset($_POST['payload']) or true){
         die ("platform_data.github_key is missing from the database, platform can't be updated");
     }
     
-    $hash = sha1($github_key);
-    echo __LINE__ . ' ' . $_SERVER['HTTP_X_HUB_SIGNATURE'] . ' != ' . $hash . ' ';
+    $hash = hash_hmac('sha1', file_get_contents('php://input'), $github_key);
+    echo __LINE__ . ' ';
     if (isset($_SERVER['HTTP_X_HUB_SIGNATURE']) && $_SERVER['HTTP_X_HUB_SIGNATURE'] === ('sha1=' . $hash)) {
         echo __LINE__ . ' ';
         
