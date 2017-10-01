@@ -14,9 +14,7 @@ if (isset($_POST['payload']) or true){
     }
     
     $hash = hash_hmac('sha1', file_get_contents('php://input'), $github_key);
-    echo __LINE__ . ' ';
     if (isset($_SERVER['HTTP_X_HUB_SIGNATURE']) && $_SERVER['HTTP_X_HUB_SIGNATURE'] === ('sha1=' . $hash)) {
-        echo __LINE__ . ' ';
         
         $result = [];
         $output = '';
