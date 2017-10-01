@@ -208,7 +208,7 @@ $app->get('/version', function ($request, $response, $args) {
     $reponse = $db->query ('SELECT data_value FROM platform_data WHERE data_name = "version"');
     if ($site_version_tag = $reponse->fetch()['data_value']){
         $reponse->closeCursor();
-        return $site_version_tag;
+        return "{ "messages": [ {"text": "On en est à la version $site_version_tag"} ] }";
     } else {
         $reponse->closeCursor();
         return "beta version";
