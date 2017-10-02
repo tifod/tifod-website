@@ -35,17 +35,13 @@
         <div class="text-center">
             <h2>{{ project_title|markdown|striptags('<a><strong><em><del><span><div>')|break_attr|raw }}</h2>
             <p class="list-inline">
-                <span>
-                    Un projet de <img class="profil_pic" src="/public/img/user/{{ top_post.author_avatar }}"><a href="/u/{{ top_post.author_id }}">{{ top_post.author_name }}</a>
-                </span>
+                <span>Un projet de <img class="profil_pic" src="/public/img/user/{{ top_post.author_avatar }}"><a href="/u/{{ top_post.author_id }}">{{ top_post.author_name }}</a></span>
                 {% if 'delete_project'|is_allowed_for(project_type) %}
                     <span>|</span>
                     <a class="text-danger" onclick="return confirm('Êtes vous sûrs?')" href="/delete-post/{{ top_post.id }}">Supprimer ce projet</a>
                 {% endif %}
                 <br>
-                <span>
-                    Ce projet est {% if project_type == 'open_public' %}visible de <strong>tous</strong>, et <strong>tous</strong> peuvent participer{% elseif project_type == 'closed_public' %}visible de <strong>tous</strong>, mais <strong>seuls les inscrits</strong> peuvent participer{% elseif project_type == 'closed_private' %}visible par <strong>les inscrits seulement</strong> et <strong>seuls les inscrits</strong> peuvent participer{% endif %}.
-                </span>
+                <span>Ce projet est {% if project_type == 'open_public' %}visible de <strong>tous</strong>, et <strong>tous</strong> peuvent participer{% elseif project_type == 'closed_public' %}visible de <strong>tous</strong>, mais <strong>seuls les inscrits</strong> peuvent participer{% elseif project_type == 'closed_private' %}visible par <strong>les inscrits seulement</strong> et <strong>seuls les inscrits</strong> peuvent participer{% endif %}.</span>
             </p>
         </div>
         {% include 'post/post-actions.html' with {'post' : top_post} %}
