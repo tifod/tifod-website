@@ -381,9 +381,12 @@ $app->get('/p', function ($request, $response) {
     $reponse = $db->query ('select *, (SELECT IF (p.user_id_pin = 0,0,1)) has_pin, (SELECT COUNT(*) FROM post tp WHERE tp.project_id = p.project_id) post_count, (SELECT COUNT(DISTINCT author_id) FROM post tp WHERE tp.project_id = p.project_id) author_count, (select user_name from user u where u.user_id = p.author_id) author_name' . $edit_query . ' from post p where parent_id = 0 order by has_pin desc, score_percent desc, score_result desc, posted_on desc');
     while ($donnees[] = $reponse->fetch());
     array_pop($donnees);
-    $lastProjectId = count($donnees) > 0 ? $donnees[count($donnees) - 1]['project_id'] + 1 : 1;
+    $max_id = 0;
+    foreach($donnees as $post){
+        $max_id = $post['project_id'] > $max_id ? $post['project_id'] : $max_id;
+    }
     $reponse->closeCursor();
-    return $this->view->render('post/all-project.html', ['projects' => $donnees, 'child' => ['id' => 0], 'projectId' => $lastProjectId]);
+    return $this->view->render('post/all-project.html', ['projects' => $donnees, 'child' => ['id' => 0], 'projectId' => ($max_id + 1)]);
 });
 $app->post('/create-project', function ($request, $response) {
     if (user_can_do('create_project','platform')){
