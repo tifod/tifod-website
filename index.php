@@ -359,8 +359,11 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
     }
 });
 $app->get('/', function ($request, $response) {
-    if (isset($_SESSION['current_user'])){ header('Location: /p'); exit(); }
-    else { header('Location: /p'); exit(); }
+    if (isset($_SESSION['current_user'])){
+        header('Location: /p'); exit();
+    } else {
+        return $this->view->render('homepage.html');
+    }
 });
 $app->get('/about', function ($request, $response) {
     return $this->view->render('homepage.html');
