@@ -5,7 +5,7 @@
         <span>|</span>
         <a href="#{{ post.id }}-file-form" class="text-no-decoration" data-scroll><i class="fa fa-file-image-o fa-fw"></i> Envoyez une image</a>
         <span>|</span>
-        <a href="#{{ post.id }}-text-form" class="text-no-decoration" data-scroll><i class="fa fa-font fa-fw"></i> Envoyez du texte</a>
+        <a href="#{{ post.id }}-text-form" class="text-no-decoration" onclick="document.getElementById('text-area-{{ post.id }}').focus();" data-scroll><i class="fa fa-font fa-fw"></i> Envoyez du texte</a>
     </div>
     <hr>
     <h6 id="{{ post.id }}-drawing-form">Dessiner</h6>
@@ -52,7 +52,10 @@
     <div class="text-help text-center">Formats acceptés : <code>.jpg .jpeg .png .svg .gif</code></div>
     <h6 id="{{ post.id }}-text-form">Envoyez du texte</h6>
     <form action="/add-post" method="post">
-        <textarea class="textarea-js" type="text" name="content" data-postid="{{ post.id }}" rows= "2"></textarea>
+        <div class="mdl-textfield mdl-js-textfield">
+            <textarea name="content" class="mdl-textfield__input" type="text" rows= "3" id="text-area-{{ post.id }}" ></textarea>
+            <label class="mdl-textfield__label" for="text-area-{{ post.id }}">Votre texte ...</label>
+        </div>
         <div>
             <button class="mdl-button mdl-js-button mdl-button--raised">Envoyer</button>
         </div>

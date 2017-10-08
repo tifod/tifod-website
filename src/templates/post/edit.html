@@ -13,11 +13,9 @@
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css">
 <link rel="stylesheet" href="https://opensource.keycdn.com/fontawesome/4.7.0/font-awesome.min.css">
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
-<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 
 <link rel="stylesheet" href="/min/?f=/public/perso/project.css,/public/drawingboard/drawingboard.min.css&v={{ site_version_tag }}"/>
-<script src="/min/?f=/public/unveil.js,/public/drawingboard/drawingboard.min.js,/public/treant/vendor/raphael.js&v={{ site_version_tag }}"></script>
+<script src="/min/?f=/public/unveil.js,/public/perso/basic_lib.js,/public/perso/post.js,/public/perso/edit.js,/public/drawingboard/drawingboard.min.js,/public/treant/vendor/raphael.js&v={{ site_version_tag }}"></script>
 <style>.post { margin-right: 0; }</style>
 {% endblock %}
 
@@ -27,7 +25,7 @@
     <div class="mdl-snackbar__text"></div>
     <button class="mdl-snackbar__action" type="button"></button>
 </div>
-<div class="posts posts-list">
+<div class="posts posts-list post-edit">
     <div class="container">
         <p>
             <a class="mdl-button mdl-js-button mdl-button--raised" href="/p/{{ parent_post.project_id }}#{{ parent_post.id }}"><i class="fa fa-fw fa-arrow-left"></i> Retour</a>
@@ -75,7 +73,9 @@
     {% endfor %}
 </div>
 {% if modifications|length == 0 %}
-    <div class="container text-center"><hr><em>Aucune modification n'a été proposé à l'auteur du post ci dessus</em></div>
+    <div class="text-center">
+        <p class="text-help">Aucune modification n'a été proposé pour l'instant</p>
+    </div>
 {% endif %}
 
 {% if 'edit_post'|is_allowed_for(project_type) %}
@@ -99,12 +99,12 @@
                 </form>
                 <div class="text-help text-center">Attention seul les balises suivantes sont acceptés :<br><code><strong>&lt;strong&gt;</strong><em>&lt;em&gt;</em><del>&lt;del&gt;</del>&lt;span&gt;&lt;div&gt;</code>
                 </div>
+                </div>
             </div>
         {% else %}
             {% include "post/post-more/add-content.html" %}
         {% endif %}
     </div>
-    <script src="/public/perso/edit.js"></script>
 {% endif %}
 
 <div class="post-more-menus">

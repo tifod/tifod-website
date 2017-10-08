@@ -360,7 +360,10 @@ $app->get('/p/{projectId}', function ($request, $response, $args) {
 });
 $app->get('/', function ($request, $response) {
     if (isset($_SESSION['current_user'])){ header('Location: /p'); exit(); }
-    else { return $this->view->render('homepage.html'); }
+    else { header('Location: /p'); exit(); }
+});
+$app->get('/about', function ($request, $response) {
+    return $this->view->render('homepage.html');
 });
 $app->get('/project', function ($request, $response) { header('Location: /p'); exit(); });
 $app->get('/projects', function ($request, $response) { header('Location: /p'); exit(); });
@@ -372,7 +375,7 @@ $app->get('/p', function ($request, $response) {
         $edit_query .= ', (IF(p.edit_id = 0,NULL,(SELECT ' . $edit_field . ' FROM post tp WHERE tp.id = p.edit_id))) edit_' . $edit_field;
     }
     
-    $reponse = $db->query ('select *, (SELECT COUNT(*) FROM post tp WHERE tp.project_id = p.project_id) post_count, (SELECT COUNT(DISTINCT author_id) FROM post tp WHERE tp.project_id = p.project_id) author_count, (select user_name from user u where u.user_id = p.author_id) author_name' . $edit_query . ' from post p where parent_id = 0');
+    $reponse = $db->query ('select *, (SELECT IF (p.user_id_pin = 0,0,1)) has_pin, (SELECT COUNT(*) FROM post tp WHERE tp.project_id = p.project_id) post_count, (SELECT COUNT(DISTINCT author_id) FROM post tp WHERE tp.project_id = p.project_id) author_count, (select user_name from user u where u.user_id = p.author_id) author_name' . $edit_query . ' from post p where parent_id = 0 order by has_pin desc, score_percent desc, score_result desc, posted_on desc');
     while ($donnees[] = $reponse->fetch());
     array_pop($donnees);
     $lastProjectId = count($donnees) > 0 ? $donnees[count($donnees) - 1]['project_id'] + 1 : 1;

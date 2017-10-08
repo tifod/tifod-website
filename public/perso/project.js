@@ -1,28 +1,6 @@
 $(function(){
-    function goToPostBasedOnHash () {
-        var hash = window.location.hash.slice(1);
-        if (/^\d+$/.test(hash)){
-            goToPost(hash);
-        }
-    };
-    animationsTest(goToPostBasedOnHash);
-    window.onhashchange = goToPostBasedOnHash;
-
-    $(document).on('click', 'a[data-scroll]', function() {
-        scrollTo($($(this).attr('href')));
-        return false;
-    });
-
-    function scrollTo (el){ $('html, body').animate( { scrollTop: $(el).offset().top }, 500); }
-
-    new Clipboard (".btn-copy-js");
-    $(document).on('click', '.btn-copy-js', function(){
-        document.getElementById("snackbar").MaterialSnackbar.showSnackbar({message: this.getAttribute("data-msg")});
-    });
-
-    $("img.lazyload").unveil(500, function(){
-        $(this).load(resizePlayer);
-    });
+    // unveil lazyload
+    $("img.lazyload").unveil(500, function(){ $(this).load(resizePlayer); });
     
     var windowWidth = $(window).width();
     $(window).resize(function(){
@@ -77,7 +55,6 @@ $(function(){
     function resetBoard (elId, returnBoard){
         if (document.getElementById(elId) != null){
             var post = document.getElementById(elId).parentNode.parentNode.parentNode;
-            if (!post.getElementsByClassName('editor-toolbar')[0]) new SimpleMDE({ element: post.getElementsByClassName('textarea-js')[0] });
             document.getElementById(elId).innerHTML = '';
             mainBoard = new DrawingBoard.Board(elId, {
                 controls: [
@@ -157,7 +134,6 @@ $(function(){
     resizePlayer();
 
     // post nav init
-    
     $(document).on('click', '.link', function(){
         showPost(this.getAttribute('data-target'));
     });
@@ -187,13 +163,11 @@ $(function(){
     }
 
     // scroll post siblings init
-    $(document).on('swiperight', '.many-posts', prevSlide);
-    $(document).on('swipeleft', '.many-posts', nextSlide);
+    $(document).on('swiperight', '.posts', prevSlide);
+    $(document).on('swipeleft', '.posts', nextSlide);
     // next/prev buttons init
     $(document).on('click', '.next', nextSlide);
     $(document).on('click', '.prev', prevSlide);
-
-    function hasClass(element, cls) { return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1; }
 
     function goToPost (postId){
         // get all the ids from data-path
@@ -238,14 +212,30 @@ $(function(){
         $(document.getElementById(postId).parentNode.parentNode).stop().animate({ scrollLeft: scrollQuantity }, timing);
     };
 
-    function resizePlayer(){
+    // show more when click on post
+    $(document).on('click',".post",function(){
+        if ($(this).find('.post-more-displayed').length == 0){
+            var post = $(this);
+            moreEls = post.find(".post-more");
+            moreEls.addClass('post-more-transition');
+            animationsTest(function(){
+                moreEls.addClass('post-more-displayed');
+                if (moreEls.length > 1 && post.find("img.lazyload").length) resizePlayer(72, post.attr('id'));
+                else if (moreEls.length > 1) resizePlayer(36, post.attr('id'));
+            });
+        }
+    });
+    
+    function resizePlayer(addedPx = 0, el_id){
         if (document.getElementsByClassName('active-post').length != 0){
             // resize the ".posts" to the post height
             var posts = document.getElementsByClassName('active-post');
             for(var z = 0; z < posts.length; z++) {
+                var t_addedPx = 0;
                 var nav = posts[z].parentNode.parentNode.parentNode.getElementsByClassName('post-siblings-nav')[0];
                 var navHeight = (nav !== undefined && nav !== null) ? ((typeof nav === 'object') ? nav.clientHeight : getAbsoluteHeight(nav) ) : 0 ;
-                posts[z].parentNode.parentNode.style.height = (getAbsoluteHeight(posts[z]) + navHeight) + 'px';
+                if (el_id == posts[z].getAttribute('id')) t_addedPx = addedPx;
+                posts[z].parentNode.parentNode.style.height = (getAbsoluteHeight(posts[z]) + navHeight) + t_addedPx + 'px';
             }
             // refresh project tree
             if (document.getElementById('project-tree')){
@@ -255,42 +245,8 @@ $(function(){
                 });
             }
             
-            animationsTest(function(){
-                // resize the whole '#project-player'
-                document.getElementById('project-player').style.height = getAbsoluteHeight(document.getElementById('project-player').firstElementChild) + 'px';
-            });
-        }
-    }
-
-    // Test if ANY/ALL page animations are currently active
-    function animationsTest (callback) {
-        var testAnimationInterval = setInterval(function () {
-            if (! $.timers.length) { // any page animations finished
-                clearInterval(testAnimationInterval);
-                callback();
-            }
-        }, 25);
-    };
-    // the same, but with any condition
-    function conditionTest (thingToTest,whatItIsSupposedToBeEqualTo,callback){
-        var testAnimationInterval = setInterval(function () {
-            if (thingToTest == whatItIsSupposedToBeEqualTo) { // any page animations finished
-                clearInterval(testAnimationInterval);
-                callback();
-            }
-        }, 25);
-    }
-
-    function toggleCssRule (cssRule){
-        var css = document.getElementById('special-style-created-with-js');
-        if (css == null){
-            css = document.createElement("style");
-            css.type = "text/css";
-            css.id = 'special-style-created-with-js';
-            css.innerHTML = cssRule;
-            document.body.appendChild(css);
-        } else {
-            css.innerHTML = (css.innerHTML == cssRule) ? '' : cssRule;
+            // resize the whole '#project-player'
+            document.getElementById('project-player').style.height = getAbsoluteHeight(document.getElementById('project-player').firstElementChild) + 'px';
         }
     }
 
@@ -333,7 +289,15 @@ $(function(){
                         }
                         document.getElementsByClassName('post-more-menus')[0].insertAdjacentHTML('beforeend',response.html_menu);
                         tree_structure = JSON.parse(response.tree_structure);
-                        resizePlayer();
+                        
+                        var img = $(document.getElementById(response.post_data.id)).find('img.lazyload');
+                        if (img.length){
+                            img.unveil(200,function (){
+                                $(this).load(function() {
+                                    resizePlayer();
+                                });
+                            });
+                        }
                         
                         componentHandler.upgradeDom();
                         document.getElementById("snackbar").MaterialSnackbar.showSnackbar({
@@ -363,31 +327,4 @@ $(function(){
             });
         },3000);
     }
-
-    function ajaxPingUrl(url,el,callback) {
-        var xmlhttp = new XMLHttpRequest(),
-        paramLength = arguments.length;
-
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-                if (xmlhttp.status == 200) {
-                    if (paramLength == 3){
-                        callback(el,JSON.parse(xmlhttp.responseText));
-                    } else {
-                        console.log(url + ', status: ' + xmlhttp.status + ' => ' + xmlhttp.responseText);
-                    }
-                } else {
-                    console.log(url + ', status: ' + xmlhttp.status + ' => ' + xmlhttp.responseText);
-                }
-            }
-        }.bind(paramLength);
-
-        xmlhttp.open("GET", url, true);
-        xmlhttp.send();
-    }
-    $(document).on('click', '.vote-btn', function(){
-        var id = this.getAttribute('id').split('-');
-        var sign = (id[1] == 'upvote') ? 'plus' : 'minus';
-        ajaxPingUrl('/vote/' + sign + '/' + id[0],this,updateScore)
-    });
 });

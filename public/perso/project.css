@@ -65,7 +65,7 @@ img.pixelated {
 
 .container { max-width: 80vw; margin: auto; }
 body { color: #47525d; background-color: #f6f9fc; }
-img { width: 100%; height: auto; }
+img { max-width: 100%; width: auto; height: auto; max-height: 90vh; }
 .url-like {
     color: rgb(68,138,255);
     font-weight: 500;
@@ -168,22 +168,40 @@ img { width: 100%; height: auto; }
 }
 .post-blue-border { border-color: #448AFF; }
 .post>img {
-    margin-left: 1px;
-    width: calc(100% - 1px);
+    display: block;
+    margin: auto;
+    max-width: calc(100% - 1px);
     border-radius: 3px 3px 0 0;
     border-bottom: solid 1px #ddd;
 }
 .post-text>* {
-    font-size: 28px;
     line-height: 1;
     text-align: center;
     margin: 1em;
 }
+.post-text p, .post-text div, .post-text li { font-size: 28px; }
+.post li { text-align: initial; }
 
 .mdl-textfield { vertical-align: middle; }
 .post-more {
-    margin: 1em;
+    min-height: 0px;
+    height: 0px;
+    opacity: 0;
+    margin: 0px;
+    transition: margin .5s, min-height .5s, opacity .5s;
+    display: none;
 }
+.post-more-transition {
+    display: block;
+}
+.post-more-displayed, .post-edit .post-more {
+    display: block;
+    margin: 1em;
+    min-height: 36px;
+    height: auto;
+    opacity: 1;
+}
+
 .post-more-nav {
     display: flex;
     align-items: center;
@@ -219,8 +237,9 @@ img { width: 100%; height: auto; }
     border-width: 0 1px 2px 1px;
     transition: background-color .5s;
 }
-.tree-post p { margin: 0; }
-.tree-post img { width: 100%; height: auto; }
+.tree-post * { margin: 0; line-height: 1.5; }
+.tree-post h1, .tree-post h2, .tree-post h3 { font-size: 18px; font-weight: 500; }
+.tree-post img { max-width: 100%; display: block; margin: auto; float: none !important; }
 .tree-post:hover, .tree-post-active { background-color: rgba(0,0,0,0.2); }
 
 .checkbox-more, .post-more-form { display: none; }

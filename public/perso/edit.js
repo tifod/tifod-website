@@ -1,17 +1,5 @@
 $(function(){
-    function goToPostBasedOnHash () {
-        var hash = window.location.hash.slice(1);
-        if (/^\d+$/.test(hash)){
-            scrollTo(document.getElementById(hash));
-        }
-    };
-    animationsTest(goToPostBasedOnHash);
-    window.onhashchange = goToPostBasedOnHash;
-    function scrollTo (el){ $('html, body').animate( { scrollTop: $(el).offset().top }, 500); }
-    
-    if (document.getElementsByClassName('.drawing-board-import')[0]){
-        var simplemde = new SimpleMDE({ element: document.getElementsByClassName('textarea-js')[0] });
-        
+    if (document.getElementsByClassName('drawing-board-import')[0]){
         $('.drawing-board-import').on('change', handleImage);
         function handleImage(e){
             var postId = event.target.getAttribute('data-postid');
@@ -93,46 +81,4 @@ $(function(){
         
         resetBoard(document.getElementsByClassName('drawing-board')[0].getAttribute('id'));
     }
-    
-    // Test if ANY/ALL page animations are currently active
-    function animationsTest (callback) {
-        var testAnimationInterval = setInterval(function () {
-            if (! $.timers.length) { // any page animations finished
-                clearInterval(testAnimationInterval);
-                callback();
-            }
-        }, 25);
-    };
-    
-    function updateScore (el, response){
-        el.parentNode.getElementsByClassName('post-score')[0].innerHTML = response['0'].score_result;
-        el.parentNode.getElementsByClassName('post-score-plus')[0].innerHTML = response['0'].vote_plus;
-        el.parentNode.getElementsByClassName('post-score-minus')[0].innerHTML = response['0'].vote_minus;
-    }
-    function ajaxPingUrl(url,el,callback) {
-        var xmlhttp = new XMLHttpRequest(),
-        paramLength = arguments.length;
-
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-                if (xmlhttp.status == 200) {
-                    if (paramLength == 3){
-                        callback(el,JSON.parse(xmlhttp.responseText));
-                    } else {
-                        console.log(url + ', status: ' + xmlhttp.status + ' => ' + xmlhttp.responseText);
-                    }
-                } else {
-                    console.log(url + ', status: ' + xmlhttp.status + ' => ' + xmlhttp.responseText);
-                }
-            }
-        }.bind(paramLength);
-
-        xmlhttp.open("GET", url, true);
-        xmlhttp.send();
-    }
-    $('.vote-btn').on('click', function(){
-        var id = this.getAttribute('id').split('-');
-        var sign = (id[1] == 'upvote') ? 'plus' : 'minus';
-        ajaxPingUrl('/vote/' + sign + '/' + id[0],this,updateScore)
-    });
 });
