@@ -1,9 +1,12 @@
 RewriteEngine On
+RewriteBase /
+
+# router file
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]
-#
-# Hotlinking
+
+# hotlinking
 RewriteCond %{HTTP_REFERER} !^http://tifod.com/ [NC]
 RewriteCond %{HTTP_REFERER} !^http://beta.tifod.com/ [NC]
 RewriteCond %{HTTP_REFERER} !^$
