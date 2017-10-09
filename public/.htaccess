@@ -4,4 +4,4 @@ RewriteEngine On
 RewriteCond %{HTTP_REFERER} !^http://tifod.com/ [NC]
 RewriteCond %{HTTP_REFERER} !^http://beta.tifod.com/ [NC]
 RewriteCond %{HTTP_REFERER} !^$
-RewriteRule .* %{HTTP_HOST}/public/img/illustration/hotlink.gif [L]
+RewriteRule .* /public/img/illustration/hotlink.gif [L]
