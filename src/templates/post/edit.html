@@ -44,7 +44,7 @@
                 {% if parent_post.content_type == 'file' %}
                     <img src="/public/img/post/{{ parent_post.content }}" alt="image sans description">
                 {% else %}
-                    <div class="post-text">{{ parent_post.content|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|break_attr|raw }}</div>
+                    <div class="post-text">{{ parent_post.content|markdown|striptags('<img><a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
                 {% endif %}
         </div>
     </div>
@@ -64,7 +64,7 @@
                     {% if parent_post.parent_id == 0 %}
                         <div class="post-text"><h1>{{ post.content|markdown|striptags('<strong><em><del><span><div>')|raw }}</h1></div>
                     {% else %}
-                        <div class="post-text">{{ post.content|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
+                        <div class="post-text">{{ post.content|markdown|striptags('<img><a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}</div>
                     {% endif %}
                 {% endif %}
             {% include 'post/post-actions.html' %}

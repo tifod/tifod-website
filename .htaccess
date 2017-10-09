@@ -3,6 +3,11 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]
 
+#redirect image hotlinks
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^http://(www\.)?tifod.com/?.*$ [NC]
+RewriteRule ^(.*)$ %{HTTP_HOST}/public/img/illustration/hotlink.gif [R=302,L]
+
 <IfModule mod_expires.c>
  ExpiresActive On
  ExpiresByType image/jpg "access plus 2592000 seconds"

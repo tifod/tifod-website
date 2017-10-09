@@ -14,7 +14,7 @@
     {% if content_type == 'file' %}
         <img class="pixelated" src="/public/img/post/{{ content }}">
     {% else %}
-        {{ content|markdown|striptags('<a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}
+        {{ content|markdown|striptags('<img><a><p><strong><em><del><ul><ol><li><h1><h2><h3><h4><h5><h6><tr><th><thead><table><tbody><td><span><div>')|raw }}
     {% endif %}
     <p class="text-help">{{ author_name ~ ', ' ~ posted_on|timeago }}</p>
 </div>

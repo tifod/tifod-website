@@ -51,6 +51,7 @@
     </form>
     <div class="text-help text-center">Formats acceptés : <code>.jpg .jpeg .png .svg .gif</code></div>
     <h6 id="{{ post.id }}-text-form">Envoyez du texte</h6>
+    <div class="text-help">Nous supportons la syntaxe Markdown (<a href="https://simplemde.com/markdown-guide">voir l'aide</a>)</div>
     <form action="/add-post" method="post">
         <div class="mdl-textfield mdl-js-textfield">
             <textarea name="content" class="mdl-textfield__input" type="text" rows= "3" id="text-area-{{ post.id }}" ></textarea>
