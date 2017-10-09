@@ -3,11 +3,10 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]
 
-#redirect image hotlinks
+RewriteCond %{HTTP_REFERER} !^http://tifod.com/ [NC]
+RewriteCond %{HTTP_REFERER} !^http://beta.tifod.com/ [NC]
 RewriteCond %{HTTP_REFERER} !^$
-RewriteCond %{HTTP_REFERER} !^http://tifod.com/?.*$ [NC]
-RewriteCond %{HTTP_REFERER} !^http://beta.tifod.com/?.*$ [NC]
-RewriteRule ^(.*)$ %{HTTP_HOST}/public/img/illustration/hotlink.gif [R=302,L]
+RewriteRule ^(.*)$ %{HTTP_HOST}/public/img/illustration/hotlink.gif [L]
 
 <IfModule mod_expires.c>
  ExpiresActive On
