@@ -1,7 +1,1 @@
 Options -Indexes
-
-RewriteEngine On
-RewriteCond %{HTTP_REFERER} !^http://tifod.com/ [NC]
-RewriteCond %{HTTP_REFERER} !^http://beta.tifod.com/ [NC]
-RewriteCond %{HTTP_REFERER} !^$
-RewriteRule .* /public/img/illustration/hotlink.gif [L]
