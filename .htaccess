@@ -4,10 +4,6 @@ RewriteCond %{HTTP_REFERER} !^http://beta.tifod.com/ [NC]
 RewriteCond %{HTTP_REFERER} !^$
 RewriteRule .* %{HTTP_HOST}/public/img/illustration/hotlink.gif [L]
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.php [QSA,L]
-
 <IfModule mod_expires.c>
  ExpiresActive On
  ExpiresByType image/jpg "access plus 2592000 seconds"
