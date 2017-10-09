@@ -5,7 +5,7 @@ RewriteRule ^ index.php [QSA,L]
 #
 # Hotlinking
 RewriteCond %{HTTP_REFERER} !^http://tifod.com/ [NC]
-# RewriteCond %{HTTP_REFERER} !^http://beta.tifod.com/ [NC]
+RewriteCond %{HTTP_REFERER} !^http://beta.tifod.com/ [NC]
 RewriteCond %{HTTP_REFERER} !^$
 RewriteRule \.(gif|jpe?g|png|svg)$ /public/img/illustration/hotlink.gif [R,L]
 
