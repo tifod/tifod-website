@@ -632,7 +632,7 @@ $app->get('/logout', function ($request, $response, $args) {
 });
 $app->get('/login', function ($request, $response, $args) {
     if (empty($_SESSION['current_user'])){
-        return $this->view->render('connexion/login.html', ['email' => (empty($_GET['email'])? false : $_GET['email']), 'redirect_to' => (empty($_GET['redirect']) ? '/' : $_GET['redirect'])]);
+        return $this->view->render('connexion/login.html', ['signup_redirect' => (empty($_GET['signup_redirect'])? false : true),'email' => (empty($_GET['email'])? false : $_GET['email']), 'redirect_to' => (empty($_GET['redirect']) ? '/' : $_GET['redirect'])]);
     } else {
         header('Location: /'); exit();
     }
@@ -705,7 +705,7 @@ $app->get('/signup', function ($request, $response, $args) {
             // check if user already exists
             $reponse = $db->prepare("SELECT user_id FROM user WHERE email = :email");
             $reponse->execute(['email' => $_GET['email']]);
-            if ($reponse->fetch() !== false){ header('Location: /login?email='.$_GET['email']); exit(); }
+            if ($reponse->fetch() !== false){ header('Location: /login?signup_redirect=1&email='.$_GET['email']); exit(); }
             
             $token_key = md5(MyApp\Utility\Math::getARandomString().$_GET['email']);
             // insert in DB and delete all expired entries

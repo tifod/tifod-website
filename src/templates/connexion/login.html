@@ -12,6 +12,7 @@
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                         <label class="mdl-textfield__label">Email</label>
                         <input class="mdl-textfield__input" {% if email %}value="{{ email }}"{% endif %} name="email" type="email">
+                        {% if signup_redirect %}<div class="text-help text-red">Cette adresse mail a déjà été utilisé pour créer un compte</div>{% endif %}
                     </div>
                 </div>
                 <div>

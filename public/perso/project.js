@@ -325,6 +325,6 @@ $(function(){
                     project_data.last_posted_on = response.post_data.posted_on;
                 }
             });
-        },3000);
+        },5000);
     }
 });
