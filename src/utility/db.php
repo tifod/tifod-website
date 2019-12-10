@@ -8,7 +8,7 @@ class Db {
         $infos = [
 			'connect' => 'mysql:host=localhost;dbname=' . $db_name . ';charset=utf8mb4',
 			'user' => 'root',
-			'password' => ''
+			'password' => 'root'
 		];
 		
 		try {
