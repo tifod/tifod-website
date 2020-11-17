@@ -12,7 +12,7 @@ class Db {
 		];
 		
 		try {
-            $db = new \PDO ($infos['connect'],$infos['user'],$infos['password']);
+            $db = new \PDO($infos['connect'],$infos['user'],$infos['password']);
             $db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             $db->exec("SET SESSION time_zone = '+2:00'");
 		} catch(Exception $e) { throw $e; }

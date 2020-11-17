@@ -1,4 +1,4 @@
-{% spaceless %}
+{% apply spaceless %}
 {% if post.edit_id != '0' %}
     {% set content_type = post.edit_content_type %}
     {% set content = post.edit_content %}
@@ -18,4 +18,4 @@
     {% endif %}
     <p class="text-help">{{ author_name ~ ', ' ~ posted_on|timeago }}</p>
 </div>
-{% endspaceless %}
+{% endapply %}

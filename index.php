@@ -12,7 +12,8 @@ function update_edit_id ($post_id){
     $db = MyApp\Utility\Db::getPDO();
     $reponse = $db->prepare ('SELECT id FROM post WHERE parent_id = :post_id AND is_an_edit = 1 AND user_id_pin != 0 ORDER BY score_percent DESC, score_result DESC, posted_on DESC LIMIT 1');
     $reponse->execute(['post_id' => $post_id]);
-    $winning_edit = $reponse->fetch()['id'];
+    $winning_edit = $reponse->fetch();
+    $winning_edit = $winning_edit ? $winning_edit['id'] : $winning_edit;
     $reponse = $db->prepare('UPDATE post SET edit_id = :edit_id WHERE id = :post_id');
     $reponse->execute(['post_id' => $post_id, 'edit_id' => (empty($winning_edit) ? 0 : $winning_edit)]);
     $reponse->closeCursor();
@@ -90,8 +91,8 @@ function user_can_do ($action_name, $project_type) {
 
 // Register component on container
 $container['view'] = function ($container) {
-    $loader = new Twig_Loader_Filesystem(__DIR__ . '/src/templates');
-    $twig = new Twig_Environment($loader, [
+    $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/src/templates');
+    $twig = new \Twig\Environment($loader, [
         'cache' => (($container['settings']['displayErrorDetails']) ? false : __DIR__ . '/src/templates/twig_cache')
     ]);
     
@@ -105,14 +106,14 @@ $container['view'] = function ($container) {
     
     $db = MyApp\Utility\Db::getPDO();
     $reponse = $db->query ('SELECT data_value FROM platform_data WHERE data_name = "version"');
-    if ($site_version_tag = $reponse->fetch()['data_value']){
-        $twig->addGlobal("site_version_tag", $site_version_tag);
+    if ($site_version_tag = $reponse->fetch()){
+        $twig->addGlobal("site_version_tag", $site_version_tag['data_value']);
     } else {
         $twig->addGlobal("site_version_tag", MyApp\Utility\Math::getARandomString(5));
     }
     $reponse->closeCursor();
     
-    $filter = new Twig_SimpleFilter('break_attr', function ($input) {
+    $filter = new \Twig\TwigFilter('break_attr', function ($input) {
         $rdm = MyApp\Utility\Math::getARandomString(3);
         $output = str_replace('=', $rdm, $input);
         $except = ['style', 'href', 'target'];
@@ -123,13 +124,13 @@ $container['view'] = function ($container) {
     });
     $twig->addFilter($filter);
     
-    $filter = new Twig_SimpleFilter('is_allowed_for', function ($action_name, $project_type) { return user_can_do($action_name, $project_type); });
+    $filter = new \Twig\TwigFilter('is_allowed_for', function ($action_name, $project_type) { return user_can_do($action_name, $project_type); });
     $twig->addFilter($filter);
     
-    $filter = new Twig_SimpleFilter('markdown', function ($text) { return Parsedown::instance()->text($text); });
+    $filter = new \Twig\TwigFilter('markdown', function ($text) { return Parsedown::instance()->text($text); });
     $twig->addFilter($filter);
         
-    $filter = new Twig_SimpleFilter('timeago', function ($datetime) {
+    $filter = new \Twig\TwigFilter('timeago', function ($datetime) {
       $time = time() - strtotime($datetime); 
 
       $units = array (

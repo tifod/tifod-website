@@ -18,51 +18,37 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
---
--- Base de données :  `beta_tifod`
---
+CREATE DATABASE IF NOT EXISTS beta_tifod DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE beta_tifod;
 
--- --------------------------------------------------------
-
---
--- Structure de la table `platform_data`
---
-
+DROP TABLE IF EXISTS platform_data;
 CREATE TABLE `platform_data` (
-  `data_name` varchar(50) COLLATE utf8mb4_bin NOT NULL,
-  `data_value` text COLLATE utf8mb4_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+  `data_name` varchar(100) NOT NULL,
+  `data_value` text NOT NULL,
+  PRIMARY KEY (`data_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Déchargement des données de la table `platform_data`
---
+INSERT INTO `platform_data` (`data_name`, `data_value`) VALUES ('version', '1.0.0');
 
-INSERT INTO `platform_data` (`data_name`, `data_value`) VALUES
-('version', '1.0.0');
-
--- --------------------------------------------------------
-
---
--- Structure de la table `post`
---
-
-CREATE TABLE `post` (
-  `id` int(11) NOT NULL,
-  `content` text DEFAULT NULL,
-  `content_type` varchar(50) NOT NULL,
-  `parent_id` int(11) NOT NULL,
-  `project_id` int(11) NOT NULL,
-  `path` text DEFAULT NULL,
-  `vote_plus` int(11) NOT NULL DEFAULT 0,
-  `vote_minus` int(11) NOT NULL DEFAULT 0,
-  `score_result` int(11) NOT NULL DEFAULT 0,
-  `score_percent` int(11) NOT NULL DEFAULT 0,
-  `user_id_pin` int(11) NOT NULL DEFAULT 0,
-  `edit_id` int(11) NOT NULL DEFAULT 0,
-  `is_an_edit` tinyint(1) NOT NULL DEFAULT 0,
-  `auto_pin_edits` tinyint(1) NOT NULL DEFAULT 0,
-  `posted_on` timestamp NOT NULL DEFAULT current_timestamp(),
-  `author_id` int(11) NOT NULL
+DROP TABLE IF EXISTS post;
+CREATE TABLE IF NOT EXISTS post (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  content text CHARACTER SET utf8mb4 DEFAULT NULL,
+  content_type varchar(50) NOT NULL,
+  parent_id int(11) NOT NULL,
+  project_id int(11) NOT NULL,
+  path text DEFAULT NULL,
+  vote_plus int(11) NOT NULL DEFAULT 0,
+  vote_minus int(11) NOT NULL DEFAULT 0,
+  score_result int(11) NOT NULL DEFAULT 0,
+  score_percent int(11) NOT NULL DEFAULT 0,
+  user_id_pin int(11) NOT NULL DEFAULT 0,
+  edit_id int(11) NOT NULL DEFAULT 0,
+  is_an_edit tinyint(1) NOT NULL DEFAULT 0,
+  auto_pin_edits tinyint(1) NOT NULL DEFAULT 0,
+  posted_on timestamp NOT NULL DEFAULT current_timestamp(),
+  author_id int(11) NOT NULL,
+  PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
